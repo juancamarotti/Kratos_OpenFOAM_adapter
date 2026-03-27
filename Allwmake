@@ -35,7 +35,7 @@ warning() {
 ################################################################################
 
 # Information header
-log "Building the OpenFOAM-preCICE adapter..."
+log "Building the OpenFOAM-CoSimIO adapter..."
 
 # Export the environment variables
 export ADAPTER_CFLAGS
