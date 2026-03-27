@@ -1,3 +1,5 @@
+COSIMIO_ROOT ?=
+
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -12,6 +14,8 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
+    -I$(MPI_ARCH_PATH)/include \
+    -I/usr/lib/x86_64-linux-gnu/openmpi/include \
     $(ADAPTER_PKG_CONFIG_CFLAGS) \
     -I../ \
     $(ADAPTER_CFLAGS)
@@ -22,5 +26,24 @@ LIB_LIBS = \
     -lcompressibleTurbulenceModels \
     -lincompressibleTurbulenceModels \
     -limmiscibleIncompressibleTwoPhaseMixture \
-    $(ADAPTER_PKG_CONFIG_LIBS) \
-    -lprecice
+    $(ADAPTER_PKG_CONFIG_LIBS)
+
+ifeq ($(strip $(COSIMIO_ROOT)),)
+$(error COSIMIO_ROOT is not set. Please export COSIMIO_ROOT=/path/to/CoSimIO)
+else
+ifeq ($(wildcard $(COSIMIO_ROOT)),)
+$(error COSIMIO_ROOT='$(COSIMIO_ROOT)' does not exist)
+else
+$(info CoSimIO found at: $(COSIMIO_ROOT))
+EXE_INC += \
+    -I$(COSIMIO_ROOT) \
+    -I$(COSIMIO_ROOT)/co_sim_io \
+    -I$(COSIMIO_ROOT)/co_sim_io/includes \
+    -I$(COSIMIO_ROOT)/external_libraries
+
+LIB_LIBS += \
+    -L$(COSIMIO_ROOT)/build \
+    -lco_sim_io_mpi \
+    -lco_sim_io
+endif
+endif
