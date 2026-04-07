@@ -11,6 +11,6 @@ module-generic/ModuleGeneric.C
 
 Adapter.C
 
-preciceAdapterFunctionObject.C
+CoSimIOAdapterFunctionObject.C
 
-LIB = $(ADAPTER_TARGET_DIR)/libpreciceAdapterFunctionObject
+LIB = $(ADAPTER_TARGET_DIR)/libCoSimIOAdapterFunctionObject
