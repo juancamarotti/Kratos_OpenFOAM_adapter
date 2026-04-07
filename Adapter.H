@@ -26,6 +26,10 @@
 // preCICE Solver Interface
 #include <precice/precice.hpp>
 
+// CoSimIO header file
+#include "co_sim_io.hpp"
+#include "co_sim_io_mpi.hpp"
+
 #if PRECICE_VERSION_GREATER_EQUAL(3, 2, 0)
 using PreciceError = ::precice::Error;
 #else
