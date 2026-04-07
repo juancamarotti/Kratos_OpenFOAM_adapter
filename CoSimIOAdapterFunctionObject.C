@@ -1,9 +1,7 @@
 /*---------------------------------------------------------------------------*\
-preCICE-adapter for OpenFOAM
+CoSimIO-adapter for OpenFOAM
 
-Copyright (c) 2017 Gerasimos Chourdakis
-
-Based on previous work by Lucia Cheung Yau. See also the README.md.
+Based on the PreCICE adapter for OpenFOAM. See also the README.md.
 -------------------------------------------------------------------------------
 
 License
@@ -22,7 +20,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "preciceAdapterFunctionObject.H"
+#include "CoSimIOAdapterFunctionObject.H"
 
 // OpenFOAM header files
 #include "Time.H"
@@ -35,15 +33,15 @@ namespace Foam
 {
 namespace functionObjects
 {
-defineTypeNameAndDebug(preciceAdapterFunctionObject, 0);
-addToRunTimeSelectionTable(functionObject, preciceAdapterFunctionObject, dictionary);
+defineTypeNameAndDebug(CoSimIOAdapterFunctionObject, 0);
+addToRunTimeSelectionTable(functionObject, CoSimIOAdapterFunctionObject, dictionary);
 }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::preciceAdapterFunctionObject::preciceAdapterFunctionObject(
+Foam::functionObjects::CoSimIOAdapterFunctionObject::CoSimIOAdapterFunctionObject(
     const word& name,
     const Time& runTime,
     const dictionary& dict)
@@ -64,11 +62,11 @@ Foam::functionObjects::preciceAdapterFunctionObject::preciceAdapterFunctionObjec
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::functionObjects::preciceAdapterFunctionObject::~preciceAdapterFunctionObject()
+Foam::functionObjects::CoSimIOAdapterFunctionObject::~CoSimIOAdapterFunctionObject()
 {
 #ifdef ADAPTER_ENABLE_TIMINGS
-    Info << "-------------------- preCICE adapter timers (primary rank) --------------------------" << nl;
-    Info << "Total time in adapter + preCICE: " << timeInAll_.str() << " (format: day-hh:mm:ss.ms)" << nl;
+    Info << "-------------------- CoSimIO adapter timers (primary rank) --------------------------" << nl;
+    Info << "Total time in adapter + CoSimIO: " << timeInAll_.str() << " (format: day-hh:mm:ss.ms)" << nl;
     Info << "  For setting up (S):            " << timeInSetup_.str() << " (read() function)" << nl;
     Info << "  For all iterations (I):        " << timeInExecute_.str() << " (execute() and adjustTimeStep() functions)" << nl << nl;
 #endif
@@ -77,7 +75,7 @@ Foam::functionObjects::preciceAdapterFunctionObject::~preciceAdapterFunctionObje
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionObjects::preciceAdapterFunctionObject::read(const dictionary& dict)
+bool Foam::functionObjects::CoSimIOAdapterFunctionObject::read(const dictionary& dict)
 {
 #ifdef ADAPTER_ENABLE_TIMINGS
     // Save the current wall clock time stamp to the clock
@@ -98,7 +96,7 @@ bool Foam::functionObjects::preciceAdapterFunctionObject::read(const dictionary&
 }
 
 
-bool Foam::functionObjects::preciceAdapterFunctionObject::execute()
+bool Foam::functionObjects::CoSimIOAdapterFunctionObject::execute()
 {
 #ifdef ADAPTER_ENABLE_TIMINGS
     clockValue clock;
@@ -116,7 +114,7 @@ bool Foam::functionObjects::preciceAdapterFunctionObject::execute()
 }
 
 
-bool Foam::functionObjects::preciceAdapterFunctionObject::end()
+bool Foam::functionObjects::CoSimIOAdapterFunctionObject::end()
 {
 #ifdef ADAPTER_ENABLE_TIMINGS
     clockValue clock;
@@ -134,12 +132,12 @@ bool Foam::functionObjects::preciceAdapterFunctionObject::end()
 }
 
 
-bool Foam::functionObjects::preciceAdapterFunctionObject::write()
+bool Foam::functionObjects::CoSimIOAdapterFunctionObject::write()
 {
     return true;
 }
 
-bool Foam::functionObjects::preciceAdapterFunctionObject::adjustTimeStep()
+bool Foam::functionObjects::CoSimIOAdapterFunctionObject::adjustTimeStep()
 {
 #ifdef ADAPTER_ENABLE_TIMINGS
     clockValue clock;

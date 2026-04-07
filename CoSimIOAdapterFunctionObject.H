@@ -1,9 +1,7 @@
 /*---------------------------------------------------------------------------*\
-preCICE-adapter for OpenFOAM
+CoSimIO-adapter for OpenFOAM
 
-Copyright (c) 2017 Gerasimos Chourdakis
-
-Based on previous work by Lucia Cheung Yau. See also the README.md.
+Based on the PreCICE adapter for OpenFOAM. See also the README.md.
 -------------------------------------------------------------------------------
 
 License
@@ -21,41 +19,40 @@ License
     along with the adapter.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::preciceAdapterFunctionObject
+    Foam::functionObjects::CoSimIOAdapterFunctionObject
 
 Description
-    This function object prepares an OpenFOAM solver for preCICE (precice.org).
+    This function object prepares an OpenFOAM solver for CoSimIO (https://kratosmultiphysics.github.io/CoSimIO/).
     See the README.md for details.
-    Look on precice.org for the latest version of the adapter.
 
     NOTE: In case the functionObjects interface is different for your OpenFOAM
     version, you may create a new function object with the same name and type,
     using the template for functionObjects that you can usually find in the
     $FOAM_ETC/codeTemplates/ directory. This is only a wrapper to the
-    adapter's methods (see preciceAdapterFunctionObject.C).
+    adapter's methods (see cosimioAdapterFunctionObject.C).
 
     Example of function object specification:
     \verbatim
-    preCICE_Adapter
+    CoSimIO_Adapter
     {
-        type preciceAdapterFunctionObject;
-        libs ("libpreciceAdapterFunctionObject.so");
+        type CoSimIOAdapterFunctionObject;
+        libs ("libCoSimIOAdapterFunctionObject.so");
     }
     \endverbatim
 
 Usage
     \table
         Property     | Description                             | Required | Default value
-        type         | type name: preciceAdapterFunctionObject | yes      |
+        type         | type name: CoSimIOAdapterFunctionObject | yes      |
     \endtable
 
 SourceFiles
-    preciceAdapterFunctionObject.C
+    CoSimIOAdapterFunctionObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PRECICEADAPTERFUNCTIONOBJECT_H
-#define PRECICEADAPTERFUNCTIONOBJECT_H
+#ifndef COSIMIOADAPTERFUNCTIONOBJECT_H
+#define COSIMIOADAPTERFUNCTIONOBJECT_H
 
 // OpenFOAM header files
 #include "fvMeshFunctionObject.H"
@@ -72,10 +69,10 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                Class preciceAdapterFunctionObject Declaration
+                Class CoSimIOAdapterFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
-class preciceAdapterFunctionObject
+class CoSimIOAdapterFunctionObject
 : public fvMeshFunctionObject
 {
     // Private data
@@ -93,33 +90,33 @@ class preciceAdapterFunctionObject
     // Private Member Functions
 
     //- No copy construct
-    preciceAdapterFunctionObject(const preciceAdapterFunctionObject&) = delete;
+    CoSimIOAdapterFunctionObject(const CoSimIOAdapterFunctionObject&) = delete;
 
     //- No copy assignment
-    void operator=(const preciceAdapterFunctionObject&) = delete;
+    void operator=(const CoSimIOAdapterFunctionObject&) = delete;
 
 
 public:
     //- Runtime type information
-    TypeName("preciceAdapterFunctionObject");
+    TypeName("CoSimIOAdapterFunctionObject");
 
 
     // Constructors
 
     //- Construct from Time and dictionary
-    preciceAdapterFunctionObject(
+    CoSimIOAdapterFunctionObject(
         const word& name,
         const Time& runTime,
         const dictionary& dict);
 
 
     //- Destructor
-    ~preciceAdapterFunctionObject() final;
+    ~CoSimIOAdapterFunctionObject() final;
 
 
     // Member Functions
 
-    //- Read the preciceAdapterFunctionObject data
+    //- Read the CoSimIOAdapterFunctionObject data
     bool read(const dictionary&) final;
 
     //- Execute in the beginning of each time-loop, after the first one
@@ -128,7 +125,7 @@ public:
     //- Execute at the final time-loop, after execute()
     bool end() final;
 
-    //- Write the preciceAdapterFunctionObject
+    //- Write the CoSimIOAdapterFunctionObject
     bool write() final;
 
     //- Called at the end of Time::adjustDeltaT() if adjustTime is true
