@@ -77,15 +77,15 @@ class CoSimIOAdapterFunctionObject
 {
     // Private data
 
-#ifdef ADAPTER_ENABLE_TIMINGS
+#ifdef adapterENABLE_TIMINGS
     //- Cumulative time spent in the complete adapter function object (including preCICE calls)
-    clockValue timeInAll_;
-    clockValue timeInSetup_;
-    clockValue timeInExecute_;
+    clockValue time_in_all;
+    clockValue time_in_setup;
+    clockValue time_in_execute;
 #endif
 
     //- Adapter's main class instance
-    preciceAdapter::Adapter adapter_;
+    preciceAdapter::Adapter adapter;
 
     // Private Member Functions
 
@@ -105,9 +105,9 @@ public:
 
     //- Construct from Time and dictionary
     CoSimIOAdapterFunctionObject(
-        const word& name,
-        const Time& runTime,
-        const dictionary& dict);
+        const word& rName,
+        const Time& rRunTime,
+        const dictionary& rDict);
 
 
     //- Destructor

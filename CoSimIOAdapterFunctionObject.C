@@ -42,11 +42,11 @@ addToRunTimeSelectionTable(functionObject, CoSimIOAdapterFunctionObject, diction
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::CoSimIOAdapterFunctionObject::CoSimIOAdapterFunctionObject(
-    const word& name,
-    const Time& runTime,
-    const dictionary& dict)
-: fvMeshFunctionObject(name, runTime, dict),
-  adapter_(runTime, mesh_)
+    const word& rName,
+    const Time& rRunTime,
+    const dictionary& rDict)
+: fvMeshFunctionObject(rName, rRunTime, rDict),
+  adapter(rRunTime, mesh_)
 {
 
 #if (defined OPENFOAM && (OPENFOAM >= 1712)) || (defined OPENFOAM_PLUS && (OPENFOAM_PLUS >= 1712))
@@ -56,7 +56,7 @@ Foam::functionObjects::CoSimIOAdapterFunctionObject::CoSimIOAdapterFunctionObjec
     UPstream::initNull();
 #endif
 
-    read(dict);
+    read(rDict);
 }
 
 
@@ -66,16 +66,16 @@ Foam::functionObjects::CoSimIOAdapterFunctionObject::~CoSimIOAdapterFunctionObje
 {
 #ifdef ADAPTER_ENABLE_TIMINGS
     Info << "-------------------- CoSimIO adapter timers (primary rank) --------------------------" << nl;
-    Info << "Total time in adapter + CoSimIO: " << timeInAll_.str() << " (format: day-hh:mm:ss.ms)" << nl;
-    Info << "  For setting up (S):            " << timeInSetup_.str() << " (read() function)" << nl;
-    Info << "  For all iterations (I):        " << timeInExecute_.str() << " (execute() and adjustTimeStep() functions)" << nl << nl;
+    Info << "Total time in adapter + CoSimIO: " << time_in_all.str() << " (format: day-hh:mm:ss.ms)" << nl;
+    Info << "  For setting up (S):            " << time_in_setup.str() << " (read() function)" << nl;
+    Info << "  For all iterations (I):        " << time_in_execute.str() << " (execute() and adjustTimeStep() functions)" << nl << nl;
 #endif
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionObjects::CoSimIOAdapterFunctionObject::read(const dictionary& dict)
+bool Foam::functionObjects::CoSimIOAdapterFunctionObject::read(const dictionary& rDict)
 {
 #ifdef ADAPTER_ENABLE_TIMINGS
     // Save the current wall clock time stamp to the clock
@@ -83,13 +83,13 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::read(const dictionary&
     clock.update();
 #endif
 
-    adapter_.configure();
+    adapter.configure();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     // Accumulate the time in this section into a global timer.
     // Same in all function object methods.
-    timeInAll_ += clock.elapsed();
-    timeInSetup_ = clock.elapsed();
+    time_in_all += clock.elapsed();
+    time_in_setup = clock.elapsed();
 #endif
 
     return true;
@@ -103,11 +103,11 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::execute()
     clock.update();
 #endif
 
-    adapter_.execute();
+    adapter.execute();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
-    timeInAll_ += clock.elapsed();
-    timeInExecute_ += clock.elapsed();
+    time_in_all += clock.elapsed();
+    time_in_execute += clock.elapsed();
 #endif
 
     return true;
@@ -121,11 +121,11 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::end()
     clock.update();
 #endif
 
-    adapter_.end();
+    adapter.end();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
-    timeInAll_ += clock.elapsed();
-    timeInExecute_ += clock.elapsed();
+    time_in_all += clock.elapsed();
+    time_in_execute += clock.elapsed();
 #endif
 
     return true;
@@ -144,11 +144,11 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::adjustTimeStep()
     clock.update();
 #endif
 
-    adapter_.adjustTimeStep();
+    adapter.adjustTimeStep();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
-    timeInAll_ += clock.elapsed();
-    timeInExecute_ += clock.elapsed();
+    time_in_all += clock.elapsed();
+    time_in_execute += clock.elapsed();
 #endif
 
     return true;

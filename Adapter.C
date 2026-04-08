@@ -478,7 +478,7 @@ try
 
     return;
 }
-catch (const PreciceError& e)
+catch (const CoSimIOError& e)
 {
     std::exit(EXIT_FAILURE);
 }
@@ -565,7 +565,7 @@ try
 
     return;
 }
-catch (const PreciceError& e)
+catch (const CoSimIOError& e)
 {
     std::exit(EXIT_FAILURE);
 }
@@ -578,7 +578,7 @@ try
 
     return;
 }
-catch (const PreciceError& e)
+catch (const CoSimIOError& e)
 {
     std::exit(EXIT_FAILURE);
 }
@@ -1420,7 +1420,7 @@ try
 
     return;
 }
-catch (const PreciceError& e)
+catch (const CoSimIOError& e)
 {
     std::exit(EXIT_FAILURE);
 }
@@ -1598,7 +1598,7 @@ try
 
     return;
 }
-catch (const PreciceError& e)
+catch (const CoSimIOError& e)
 {
     std::exit(EXIT_FAILURE);
 }

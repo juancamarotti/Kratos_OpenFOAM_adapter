@@ -1,6 +1,5 @@
 #ifndef PRECICEADAPTER_H
 #define PRECICEADAPTER_H
-
 #include "Interface.H"
 
 // Conjugate Heat Transfer module
@@ -30,11 +29,7 @@
 #include "co_sim_io.hpp"
 #include "co_sim_io_mpi.hpp"
 
-#if PRECICE_VERSION_GREATER_EQUAL(3, 2, 0)
-using PreciceError = ::precice::Error;
-#else
-using PreciceError = std::runtime_error;
-#endif
+using CoSimIOError = std::runtime_error;
 
 namespace preciceAdapter
 {
