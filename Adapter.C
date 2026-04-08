@@ -18,7 +18,7 @@ preciceAdapter::Adapter::Adapter(const Time& runTime, const fvMesh& mesh)
 
 void preciceAdapter::Adapter::readFieldConfigs(const std::string& listName, Foam::ITstream& stream, std::vector<FieldConfig>& configs)
 {
-    // Perform check on whether read/writeData is a list
+    // Perform check on whether read/WriteData is a list
     if (stream.peek() == token::BEGIN_LIST)
     {
         token _t;
@@ -155,31 +155,31 @@ void preciceAdapter::Adapter::configFileRead()
                 const dictionary& interfaceDict = interfaceDictEntry.dict();
                 struct InterfaceConfig interfaceConfig;
 
-                interfaceConfig.meshName = interfaceDict.get<word>("mesh");
-                DEBUG(adapterInfo("  - mesh         : " + interfaceConfig.meshName));
+                interfaceConfig.MeshName = interfaceDict.get<word>("mesh");
+                DEBUG(adapterInfo("  - mesh         : " + interfaceConfig.MeshName));
 
-                // By default, assume "faceCenters" as locationsType
-                interfaceConfig.locationsType = interfaceDict.lookupOrDefault<word>("locations", "faceCenters");
-                DEBUG(adapterInfo("    locations    : " + interfaceConfig.locationsType));
+                // By default, assume "faceCenters" as LocationsType
+                interfaceConfig.LocationsType = interfaceDict.lookupOrDefault<word>("locations", "faceCenters");
+                DEBUG(adapterInfo("    locations    : " + interfaceConfig.LocationsType));
 
                 // By default, assume that no mesh connectivity is required (i.e. no nearest-projection mapping)
-                interfaceConfig.meshConnectivity = interfaceDict.lookupOrDefault<bool>("connectivity", false);
+                interfaceConfig.MeshConnectivity = interfaceDict.lookupOrDefault<bool>("connectivity", false);
                 // Mesh connectivity only makes sense in case of faceNodes, check and raise a warning otherwise
-                if (interfaceConfig.meshConnectivity && (interfaceConfig.locationsType == "faceCenters" || interfaceConfig.locationsType == "volumeCenters" || interfaceConfig.locationsType == "volumeCentres"))
+                if (interfaceConfig.MeshConnectivity && (interfaceConfig.LocationsType == "faceCenters" || interfaceConfig.LocationsType == "volumeCenters" || interfaceConfig.LocationsType == "volumeCentres"))
                 {
                     DEBUG(adapterInfo("Mesh connectivity is not supported for faceCenters or volumeCenters. \n"
-                                      "Please configure the desired interface with the locationsType faceNodes. \n"
+                                      "Please configure the desired interface with the LocationsType faceNodes. \n"
                                       "Have a look in the adapter documentation for detailed information.",
                                       "error"));
                     return;
                 }
-                DEBUG(adapterInfo("    connectivity : " + std::to_string(interfaceConfig.meshConnectivity)));
+                DEBUG(adapterInfo("    connectivity : " + std::to_string(interfaceConfig.MeshConnectivity)));
 
                 DEBUG(adapterInfo("    patches      : "));
                 auto patches = interfaceDict.get<wordList>("patches");
                 for (auto patch : patches)
                 {
-                    interfaceConfig.patchNames.push_back(patch);
+                    interfaceConfig.PatchNames.push_back(patch);
                     DEBUG(adapterInfo("      - " + patch));
                 }
 
@@ -188,31 +188,31 @@ void preciceAdapter::Adapter::configFileRead()
 
                 for (auto cellSet : cellSets)
                 {
-                    interfaceConfig.cellSetNames.push_back(cellSet);
+                    interfaceConfig.CellSetNames.push_back(cellSet);
                     DEBUG(adapterInfo("      - " + cellSet));
                 }
 
-                if (!interfaceConfig.cellSetNames.empty() && !(interfaceConfig.locationsType == "volumeCenters" || interfaceConfig.locationsType == "volumeCentres"))
+                if (!interfaceConfig.CellSetNames.empty() && !(interfaceConfig.LocationsType == "volumeCenters" || interfaceConfig.LocationsType == "volumeCentres"))
                 {
                     adapterInfo("Cell sets are not supported for locationType != volumeCenters. \n"
-                                "Please configure the desired interface with the locationsType volumeCenters. \n"
+                                "Please configure the desired interface with the LocationsType volumeCenters. \n"
                                 "Have a look in the adapter documentation for detailed information.",
                                 "error");
                     return;
                 }
 
-                if (interfaceDict.found("writeData"))
+                if (interfaceDict.found("WriteData"))
                 {
-                    DEBUG(adapterInfo("    writeData    : "));
-                    ITstream writeDataStream = interfaceDict.lookup("writeData");
-                    readFieldConfigs("writeData", writeDataStream, interfaceConfig.writeData);
+                    DEBUG(adapterInfo("    WriteData    : "));
+                    ITstream writeDataStream = interfaceDict.lookup("WriteData");
+                    readFieldConfigs("WriteData", writeDataStream, interfaceConfig.WriteData);
                 }
 
-                if (interfaceDict.found("readData"))
+                if (interfaceDict.found("ReadData"))
                 {
-                    DEBUG(adapterInfo("    readData     : "));
-                    ITstream readDataStream = interfaceDict.lookup("readData");
-                    readFieldConfigs("readData", readDataStream, interfaceConfig.readData);
+                    DEBUG(adapterInfo("    ReadData     : "));
+                    ITstream readDataStream = interfaceDict.lookup("ReadData");
+                    readFieldConfigs("ReadData", readDataStream, interfaceConfig.ReadData);
                 }
 
                 interfacesConfig_.push_back(interfaceConfig);
@@ -322,14 +322,14 @@ try
         std::string nameCellDisplacement = FSIenabled_ ? FSI_->getCellDisplacementFieldName() : "default";
         bool restartFromDeformed = FSIenabled_ ? FSI_->isRestartingFromDeformed() : false;
 
-        Interface* interface = new Interface(*precice_, mesh_, interfacesConfig_.at(i).meshName, interfacesConfig_.at(i).locationsType, interfacesConfig_.at(i).patchNames, interfacesConfig_.at(i).cellSetNames, interfacesConfig_.at(i).meshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement);
+        Interface* interface = new Interface(*precice_, mesh_, interfacesConfig_.at(i).MeshName, interfacesConfig_.at(i).LocationsType, interfacesConfig_.at(i).PatchNames, interfacesConfig_.at(i).CellSetNames, interfacesConfig_.at(i).MeshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement);
         interfaces_.push_back(interface);
-        DEBUG(adapterInfo("Interface created on mesh " + interfacesConfig_.at(i).meshName));
+        DEBUG(adapterInfo("Interface created on mesh " + interfacesConfig_.at(i).MeshName));
 
         DEBUG(adapterInfo("Adding coupling data writers..."));
-        for (uint j = 0; j < interfacesConfig_.at(i).writeData.size(); j++)
+        for (uint j = 0; j < interfacesConfig_.at(i).WriteData.size(); j++)
         {
-            const FieldConfig& fieldConfig = interfacesConfig_.at(i).writeData.at(j);
+            const FieldConfig& fieldConfig = interfacesConfig_.at(i).WriteData.at(j);
             std::string dataName = fieldConfig.name;
 
             unsigned int inModules = 0;
@@ -379,9 +379,9 @@ try
         } // end add coupling data writers
 
         DEBUG(adapterInfo("Adding coupling data readers..."));
-        for (uint j = 0; j < interfacesConfig_.at(i).readData.size(); j++)
+        for (uint j = 0; j < interfacesConfig_.at(i).ReadData.size(); j++)
         {
-            const FieldConfig& fieldConfig = interfacesConfig_.at(i).readData.at(j);
+            const FieldConfig& fieldConfig = interfacesConfig_.at(i).ReadData.at(j);
             std::string dataName = fieldConfig.name;
 
             unsigned int inModules = 0;

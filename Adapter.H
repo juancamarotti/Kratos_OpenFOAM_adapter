@@ -44,13 +44,13 @@ private:
     //  of data that are exchanged.
     struct InterfaceConfig
     {
-        std::string meshName;
-        std::string locationsType;
-        bool meshConnectivity;
-        std::vector<std::string> patchNames;
-        std::vector<std::string> cellSetNames;
-        std::vector<struct FieldConfig> writeData;
-        std::vector<struct FieldConfig> readData;
+        std::string MeshName;
+        std::string LocationsType;
+        bool MeshConnectivity;
+        std::vector<std::string> PatchNames;
+        std::vector<std::string> CellSetNames;
+        std::vector<struct FieldConfig> WriteData;
+        std::vector<struct FieldConfig> ReadData;
     };
 
     //- Configuration interfaces
