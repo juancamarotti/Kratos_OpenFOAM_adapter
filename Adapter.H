@@ -58,18 +58,18 @@ private:
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     //- Timers
-    clockValue timeInConfigRead_;
-    clockValue timeInPreciceConstruct_;
-    clockValue timeInMeshSetup_;
-    clockValue timeInInitialize_;
-    clockValue timeInCheckpointingSetup_;
-    clockValue timeInWrite_;
-    clockValue timeInAdvance_;
-    clockValue timeInRead_;
-    clockValue timeInCheckpointingRead_;
-    clockValue timeInCheckpointingWrite_;
-    clockValue timeInWriteResults_;
-    clockValue timeInFinalize_;
+    clockValue time_in_config_read;
+    clockValue time_in_co_sim_io_construct;
+    clockValue time_in_mesh_setup;
+    clockValue time_in_initialize;
+    clockValue time_in_checkpointing_setup;
+    clockValue time_in_write;
+    clockValue time_in_advance;
+    clockValue time_in_read;
+    clockValue time_in_checkpointing_read;
+    clockValue time_in_checkpointing_write;
+    clockValue time_in_write_results;
+    clockValue time_in_finalize;
 #endif
 
     //- OpenFOAM runTime object

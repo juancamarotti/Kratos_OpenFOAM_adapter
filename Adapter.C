@@ -279,7 +279,7 @@ void preciceAdapter::Adapter::configFileRead()
     // TODO: Loading modules should be implemented in more general way,
     // in order to avoid code duplication. See issue #16 on GitHub.
 
-    ACCUMULATE_TIMER(timeInConfigRead_);
+    ACCUMULATE_TIMER(time_in_config_read_);
 
     return;
 }
@@ -311,7 +311,7 @@ try
     precice_ = new precice::Participant(participantName_, preciceConfigFilename_, Pstream::myProcNo(), Pstream::nProcs());
     DEBUG(adapterInfo("  preCICE solver interface was created."));
 
-    ACCUMULATE_TIMER(timeInPreciceConstruct_);
+    ACCUMULATE_TIMER(time_in_co_sim_io_construct);
 
     // Create interfaces
     REUSE_TIMER();
@@ -433,7 +433,7 @@ try
         // Create the interface's data buffer
         interface->createBuffer();
     }
-    ACCUMULATE_TIMER(timeInMeshSetup_);
+    ACCUMULATE_TIMER(time_in_mesh_setup);
 
     // Initialize preCICE and exchange the first coupling data
     initialize();
@@ -531,7 +531,7 @@ try
             const_cast<Time&>(runTime_).writeNow();
         }
     }
-    ACCUMULATE_TIMER(timeInWriteResults_);
+    ACCUMULATE_TIMER(time_in_write_results);
 
     // Adjust the timestep, if it is fixed
     if (!adjustableTimestep_)
@@ -593,7 +593,7 @@ void preciceAdapter::Adapter::readCouplingData(double relativeReadTime)
         interfaces_.at(i)->readCouplingData(relativeReadTime);
     }
 
-    ACCUMULATE_TIMER(timeInRead_);
+    ACCUMULATE_TIMER(time_in_read);
 
     return;
 }
@@ -608,7 +608,7 @@ void preciceAdapter::Adapter::writeCouplingData()
         interfaces_.at(i)->writeCouplingData();
     }
 
-    ACCUMULATE_TIMER(timeInWrite_);
+    ACCUMULATE_TIMER(time_in_write);
 
     return;
 }
@@ -626,7 +626,7 @@ void preciceAdapter::Adapter::initialize()
 
     precice_->initialize();
     preciceInitialized_ = true;
-    ACCUMULATE_TIMER(timeInInitialize_);
+    ACCUMULATE_TIMER(time_in_initialize);
 
     adapterInfo("preCICE was configured and initialized", "info");
 
@@ -642,7 +642,7 @@ void preciceAdapter::Adapter::finalize()
         // Finalize the preCICE solver interface
         SETUP_TIMER();
         precice_->finalize();
-        ACCUMULATE_TIMER(timeInFinalize_);
+        ACCUMULATE_TIMER(time_in_finalize);
 
         preciceInitialized_ = false;
 
@@ -663,7 +663,7 @@ void preciceAdapter::Adapter::advance()
 
     SETUP_TIMER();
     precice_->advance(timestepSolver_);
-    ACCUMULATE_TIMER(timeInAdvance_);
+    ACCUMULATE_TIMER(time_in_advance);
 
     return;
 }
@@ -916,7 +916,7 @@ void preciceAdapter::Adapter::setupCheckpointing()
 
 #undef doLocalCode
 
-    ACCUMULATE_TIMER(timeInCheckpointingSetup_);
+    ACCUMULATE_TIMER(time_in_checkpointing_setup);
 }
 
 void preciceAdapter::Adapter::pruneCheckpointedFields()
@@ -1273,7 +1273,7 @@ void preciceAdapter::Adapter::readCheckpoint()
 
     DEBUG(adapterInfo("Checkpoint was read. Time = " + std::to_string(runTime_.value())));
 
-    ACCUMULATE_TIMER(timeInCheckpointingRead_);
+    ACCUMULATE_TIMER(time_in_checkpointing_read);
 
     return;
 }
@@ -1357,7 +1357,7 @@ void preciceAdapter::Adapter::writeCheckpoint()
 
     DEBUG(adapterInfo("Checkpoint for time t = " + std::to_string(runTime_.value()) + " was stored."));
 
-    ACCUMULATE_TIMER(timeInCheckpointingWrite_);
+    ACCUMULATE_TIMER(time_in_checkpointing_write);
 
     return;
 }
@@ -1578,20 +1578,20 @@ try
 
     TIMING_MODE(
         // Continuing the output started in the destructor of preciceAdapterFunctionObject
-        Info << "Time exclusively in the adapter: " << (timeInConfigRead_ + timeInMeshSetup_ + timeInCheckpointingSetup_ + timeInWrite_ + timeInRead_ + timeInCheckpointingWrite_ + timeInCheckpointingRead_).str() << nl;
-        Info << "  (S) reading preciceDict:       " << timeInConfigRead_.str() << nl;
-        Info << "  (S) constructing preCICE:      " << timeInPreciceConstruct_.str() << nl;
-        Info << "  (S) setting up the interfaces: " << timeInMeshSetup_.str() << nl;
-        Info << "  (S) setting up checkpointing:  " << timeInCheckpointingSetup_.str() << nl;
-        Info << "  (I) writing data:              " << timeInWrite_.str() << nl;
-        Info << "  (I) reading data:              " << timeInRead_.str() << nl;
-        Info << "  (I) writing checkpoints:       " << timeInCheckpointingWrite_.str() << nl;
-        Info << "  (I) reading checkpoints:       " << timeInCheckpointingRead_.str() << nl;
-        Info << "  (I) writing OpenFOAM results:  " << timeInWriteResults_.str() << " (at the end of converged time windows)" << nl << nl;
-        Info << "Time exclusively in preCICE:     " << (timeInInitialize_ + timeInAdvance_ + timeInFinalize_).str() << nl;
-        Info << "  (S) initialize():              " << timeInInitialize_.str() << nl;
-        Info << "  (I) advance():                 " << timeInAdvance_.str() << nl;
-        Info << "  (I) finalize():                " << timeInFinalize_.str() << nl;
+        Info << "Time exclusively in the adapter: " << (time_in_config_read_ + time_in_mesh_setup + time_in_checkpointing_setup + time_in_write + time_in_read + time_in_checkpointing_write + time_in_checkpointing_read).str() << nl;
+        Info << "  (S) reading preciceDict:       " << time_in_config_read_.str() << nl;
+        Info << "  (S) constructing preCICE:      " << time_in_co_sim_io_construct.str() << nl;
+        Info << "  (S) setting up the interfaces: " << time_in_mesh_setup.str() << nl;
+        Info << "  (S) setting up checkpointing:  " << time_in_checkpointing_setup.str() << nl;
+        Info << "  (I) writing data:              " << time_in_write.str() << nl;
+        Info << "  (I) reading data:              " << time_in_read.str() << nl;
+        Info << "  (I) writing checkpoints:       " << time_in_checkpointing_write.str() << nl;
+        Info << "  (I) reading checkpoints:       " << time_in_checkpointing_read.str() << nl;
+        Info << "  (I) writing OpenFOAM results:  " << time_in_write_results.str() << " (at the end of converged time windows)" << nl << nl;
+        Info << "Time exclusively in preCICE:     " << (time_in_initialize + time_in_advance + time_in_finalize).str() << nl;
+        Info << "  (S) initialize():              " << time_in_initialize.str() << nl;
+        Info << "  (I) advance():                 " << time_in_advance.str() << nl;
+        Info << "  (I) finalize():                " << time_in_finalize.str() << nl;
         Info << "  These times include time waiting for other participants." << nl;
         Info << "  See also precice-profiling on the website https://precice.org/tooling-performance-analysis.html." << nl;
         Info << "-------------------------------------------------------------------------------------" << nl;)
