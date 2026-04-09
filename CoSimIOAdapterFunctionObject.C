@@ -46,7 +46,7 @@ Foam::functionObjects::CoSimIOAdapterFunctionObject::CoSimIOAdapterFunctionObjec
     const Time& rRunTime,
     const dictionary& rDict)
 : fvMeshFunctionObject(rName, rRunTime, rDict),
-  adapter(rRunTime, mesh_)
+  mAdapter(rRunTime, mesh_)
 {
 
 #if (defined OPENFOAM && (OPENFOAM >= 1712)) || (defined OPENFOAM_PLUS && (OPENFOAM_PLUS >= 1712))
@@ -83,7 +83,7 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::read(const dictionary&
     clock.update();
 #endif
 
-    adapter.configure();
+    mAdapter.configure();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     // Accumulate the time in this section into a global timer.
@@ -103,7 +103,7 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::execute()
     clock.update();
 #endif
 
-    adapter.execute();
+    mAdapter.execute();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     time_in_all += clock.elapsed();
@@ -121,7 +121,7 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::end()
     clock.update();
 #endif
 
-    adapter.end();
+    mAdapter.end();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     time_in_all += clock.elapsed();
@@ -144,7 +144,7 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::adjustTimeStep()
     clock.update();
 #endif
 
-    adapter.adjustTimeStep();
+    mAdapter.adjustTimeStep();
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     time_in_all += clock.elapsed();
