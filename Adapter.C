@@ -8,8 +8,8 @@
 using namespace Foam;
 
 preciceAdapter::Adapter::Adapter(const Time& runTime, const fvMesh& mesh)
-: runTime_(runTime),
-  mesh_(mesh)
+: mRunTime(runTime),
+  mMesh(mesh)
 {
     adapterInfo("Loaded the OpenFOAM-preCICE adapter - v1.3.1.", "info");
 
@@ -91,18 +91,18 @@ void preciceAdapter::Adapter::configFileRead()
     static IOdictionary preciceDict(
         IOobject(
             "preciceDict",
-            runTime_.system(),
-            mesh_,
+            mRunTime.system(),
+            mMesh,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE));
 
     // Read and display the preCICE configuration file name
-    preciceConfigFilename_ = preciceDict.get<fileName>("preciceConfig");
-    DEBUG(adapterInfo("  precice-config-file : " + preciceConfigFilename_));
+    mCoSimIOConfigFilename = preciceDict.get<fileName>("preciceConfig");
+    DEBUG(adapterInfo("  precice-config-file : " + mCoSimIOConfigFilename));
 
     // Read and display the participant name
-    participantName_ = preciceDict.get<word>("participant");
-    DEBUG(adapterInfo("  participant name    : " + participantName_));
+    mParticipantName = preciceDict.get<word>("participant");
+    DEBUG(adapterInfo("  participant name    : " + mParticipantName));
 
     // Read and display the list of modules
     DEBUG(adapterInfo("  modules requested   : "));
@@ -114,22 +114,22 @@ void preciceAdapter::Adapter::configFileRead()
         // Set the modules switches
         if (module == "CHT")
         {
-            CHTenabled_ = true;
+            mCHTEnabled = true;
         }
 
         if (module == "FSI")
         {
-            FSIenabled_ = true;
+            mFSIEnabled = true;
         }
 
         if (module == "FF")
         {
-            FFenabled_ = true;
+            mFFenabled = true;
         }
 
         if (module == "generic")
         {
-            genericModuleEnabled_ = true;
+            mGenericModuleEnabled = true;
         }
     }
 
@@ -215,17 +215,17 @@ void preciceAdapter::Adapter::configFileRead()
                     readFieldConfigs("ReadData", readDataStream, interfaceConfig.ReadData);
                 }
 
-                interfacesConfig_.push_back(interfaceConfig);
+                mInterfacesConfig.push_back(interfaceConfig);
             }
         }
     }
 
     // NOTE: set the switch for your new module here
 
-    if (genericModuleEnabled_)
+    if (mGenericModuleEnabled)
     {
-        Generic_ = new Generic::GenericInterface(mesh_);
-        if (!Generic_->configure(preciceDict))
+        mGeneric = new Generic::GenericInterface(mMesh);
+        if (!mGeneric->configure(preciceDict))
         {
             return;
         }
@@ -233,10 +233,10 @@ void preciceAdapter::Adapter::configFileRead()
 
     // If the CHT module is enabled, create it, read the
     // CHT-specific options and configure it.
-    if (CHTenabled_)
+    if (mCHTEnabled)
     {
-        CHT_ = new CHT::ConjugateHeatTransfer(mesh_);
-        if (!CHT_->configure(preciceDict))
+        mCHT = new CHT::ConjugateHeatTransfer(mMesh);
+        if (!mCHT->configure(preciceDict))
         {
             adapterInfo("There was an error while configuring the CHT module",
                         "error");
@@ -246,10 +246,10 @@ void preciceAdapter::Adapter::configFileRead()
 
     // If the FSI module is enabled, create it, read the
     // FSI-specific options and configure it.
-    if (FSIenabled_)
+    if (mFSIEnabled)
     {
-        FSI_ = new FSI::FluidStructureInteraction(mesh_, runTime_);
-        if (!FSI_->configure(preciceDict))
+        mFSI = new FSI::FluidStructureInteraction(mMesh, mRunTime);
+        if (!mFSI->configure(preciceDict))
         {
             adapterInfo("There was an error while configuring the FSI module",
                         "error");
@@ -257,10 +257,10 @@ void preciceAdapter::Adapter::configFileRead()
         }
     }
 
-    if (FFenabled_)
+    if (mFFenabled)
     {
-        FF_ = new FF::FluidFluid(mesh_);
-        if (!FF_->configure(preciceDict))
+        mFF = new FF::FluidFluid(mMesh);
+        if (!mFF->configure(preciceDict))
         {
             adapterInfo("There was an error while configuring the FF module",
                         "error");
@@ -270,7 +270,7 @@ void preciceAdapter::Adapter::configFileRead()
 
     // NOTE: Create your module and read any options specific to it here
 
-    if (!CHTenabled_ && !FSIenabled_ && !FFenabled_ && !genericModuleEnabled_) // NOTE: Add your new switch here
+    if (!mCHTEnabled && !mFSIEnabled && !mFFenabled && !mGenericModuleEnabled) // NOTE: Add your new switch here
     {
         adapterInfo("No module is enabled.", "error");
         return;
@@ -292,9 +292,9 @@ try
 
     // Check the timestep type (fixed vs adjustable)
     DEBUG(adapterInfo("Checking the timestep type (fixed vs adjustable)..."));
-    adjustableTimestep_ = runTime_.controlDict().lookupOrDefault("adjustTimeStep", false);
+    mAdjustableTimestep = mRunTime.controlDict().lookupOrDefault("adjustTimeStep", false);
 
-    if (adjustableTimestep_)
+    if (mAdjustableTimestep)
     {
         DEBUG(adapterInfo("  Timestep type: adjustable."));
     }
@@ -308,7 +308,7 @@ try
     DEBUG(adapterInfo("Creating the preCICE solver interface..."));
     DEBUG(adapterInfo("  Number of processes: " + std::to_string(Pstream::nProcs())));
     DEBUG(adapterInfo("  MPI rank: " + std::to_string(Pstream::myProcNo())));
-    precice_ = new precice::Participant(participantName_, preciceConfigFilename_, Pstream::myProcNo(), Pstream::nProcs());
+    mPrecice = new precice::Participant(mParticipantName, mCoSimIOConfigFilename, Pstream::myProcNo(), Pstream::nProcs());
     DEBUG(adapterInfo("  preCICE solver interface was created."));
 
     ACCUMULATE_TIMER(time_in_co_sim_io_construct);
@@ -316,38 +316,38 @@ try
     // Create interfaces
     REUSE_TIMER();
     DEBUG(adapterInfo("Creating interfaces..."));
-    for (uint i = 0; i < interfacesConfig_.size(); i++)
+    for (uint i = 0; i < mInterfacesConfig.size(); i++)
     {
-        std::string namePointDisplacement = FSIenabled_ ? FSI_->getPointDisplacementFieldName() : "default";
-        std::string nameCellDisplacement = FSIenabled_ ? FSI_->getCellDisplacementFieldName() : "default";
-        bool restartFromDeformed = FSIenabled_ ? FSI_->isRestartingFromDeformed() : false;
+        std::string namePointDisplacement = mFSIEnabled ? mFSI->getPointDisplacementFieldName() : "default";
+        std::string nameCellDisplacement = mFSIEnabled ? mFSI->getCellDisplacementFieldName() : "default";
+        bool restartFromDeformed = mFSIEnabled ? mFSI->isRestartingFromDeformed() : false;
 
-        Interface* interface = new Interface(*precice_, mesh_, interfacesConfig_.at(i).MeshName, interfacesConfig_.at(i).LocationsType, interfacesConfig_.at(i).PatchNames, interfacesConfig_.at(i).CellSetNames, interfacesConfig_.at(i).MeshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement);
-        interfaces_.push_back(interface);
-        DEBUG(adapterInfo("Interface created on mesh " + interfacesConfig_.at(i).MeshName));
+        Interface* interface = new Interface(*mPrecice, mMesh, mInterfacesConfig.at(i).MeshName, mInterfacesConfig.at(i).LocationsType, mInterfacesConfig.at(i).PatchNames, mInterfacesConfig.at(i).CellSetNames, mInterfacesConfig.at(i).MeshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement);
+        mInterfaces.push_back(interface);
+        DEBUG(adapterInfo("Interface created on mesh " + mInterfacesConfig.at(i).MeshName));
 
         DEBUG(adapterInfo("Adding coupling data writers..."));
-        for (uint j = 0; j < interfacesConfig_.at(i).WriteData.size(); j++)
+        for (uint j = 0; j < mInterfacesConfig.at(i).WriteData.size(); j++)
         {
-            const FieldConfig& fieldConfig = interfacesConfig_.at(i).WriteData.at(j);
+            const FieldConfig& fieldConfig = mInterfacesConfig.at(i).WriteData.at(j);
             std::string dataName = fieldConfig.name;
 
             unsigned int inModules = 0;
 
             // Add CHT-related coupling data writers
-            if (CHTenabled_ && CHT_->addWriters(fieldConfig, interface))
+            if (mCHTEnabled && mCHT->addWriters(fieldConfig, interface))
             {
                 inModules++;
             }
 
             // Add FSI-related coupling data writers
-            if (FSIenabled_ && FSI_->addWriters(fieldConfig, interface))
+            if (mFSIEnabled && mFSI->addWriters(fieldConfig, interface))
             {
                 inModules++;
             }
 
             // Add FF-related coupling data writers
-            if (FFenabled_ && FF_->addWriters(fieldConfig, interface))
+            if (mFFenabled && mFF->addWriters(fieldConfig, interface))
             {
                 inModules++;
             }
@@ -356,7 +356,7 @@ try
             // Only add Generic interface if not found in other modules
             if (inModules == 0)
             {
-                if (genericModuleEnabled_ && Generic_->addWriters(fieldConfig, interface))
+                if (mGenericModuleEnabled && mGeneric->addWriters(fieldConfig, interface))
                 {
                     inModules++;
                 };
@@ -379,27 +379,27 @@ try
         } // end add coupling data writers
 
         DEBUG(adapterInfo("Adding coupling data readers..."));
-        for (uint j = 0; j < interfacesConfig_.at(i).ReadData.size(); j++)
+        for (uint j = 0; j < mInterfacesConfig.at(i).ReadData.size(); j++)
         {
-            const FieldConfig& fieldConfig = interfacesConfig_.at(i).ReadData.at(j);
+            const FieldConfig& fieldConfig = mInterfacesConfig.at(i).ReadData.at(j);
             std::string dataName = fieldConfig.name;
 
             unsigned int inModules = 0;
 
             // Add CHT-related coupling data readers
-            if (CHTenabled_ && CHT_->addReaders(fieldConfig, interface))
+            if (mCHTEnabled && mCHT->addReaders(fieldConfig, interface))
             {
                 inModules++;
             }
 
             // Add FSI-related coupling data readers
-            if (FSIenabled_ && FSI_->addReaders(fieldConfig, interface))
+            if (mFSIEnabled && mFSI->addReaders(fieldConfig, interface))
             {
                 inModules++;
             }
 
             // Add FF-related coupling data readers
-            if (FFenabled_ && FF_->addReaders(fieldConfig, interface))
+            if (mFFenabled && mFF->addReaders(fieldConfig, interface))
             {
                 inModules++;
             }
@@ -408,7 +408,7 @@ try
             // Only add Generic interface if not found in other modules
             if (inModules == 0)
             {
-                if (genericModuleEnabled_ && Generic_->addReaders(fieldConfig, interface))
+                if (mGenericModuleEnabled && mGeneric->addReaders(fieldConfig, interface))
                 {
                     inModules++;
                 }
@@ -442,7 +442,7 @@ try
     // and write the first checkpoint
     if (requiresWritingCheckpoint())
     {
-        checkpointing_ = true;
+        mCheckpointing = true;
 
         // Setup the checkpointing (find and add fields to checkpoint)
         setupCheckpointing();
@@ -452,7 +452,7 @@ try
     }
 
     // Adjust the timestep for the first iteration, if it is fixed
-    if (!adjustableTimestep_)
+    if (!mAdjustableTimestep)
     {
         adjustSolverTimeStepAndReadData();
     }
@@ -474,7 +474,7 @@ try
         "Any functionObject's end() method will be triggered by the adapter. "
         "You may disable this behavior in the adapter's configuration.",
         "info");
-    const_cast<Time&>(runTime_).setEndTime(GREAT);
+    const_cast<Time&>(mRunTime).setEndTime(GREAT);
 
     return;
 }
@@ -518,23 +518,23 @@ try
     // Check the behavior e.g. by using watch on a result file:
     //     watch -n 0.1 -d ls --full-time Fluid/0.01/T.gz
     SETUP_TIMER();
-    if (checkpointing_ && isCouplingTimeWindowComplete())
+    if (mCheckpointing && isCouplingTimeWindowComplete())
     {
         // Check if the time directory already exists
         // (i.e. the solver wrote results that need to be updated)
-        if (runTime_.timePath().type() == fileName::DIRECTORY)
+        if (mRunTime.timePath().type() == fileName::DIRECTORY)
         {
             adapterInfo(
                 "The coupling timestep completed. "
                 "Writing the updated results.",
                 "info");
-            const_cast<Time&>(runTime_).writeNow();
+            const_cast<Time&>(mRunTime).writeNow();
         }
     }
     ACCUMULATE_TIMER(time_in_write_results);
 
     // Adjust the timestep, if it is fixed
-    if (!adjustableTimestep_)
+    if (!mAdjustableTimestep)
     {
         adjustSolverTimeStepAndReadData();
     }
@@ -551,7 +551,7 @@ try
         // Tell OpenFOAM to stop the simulation.
         // Set the solver's endTime to now. The next evaluation of
         // runTime.run() will be false and the solver will exit.
-        const_cast<Time&>(runTime_).setEndTime(runTime_.value());
+        const_cast<Time&>(mRunTime).setEndTime(mRunTime.value());
         adapterInfo(
             "The simulation was ended by preCICE. "
             "Calling the end() methods of any functionObject explicitly.",
@@ -560,7 +560,7 @@ try
                     "Next to the preCICE library and any other components, please also cite this adapter. "
                     "Find how on https://precice.org/adapter-openfoam-overview.html.",
                     "info");
-        const_cast<Time&>(runTime_).functionObjects().end();
+        const_cast<Time&>(mRunTime).functionObjects().end();
     }
 
     return;
@@ -588,9 +588,9 @@ void preciceAdapter::Adapter::readCouplingData(double relativeReadTime)
     SETUP_TIMER();
     DEBUG(adapterInfo("Reading coupling data..."));
 
-    for (uint i = 0; i < interfaces_.size(); i++)
+    for (uint i = 0; i < mInterfaces.size(); i++)
     {
-        interfaces_.at(i)->readCouplingData(relativeReadTime);
+        mInterfaces.at(i)->readCouplingData(relativeReadTime);
     }
 
     ACCUMULATE_TIMER(time_in_read);
@@ -603,9 +603,9 @@ void preciceAdapter::Adapter::writeCouplingData()
     SETUP_TIMER();
     DEBUG(adapterInfo("Writing coupling data..."));
 
-    for (uint i = 0; i < interfaces_.size(); i++)
+    for (uint i = 0; i < mInterfaces.size(); i++)
     {
-        interfaces_.at(i)->writeCouplingData();
+        mInterfaces.at(i)->writeCouplingData();
     }
 
     ACCUMULATE_TIMER(time_in_write);
@@ -618,14 +618,14 @@ void preciceAdapter::Adapter::initialize()
     DEBUG(adapterInfo("Initializing the preCICE solver interface..."));
     SETUP_TIMER();
 
-    if (precice_->requiresInitialData())
+    if (mPrecice->requiresInitialData())
     {
         DEBUG(adapterInfo("Initializing preCICE data..."));
         writeCouplingData();
     }
 
-    precice_->initialize();
-    preciceInitialized_ = true;
+    mPrecice->initialize();
+    mCoSimIOInitialized = true;
     ACCUMULATE_TIMER(time_in_initialize);
 
     adapterInfo("preCICE was configured and initialized", "info");
@@ -635,16 +635,16 @@ void preciceAdapter::Adapter::initialize()
 
 void preciceAdapter::Adapter::finalize()
 {
-    if (nullptr != precice_ && preciceInitialized_ && !isCouplingOngoing())
+    if (nullptr != mPrecice && mCoSimIOInitialized && !isCouplingOngoing())
     {
         DEBUG(adapterInfo("Finalizing the preCICE solver interface..."));
 
         // Finalize the preCICE solver interface
         SETUP_TIMER();
-        precice_->finalize();
+        mPrecice->finalize();
         ACCUMULATE_TIMER(time_in_finalize);
 
-        preciceInitialized_ = false;
+        mCoSimIOInitialized = false;
 
         // Delete the solver interface and all the related data
         teardown();
@@ -662,7 +662,7 @@ void preciceAdapter::Adapter::advance()
     DEBUG(adapterInfo("Advancing preCICE..."));
 
     SETUP_TIMER();
-    precice_->advance(timestepSolver_);
+    mPrecice->advance(timestepSolver_);
     ACCUMULATE_TIMER(time_in_advance);
 
     return;
@@ -685,13 +685,13 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
     */
 
     // Is the timestep adjustable or fixed?
-    if (!adjustableTimestep_)
+    if (!mAdjustableTimestep)
     {
         // Have we already stored the timestep?
-        if (!useStoredTimestep_)
+        if (!mUseStoredTimestep)
         {
             // Show a warning if runTimeModifiable is set
-            if (runTime_.runTimeModifiable())
+            if (mRunTime.runTimeModifiable())
             {
                 adapterInfo(
                     "You have enabled 'runTimeModifiable' in the "
@@ -704,10 +704,10 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
             }
 
             // Store the value
-            timestepStored_ = runTime_.deltaT().value();
+            timestepStored_ = mRunTime.deltaT().value();
 
             // Ok, we stored it once, we will use this from now on
-            useStoredTimestep_ = true;
+            mUseStoredTimestep = true;
         }
 
         // Use the stored timestep as the determined solver's timestep
@@ -717,7 +717,7 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
     {
         // The timestep is adjustable, so OpenFOAM will modify it
         // and therefore we can use the updated value
-        timestepSolverDetermined = runTime_.deltaT().value();
+        timestepSolverDetermined = mRunTime.deltaT().value();
     }
 
     /* If the solver tries to use a timestep smaller than the one determined
@@ -727,21 +727,21 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
        the same timestep as the one determined by preCICE.
     */
     double tolerance = 1e-14;
-    if (precice_->getMaxTimeStepSize() - timestepSolverDetermined > tolerance)
+    if (mPrecice->getMaxTimeStepSize() - timestepSolverDetermined > tolerance)
     {
         adapterInfo(
             "The solver's timestep is smaller than the "
             "coupling timestep. Subcycling...",
             "info");
         timestepSolver_ = timestepSolverDetermined;
-        if (FSIenabled_)
+        if (mFSIEnabled)
         {
             adapterInfo(
                 "The adapter does not fully support subcycling for FSI and instabilities may occur.",
                 "warning");
         }
     }
-    else if (timestepSolverDetermined - precice_->getMaxTimeStepSize() > tolerance)
+    else if (timestepSolverDetermined - mPrecice->getMaxTimeStepSize() > tolerance)
     {
         // In the last time-step, we adjust to dt = 0, but we don't need to trigger the warning here
         if (isCouplingOngoing())
@@ -749,28 +749,28 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
             adapterInfo(
                 "The solver's timestep cannot be larger than the coupling timestep."
                 " Adjusting from "
-                    + std::to_string(timestepSolverDetermined) + " to " + std::to_string(precice_->getMaxTimeStepSize()),
+                    + std::to_string(timestepSolverDetermined) + " to " + std::to_string(mPrecice->getMaxTimeStepSize()),
                 "warning");
         }
-        timestepSolver_ = precice_->getMaxTimeStepSize();
+        timestepSolver_ = mPrecice->getMaxTimeStepSize();
     }
     else
     {
         DEBUG(adapterInfo("The solver's timestep is the same as the "
                           "coupling timestep."));
-        timestepSolver_ = precice_->getMaxTimeStepSize();
+        timestepSolver_ = mPrecice->getMaxTimeStepSize();
     }
 
     // Update the solver's timestep (but don't trigger the adjustDeltaT(),
     // which also triggers the functionObject's adjustTimeStep())
     // TODO: Keep this in mind if any relevant problem appears.
-    const_cast<Time&>(runTime_).setDeltaT(timestepSolver_, false);
+    const_cast<Time&>(mRunTime).setDeltaT(timestepSolver_, false);
 
     DEBUG(adapterInfo("Reading coupling data associated to the calculated time-step size..."));
 
     // Read the received coupling data from the buffer
     // Fits to an implicit Euler
-    readCouplingData(runTime_.deltaT().value());
+    readCouplingData(mRunTime.deltaT().value());
     return;
 }
 
@@ -780,11 +780,11 @@ bool preciceAdapter::Adapter::isCouplingOngoing()
 
     // If the coupling ends before the solver ends,
     // the solver would try to access this method again,
-    // giving a segmentation fault if precice_
+    // giving a segmentation fault if mPrecice
     // was not available.
-    if (nullptr != precice_)
+    if (nullptr != mPrecice)
     {
-        isCouplingOngoing = precice_->isCouplingOngoing();
+        isCouplingOngoing = mPrecice->isCouplingOngoing();
     }
 
     return isCouplingOngoing;
@@ -792,34 +792,34 @@ bool preciceAdapter::Adapter::isCouplingOngoing()
 
 bool preciceAdapter::Adapter::isCouplingTimeWindowComplete()
 {
-    return precice_->isTimeWindowComplete();
+    return mPrecice->isTimeWindowComplete();
 }
 
 bool preciceAdapter::Adapter::requiresReadingCheckpoint()
 {
-    return precice_->requiresReadingCheckpoint();
+    return mPrecice->requiresReadingCheckpoint();
 }
 
 bool preciceAdapter::Adapter::requiresWritingCheckpoint()
 {
-    return precice_->requiresWritingCheckpoint();
+    return mPrecice->requiresWritingCheckpoint();
 }
 
 
 void preciceAdapter::Adapter::storeCheckpointTime()
 {
-    couplingIterationTimeIndex_ = runTime_.timeIndex();
-    couplingIterationTimeValue_ = runTime_.value();
-    DEBUG(adapterInfo("Stored time value t = " + std::to_string(runTime_.value())));
+    couplingIterationTimeIndex_ = mRunTime.timeIndex();
+    couplingIterationTimeValue_ = mRunTime.value();
+    DEBUG(adapterInfo("Stored time value t = " + std::to_string(mRunTime.value())));
 
     return;
 }
 
 void preciceAdapter::Adapter::reloadCheckpointTime()
 {
-    const_cast<Time&>(runTime_).setTime(couplingIterationTimeValue_, couplingIterationTimeIndex_);
+    const_cast<Time&>(mRunTime).setTime(couplingIterationTimeValue_, couplingIterationTimeIndex_);
     // TODO also reset the current iteration?!
-    DEBUG(adapterInfo("Reloaded time value t = " + std::to_string(runTime_.value())));
+    DEBUG(adapterInfo("Reloaded time value t = " + std::to_string(mRunTime.value())));
 
     return;
 }
@@ -830,17 +830,17 @@ void preciceAdapter::Adapter::storeMeshPoints()
     {
         DEBUG(adapterInfo("Storing mesh points..."));
         // Add points and oldPoints
-        meshPoints_ = new Foam::pointField(mesh_.points());
-        meshOldPoints_ = new Foam::pointField(mesh_.oldPoints());
+        meshPoints_ = new Foam::pointField(mMesh.points());
+        meshOldPoints_ = new Foam::pointField(mMesh.oldPoints());
     }
 
-    if (mesh_.moving())
+    if (mMesh.moving())
     {
-        if (!meshCheckPointed_)
+        if (!mMeshCheckPointed)
         {
             // Set up the checkpoint for the mesh flux: meshPhi
             setupMeshCheckpointing();
-            meshCheckPointed_ = true;
+            mMeshCheckPointed = true;
         }
         writeMeshCheckpoint();
     }
@@ -848,18 +848,18 @@ void preciceAdapter::Adapter::storeMeshPoints()
 
 void preciceAdapter::Adapter::reloadMeshPoints()
 {
-    if (!mesh_.moving())
+    if (!mMesh.moving())
     {
         DEBUG(adapterInfo("Mesh points not moved as the mesh is not moving"));
         return;
     }
 
     // Reload mesh points
-    const_cast<Foam::fvMesh&>(mesh_).movePoints(*meshPoints_);
+    const_cast<Foam::fvMesh&>(mMesh).movePoints(*meshPoints_);
 
     // polyMesh.movePoints will only update oldPoints
     // if (curMotionTimeIndex_ != time().timeIndex())
-    const_cast<pointField&>(mesh_.oldPoints()) = *meshOldPoints_;
+    const_cast<pointField&>(mMesh.oldPoints()) = *meshOldPoints_;
 
     readMeshCheckpoint();
 
@@ -877,9 +877,9 @@ void preciceAdapter::Adapter::setupMeshCheckpointing()
     // are updated by the function fvMesh::movePoints. Only the meshPhi needs checkpointing.
     DEBUG(adapterInfo("Creating a list of the mesh checkpointed fields..."));
     // Add meshPhi (Face motion flux)
-    addMeshCheckpointField(const_cast<surfaceScalarField&>(mesh_.phi()));
+    addMeshCheckpointField(const_cast<surfaceScalarField&>(mMesh.phi()));
 
-    DEBUG(adapterInfo("Added " + mesh_.phi().name() + " to the list of checkpointed fields."));
+    DEBUG(adapterInfo("Added " + mMesh.phi().name() + " to the list of checkpointed fields."));
 }
 
 
@@ -893,9 +893,9 @@ void preciceAdapter::Adapter::setupCheckpointing()
 #undef doLocalCode
 #define doLocalCode(GeomFieldType)                                           \
     /* Checkpoint registered GeomFieldType objects */                        \
-    for (const word& obj : mesh_.sortedNames<GeomFieldType>())               \
+    for (const word& obj : mMesh.sortedNames<GeomFieldType>())               \
     {                                                                        \
-        addCheckpointField(mesh_.thisDb().getObjectPtr<GeomFieldType>(obj)); \
+        addCheckpointField(mMesh.thisDb().getObjectPtr<GeomFieldType>(obj)); \
         DEBUG(adapterInfo("Checkpoint " + obj + " : " #GeomFieldType));      \
     }
 
@@ -935,7 +935,7 @@ void preciceAdapter::Adapter::pruneCheckpointedFields()
     toRemoveIndices.clear();                                                                                                                  \
     index = 0;                                                                                                                                \
     /* Iterate through fields in OpenFOAM registry */                                                                                         \
-    for (const word& fieldName : mesh_.sortedNames<GeomFieldType>())                                                                          \
+    for (const word& fieldName : mMesh.sortedNames<GeomFieldType>())                                                                          \
     {                                                                                                                                         \
         regFields.push_back(fieldName);                                                                                                       \
     }                                                                                                                                         \
@@ -1097,7 +1097,7 @@ void preciceAdapter::Adapter::readCheckpoint()
     reloadCheckpointTime();
 
     // Reload the meshPoints (if FSI is enabled)
-    if (FSIenabled_)
+    if (mFSIEnabled)
     {
         reloadMeshPoints();
     }
@@ -1271,7 +1271,7 @@ void preciceAdapter::Adapter::readCheckpoint()
 
     // NOTE: Add here other field types to read, if needed.
 
-    DEBUG(adapterInfo("Checkpoint was read. Time = " + std::to_string(runTime_.value())));
+    DEBUG(adapterInfo("Checkpoint was read. Time = " + std::to_string(mRunTime.value())));
 
     ACCUMULATE_TIMER(time_in_checkpointing_read);
 
@@ -1289,7 +1289,7 @@ void preciceAdapter::Adapter::writeCheckpoint()
     storeCheckpointTime();
 
     // Store the meshPoints (if FSI is enabled)
-    if (FSIenabled_)
+    if (mFSIEnabled)
     {
         storeMeshPoints();
     }
@@ -1355,7 +1355,7 @@ void preciceAdapter::Adapter::writeCheckpoint()
     }
     // NOTE: Add here other types to write, if needed.
 
-    DEBUG(adapterInfo("Checkpoint for time t = " + std::to_string(runTime_.value()) + " was stored."));
+    DEBUG(adapterInfo("Checkpoint for time t = " + std::to_string(mRunTime.value()) + " was stored."));
 
     ACCUMULATE_TIMER(time_in_checkpointing_write);
 
@@ -1382,7 +1382,7 @@ void preciceAdapter::Adapter::readMeshCheckpoint()
         }
     }
 
-    DEBUG(adapterInfo("Mesh checkpoint was read. Time = " + std::to_string(runTime_.value())));
+    DEBUG(adapterInfo("Mesh checkpoint was read. Time = " + std::to_string(mRunTime.value())));
 
     return;
 }
@@ -1402,9 +1402,9 @@ void preciceAdapter::Adapter::writeMeshCheckpoint()
     // Store mesh points
     // swap pointers
     *(meshOldPoints_) = *(meshPoints_);
-    *(meshPoints_) = mesh_.points();
+    *(meshPoints_) = mMesh.points();
 
-    DEBUG(adapterInfo("Mesh checkpoint for time t = " + std::to_string(runTime_.value()) + " was stored."));
+    DEBUG(adapterInfo("Mesh checkpoint for time t = " + std::to_string(mRunTime.value()) + " was stored."));
 
     return;
 }
@@ -1413,7 +1413,7 @@ void preciceAdapter::Adapter::end()
 try
 {
     // Throw a warning if the simulation exited before the coupling was complete
-    if (nullptr != precice_ && isCouplingOngoing())
+    if (nullptr != mPrecice && isCouplingOngoing())
     {
         adapterInfo("The solver exited before the coupling was complete.", "warning");
     }
@@ -1429,26 +1429,26 @@ void preciceAdapter::Adapter::teardown()
 {
     // If the solver interface was not deleted before, delete it now.
     // Normally it should be deleted when isCouplingOngoing() becomes false.
-    if (nullptr != precice_)
+    if (nullptr != mPrecice)
     {
         DEBUG(adapterInfo("Destroying the preCICE solver interface..."));
-        delete precice_;
-        precice_ = nullptr;
+        delete mPrecice;
+        mPrecice = nullptr;
     }
 
     // Delete the preCICE solver interfaces
-    if (interfaces_.size() > 0)
+    if (mInterfaces.size() > 0)
     {
         DEBUG(adapterInfo("Deleting the interfaces..."));
-        for (uint i = 0; i < interfaces_.size(); i++)
+        for (uint i = 0; i < mInterfaces.size(); i++)
         {
-            delete interfaces_.at(i);
+            delete mInterfaces.at(i);
         }
-        interfaces_.clear();
+        mInterfaces.clear();
     }
 
     // Delete the copied fields for checkpointing
-    if (checkpointing_)
+    if (mCheckpointing)
     {
         DEBUG(adapterInfo("Deleting the checkpoints... "));
 
@@ -1528,42 +1528,42 @@ void preciceAdapter::Adapter::teardown()
 
         // NOTE: Add here delete for other types, if needed
 
-        checkpointing_ = false;
+        mCheckpointing = false;
 
         delete meshPoints_;
         delete meshOldPoints_;
     }
 
     // Delete the CHT module
-    if (nullptr != CHT_)
+    if (nullptr != mCHT)
     {
         DEBUG(adapterInfo("Destroying the CHT module..."));
-        delete CHT_;
-        CHT_ = nullptr;
+        delete mCHT;
+        mCHT = nullptr;
     }
 
     // Delete the FSI module
-    if (nullptr != FSI_)
+    if (nullptr != mFSI)
     {
         DEBUG(adapterInfo("Destroying the FSI module..."));
-        delete FSI_;
-        FSI_ = nullptr;
+        delete mFSI;
+        mFSI = nullptr;
     }
 
     // Delete the FF module
-    if (nullptr != FF_)
+    if (nullptr != mFF)
     {
         DEBUG(adapterInfo("Destroying the FF module..."));
-        delete FF_;
-        FF_ = nullptr;
+        delete mFF;
+        mFF = nullptr;
     }
 
     // Delete the Generic module
-    if (nullptr != Generic_)
+    if (nullptr != mGeneric)
     {
         DEBUG(adapterInfo("Destroying the Generic module..."));
-        delete Generic_;
-        Generic_ = nullptr;
+        delete mGeneric;
+        mGeneric = nullptr;
     }
 
     // NOTE: Delete your new module here

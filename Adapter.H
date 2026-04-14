@@ -54,7 +54,7 @@ private:
     };
 
     //- Configuration interfaces
-    std::vector<struct InterfaceConfig> interfacesConfig_;
+    std::vector<struct InterfaceConfig> mInterfacesConfig;
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     //- Timers
@@ -73,65 +73,65 @@ private:
 #endif
 
     //- OpenFOAM runTime object
-    const Foam::Time& runTime_;
+    const Foam::Time& mRunTime;
 
     //- OpenFOAM fvMesh object
-    const Foam::fvMesh& mesh_;
+    const Foam::fvMesh& mMesh;
 
     // Configuration parameters used in the Adapter
 
     //- preCICE configuration file name
-    Foam::word preciceConfigFilename_;
+    Foam::word mCoSimIOConfigFilename;
 
     //- preCICE participant name
-    Foam::word participantName_;
+    Foam::word mParticipantName;
 
     //- Switch for checkpointing
-    bool checkpointing_ = false;
+    bool mCheckpointing = false;
 
     //- Moving mesh checkpointing
-    bool meshCheckPointed_ = false;
+    bool mMeshCheckPointed = false;
 
     //- Type of timestep (fixed, adjustable)
-    bool adjustableTimestep_;
+    bool mAdjustableTimestep;
 
     //- Should the (fixed) timestep be stored and used?
-    bool useStoredTimestep_ = false;
+    bool mUseStoredTimestep = false;
 
     //- Switch to enable the ConjugateHeatTransfer module
-    bool CHTenabled_ = false;
+    bool mCHTEnabled = false;
 
     //- Switch to enable the FluidStructureInteraction module
-    bool FSIenabled_ = false;
+    bool mFSIEnabled = false;
 
     //- Switch to enable the FluidFluid module
-    bool FFenabled_ = false;
+    bool mFFenabled = false;
 
     // NOTE: Add a switch for your new module here
 
     //- Switch to enable General module
-    bool genericModuleEnabled_ = false;
+    bool mGenericModuleEnabled = false;
 
     //- Interfaces
-    std::vector<Interface*> interfaces_;
+    std::vector<Interface*> mInterfaces;
 
     //- preCICE solver interface
-    precice::Participant* precice_ = nullptr;
+    precice::Participant* mPrecice = nullptr;
 
     //- preCICE solver interface initialized
-    bool preciceInitialized_ = false;
+    bool mCoSimIOInitialized = false;
 
     //- Conjugate Heat Transfer module object
-    CHT::ConjugateHeatTransfer* CHT_ = nullptr;
+    CHT::ConjugateHeatTransfer* mCHT = nullptr;
 
     //- Fluid-Structure Interaction module object
-    FSI::FluidStructureInteraction* FSI_ = nullptr;
+    FSI::FluidStructureInteraction* mFSI = nullptr;
 
     //- Fluid-Fluid module object
-    FF::FluidFluid* FF_ = nullptr;
+    FF::FluidFluid* mFF = nullptr;
 
     //- Generic module object
-    Generic::GenericInterface* Generic_ = nullptr;
+    Generic::GenericInterface* mGeneric = nullptr;
 
     // NOTE: Add here a pointer for your new module object
 
