@@ -239,7 +239,8 @@ private:
     //- Check the adapter's configuration file
     bool configFileCheck(const std::string adapterConfigFileName);
 
-    // Methods communicating with preCICE
+    // Methods communicating with CoSimIO
+    void ConnectSolverToCoSimIO();
 
     //- Initialize preCICE and exchange the first data
     void initialize();

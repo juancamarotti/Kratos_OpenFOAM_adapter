@@ -309,6 +309,8 @@ try
     DEBUG(adapterInfo("  Number of processes: " + std::to_string(Pstream::nProcs())));
     DEBUG(adapterInfo("  MPI rank: " + std::to_string(Pstream::myProcNo())));
     mPrecice = new precice::Participant(mParticipantName, mCoSimIOConfigFilename, Pstream::myProcNo(), Pstream::nProcs());
+    ConnectSolverToCoSimIO();
+    std::cout << "Connection successful" << std::endl;
     DEBUG(adapterInfo("  preCICE solver interface was created."));
 
     ACCUMULATE_TIMER(time_in_co_sim_io_construct);
@@ -609,6 +611,33 @@ void preciceAdapter::Adapter::writeCouplingData()
     }
 
     ACCUMULATE_TIMER(time_in_write);
+
+    return;
+}
+
+void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
+{
+    // Connection between openFOAM and Kratos-CoSimulation using CoSimIO (ONLY ONE TIME for multiple interfaces)
+    CoSimIO::Info settings;
+    settings.Set("my_name", "Openfoam_Adapter");
+    settings.Set("connect_to", "Openfoam_Kratos_Wrapper");
+    settings.Set("communication_format", "file");
+    settings.Set("echo_level", 0);
+    settings.Set("version", "1.25");
+    CoSimIO::Info connect_info;
+
+    // if(TotalNumOfProcesses == 1)
+    // {
+    Info << "Running in Serial. Connecting to CoSimulation using File IO" << nl;
+    connect_info = CoSimIO::Connect(settings);
+    //
+    //else{
+        // Info << "Running in Parallel. Connecting to CoSimulation using MPI" << nl;
+        // connect_info = CoSimIO::ConnectMPI(settings, MPI_COMM_WORLD);
+    //}
+
+    //COSIMIO_CHECK_EQUAL(connect_info.Get<int>("connection_status"), CoSimIO::ConnectionStatus::Connected);
+    //connection_name = connect_info.Get<std::string>("connection_name");
 
     return;
 }
