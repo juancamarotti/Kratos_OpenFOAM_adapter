@@ -692,7 +692,7 @@ void preciceAdapter::Adapter::advance()
     DEBUG(adapterInfo("Advancing preCICE..."));
 
     SETUP_TIMER();
-    mPrecice->advance(timestepSolver_);
+    mPrecice->advance(mTimeStepSolver);
     ACCUMULATE_TIMER(time_in_advance);
 
     return;
@@ -763,7 +763,7 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
             "The solver's timestep is smaller than the "
             "coupling timestep. Subcycling...",
             "info");
-        timestepSolver_ = timestepSolverDetermined;
+        mTimeStepSolver = timestepSolverDetermined;
         if (mFSIEnabled)
         {
             adapterInfo(
@@ -782,19 +782,19 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
                     + std::to_string(timestepSolverDetermined) + " to " + std::to_string(mPrecice->getMaxTimeStepSize()),
                 "warning");
         }
-        timestepSolver_ = mPrecice->getMaxTimeStepSize();
+        mTimeStepSolver = mPrecice->getMaxTimeStepSize();
     }
     else
     {
         DEBUG(adapterInfo("The solver's timestep is the same as the "
                           "coupling timestep."));
-        timestepSolver_ = mPrecice->getMaxTimeStepSize();
+        mTimeStepSolver = mPrecice->getMaxTimeStepSize();
     }
 
     // Update the solver's timestep (but don't trigger the adjustDeltaT(),
     // which also triggers the functionObject's adjustTimeStep())
     // TODO: Keep this in mind if any relevant problem appears.
-    const_cast<Time&>(mRunTime).setDeltaT(timestepSolver_, false);
+    const_cast<Time&>(mRunTime).setDeltaT(mTimeStepSolver, false);
 
     DEBUG(adapterInfo("Reading coupling data associated to the calculated time-step size..."));
 

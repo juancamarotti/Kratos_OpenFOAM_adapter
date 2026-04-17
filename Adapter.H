@@ -138,7 +138,7 @@ private:
     // Timesteps
 
     //- Timestep used by the solver
-    double timestepSolver_;
+    double mTimeStepSolver;
 
     //- Stored (fixed) timestep
     double timestepStored_;
