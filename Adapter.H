@@ -141,80 +141,80 @@ private:
     double mTimeStepSolver;
 
     //- Stored (fixed) timestep
-    double timestepStored_;
+    double mTimeStepStored;
 
     // Checkpointing
 
     //- Checkpointed time (value)
-    Foam::scalar couplingIterationTimeValue_;
+    Foam::scalar mCouplingIterationTimeValue;
 
     //- Checkpointed time (index)
-    Foam::label couplingIterationTimeIndex_;
+    Foam::label mCouplingIterationTimeIndex;
 
     // Vectors of pointers to the checkpointed mesh fields and their copies
 
     //- Checkpointed mesh points, oldPoints
-    Foam::pointField* meshPoints_ = nullptr;
-    Foam::pointField* meshOldPoints_ = nullptr;
+    Foam::pointField* mMeshPoints = nullptr;
+    Foam::pointField* mMeshOldPoints = nullptr;
 
     //- Checkpointed surfaceScalarField mesh fields (phi)
-    std::vector<Foam::surfaceScalarField*> meshSurfaceScalarFields_;
+    std::vector<Foam::surfaceScalarField*> mMeshSurfaceScalarFields;
 
     //- Checkpointed surfaceScalarField mesh fields (copies)
-    std::vector<Foam::surfaceScalarField*> meshSurfaceScalarFieldCopies_;
+    std::vector<Foam::surfaceScalarField*> mMeshSurfaceScalarFieldCopies;
 
     // Vectors of pointers to the checkpointed fields and their copies
 
     //- Checkpointed volScalarField fields
-    std::vector<Foam::volScalarField*> volScalarFields_;
+    std::vector<Foam::volScalarField*> mVolScalarFields;
 
     //- Checkpointed volScalarField fields (copies)
-    std::vector<Foam::volScalarField*> volScalarFieldCopies_;
+    std::vector<Foam::volScalarField*> mVolScalarFieldCopies;
 
     //- Checkpointed volVectorField fields
-    std::vector<Foam::volVectorField*> volVectorFields_;
+    std::vector<Foam::volVectorField*> mVolVectorFields;
 
     //- Checkpointed volVectorField fields (copies)
-    std::vector<Foam::volVectorField*> volVectorFieldCopies_;
+    std::vector<Foam::volVectorField*> mVolVectorFieldCopies;
 
     //- Checkpointed surfaceScalarField fields
-    std::vector<Foam::surfaceScalarField*> surfaceScalarFields_;
+    std::vector<Foam::surfaceScalarField*> mSurfaceScalarFields;
 
     //- Checkpointed surfaceScalarField fields (copies)
-    std::vector<Foam::surfaceScalarField*> surfaceScalarFieldCopies_;
+    std::vector<Foam::surfaceScalarField*> mSurfaceScalarFieldCopies;
 
     //- Checkpointed surfaceVectorField fields
-    std::vector<Foam::surfaceVectorField*> surfaceVectorFields_;
+    std::vector<Foam::surfaceVectorField*> mSurfaceVectorFields;
 
     //- Checkpointed surfaceVectorField fields (copies)
-    std::vector<Foam::surfaceVectorField*> surfaceVectorFieldCopies_;
+    std::vector<Foam::surfaceVectorField*> mSurfaceVectorFieldCopies;
 
     //- Checkpointed pointScalarField fields
-    std::vector<Foam::pointScalarField*> pointScalarFields_;
+    std::vector<Foam::pointScalarField*> mPointScalarFields;
 
     //- Checkpointed pointScalarField fields (copies)
-    std::vector<Foam::pointScalarField*> pointScalarFieldCopies_;
+    std::vector<Foam::pointScalarField*> mPointScalarFieldCopies;
 
     //- Checkpointed pointVectorField fields
-    std::vector<Foam::pointVectorField*> pointVectorFields_;
+    std::vector<Foam::pointVectorField*> mPointVectorFields;
 
     //- Checkpointed pointVectorField fields (copies)
-    std::vector<Foam::pointVectorField*> pointVectorFieldCopies_;
+    std::vector<Foam::pointVectorField*> mPointVectorFieldCopies;
 
     //- Checkpointed volTensorField fields
-    std::vector<Foam::volTensorField*> volTensorFields_;
+    std::vector<Foam::volTensorField*> mVolTensorFields;
 
     //- Checkpointed volTensorField fields (copies)
-    std::vector<Foam::volTensorField*> volTensorFieldCopies_;
+    std::vector<Foam::volTensorField*> mVolTensorFieldCopies;
 
     //- Checkpointed surfaceTensorField fields
-    std::vector<Foam::surfaceTensorField*> surfaceTensorFields_;
+    std::vector<Foam::surfaceTensorField*> mSurfaceTensorFields;
 
     //- Checkpointed surfaceTensorField fields (copies)
-    std::vector<Foam::surfaceTensorField*> surfaceTensorFieldCopies_;
+    std::vector<Foam::surfaceTensorField*> mSurfaceTensorFieldCopies;
 
     //- Checkpointed pointTensorField fields
-    std::vector<Foam::pointTensorField*> pointTensorFields_;
+    std::vector<Foam::pointTensorField*> mPointTensorFields;
 
     //- Checkpointed pointTensorField fields (copies)
     std::vector<Foam::pointTensorField*> pointTensorFieldCopies_;

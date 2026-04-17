@@ -734,14 +734,14 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
             }
 
             // Store the value
-            timestepStored_ = mRunTime.deltaT().value();
+            mTimeStepStored = mRunTime.deltaT().value();
 
             // Ok, we stored it once, we will use this from now on
             mUseStoredTimestep = true;
         }
 
         // Use the stored timestep as the determined solver's timestep
-        timestepSolverDetermined = timestepStored_;
+        timestepSolverDetermined = mTimeStepStored;
     }
     else
     {
@@ -838,8 +838,8 @@ bool preciceAdapter::Adapter::requiresWritingCheckpoint()
 
 void preciceAdapter::Adapter::storeCheckpointTime()
 {
-    couplingIterationTimeIndex_ = mRunTime.timeIndex();
-    couplingIterationTimeValue_ = mRunTime.value();
+    mCouplingIterationTimeIndex = mRunTime.timeIndex();
+    mCouplingIterationTimeValue = mRunTime.value();
     DEBUG(adapterInfo("Stored time value t = " + std::to_string(mRunTime.value())));
 
     return;
@@ -847,7 +847,7 @@ void preciceAdapter::Adapter::storeCheckpointTime()
 
 void preciceAdapter::Adapter::reloadCheckpointTime()
 {
-    const_cast<Time&>(mRunTime).setTime(couplingIterationTimeValue_, couplingIterationTimeIndex_);
+    const_cast<Time&>(mRunTime).setTime(mCouplingIterationTimeValue, mCouplingIterationTimeIndex);
     // TODO also reset the current iteration?!
     DEBUG(adapterInfo("Reloaded time value t = " + std::to_string(mRunTime.value())));
 
@@ -856,12 +856,12 @@ void preciceAdapter::Adapter::reloadCheckpointTime()
 
 void preciceAdapter::Adapter::storeMeshPoints()
 {
-    if (!meshPoints_)
+    if (!mMeshPoints)
     {
         DEBUG(adapterInfo("Storing mesh points..."));
         // Add points and oldPoints
-        meshPoints_ = new Foam::pointField(mMesh.points());
-        meshOldPoints_ = new Foam::pointField(mMesh.oldPoints());
+        mMeshPoints = new Foam::pointField(mMesh.points());
+        mMeshOldPoints = new Foam::pointField(mMesh.oldPoints());
     }
 
     if (mMesh.moving())
@@ -885,11 +885,11 @@ void preciceAdapter::Adapter::reloadMeshPoints()
     }
 
     // Reload mesh points
-    const_cast<Foam::fvMesh&>(mMesh).movePoints(*meshPoints_);
+    const_cast<Foam::fvMesh&>(mMesh).movePoints(*mMeshPoints);
 
     // polyMesh.movePoints will only update oldPoints
     // if (curMotionTimeIndex_ != time().timeIndex())
-    const_cast<pointField&>(mMesh.oldPoints()) = *meshOldPoints_;
+    const_cast<pointField&>(mMesh.oldPoints()) = *mMeshOldPoints;
 
     readMeshCheckpoint();
 
@@ -992,18 +992,18 @@ void preciceAdapter::Adapter::pruneCheckpointedFields()
         }                                                                                                                                     \
     }
 
-    doLocalCode(volScalarField, volScalarFields_, volScalarFieldCopies_);
-    doLocalCode(volVectorField, volVectorFields_, volVectorFieldCopies_);
-    doLocalCode(volTensorField, volTensorFields_, volTensorFieldCopies_);
+    doLocalCode(volScalarField, mVolScalarFields, mVolScalarFieldCopies);
+    doLocalCode(volVectorField, mVolVectorFields, mVolVectorFieldCopies);
+    doLocalCode(volTensorField, mVolTensorFields, mVolTensorFieldCopies);
     doLocalCode(volSymmTensorField, volSymmTensorFields_, volSymmTensorFieldCopies_);
 
-    doLocalCode(surfaceScalarField, surfaceScalarFields_, surfaceScalarFieldCopies_);
-    doLocalCode(surfaceVectorField, surfaceVectorFields_, surfaceVectorFieldCopies_);
-    doLocalCode(surfaceTensorField, surfaceTensorFields_, surfaceTensorFieldCopies_);
+    doLocalCode(surfaceScalarField, mSurfaceScalarFields, mSurfaceScalarFieldCopies);
+    doLocalCode(surfaceVectorField, mSurfaceVectorFields, mSurfaceVectorFieldCopies);
+    doLocalCode(surfaceTensorField, mSurfaceTensorFields, mSurfaceTensorFieldCopies);
 
-    doLocalCode(pointScalarField, pointScalarFields_, pointScalarFieldCopies_);
-    doLocalCode(pointVectorField, pointVectorFields_, pointVectorFieldCopies_);
-    doLocalCode(pointTensorField, pointTensorFields_, pointTensorFieldCopies_);
+    doLocalCode(pointScalarField, mPointScalarFields, mPointScalarFieldCopies);
+    doLocalCode(pointVectorField, mPointVectorFields, mPointVectorFieldCopies);
+    doLocalCode(pointTensorField, mPointTensorFields, pointTensorFieldCopies_);
 
 #undef doLocalCode
 }
@@ -1012,16 +1012,16 @@ void preciceAdapter::Adapter::pruneCheckpointedFields()
 
 void preciceAdapter::Adapter::addMeshCheckpointField(surfaceScalarField& field)
 {
-    meshSurfaceScalarFields_.push_back(&field);
-    meshSurfaceScalarFieldCopies_.push_back(new surfaceScalarField(field));
+    mMeshSurfaceScalarFields.push_back(&field);
+    mMeshSurfaceScalarFieldCopies.push_back(new surfaceScalarField(field));
 }
 
 void preciceAdapter::Adapter::addCheckpointField(volScalarField* field)
 {
     if (field)
     {
-        volScalarFields_.push_back(field);
-        volScalarFieldCopies_.push_back(new volScalarField(*field));
+        mVolScalarFields.push_back(field);
+        mVolScalarFieldCopies.push_back(new volScalarField(*field));
     }
 }
 
@@ -1029,8 +1029,8 @@ void preciceAdapter::Adapter::addCheckpointField(volVectorField* field)
 {
     if (field)
     {
-        volVectorFields_.push_back(field);
-        volVectorFieldCopies_.push_back(new volVectorField(*field));
+        mVolVectorFields.push_back(field);
+        mVolVectorFieldCopies.push_back(new volVectorField(*field));
     }
 }
 
@@ -1038,8 +1038,8 @@ void preciceAdapter::Adapter::addCheckpointField(surfaceScalarField* field)
 {
     if (field)
     {
-        surfaceScalarFields_.push_back(field);
-        surfaceScalarFieldCopies_.push_back(new surfaceScalarField(*field));
+        mSurfaceScalarFields.push_back(field);
+        mSurfaceScalarFieldCopies.push_back(new surfaceScalarField(*field));
     }
 }
 
@@ -1047,8 +1047,8 @@ void preciceAdapter::Adapter::addCheckpointField(surfaceVectorField* field)
 {
     if (field)
     {
-        surfaceVectorFields_.push_back(field);
-        surfaceVectorFieldCopies_.push_back(new surfaceVectorField(*field));
+        mSurfaceVectorFields.push_back(field);
+        mSurfaceVectorFieldCopies.push_back(new surfaceVectorField(*field));
     }
 }
 
@@ -1056,8 +1056,8 @@ void preciceAdapter::Adapter::addCheckpointField(pointScalarField* field)
 {
     if (field)
     {
-        pointScalarFields_.push_back(field);
-        pointScalarFieldCopies_.push_back(new pointScalarField(*field));
+        mPointScalarFields.push_back(field);
+        mPointScalarFieldCopies.push_back(new pointScalarField(*field));
     }
 }
 
@@ -1065,8 +1065,8 @@ void preciceAdapter::Adapter::addCheckpointField(pointVectorField* field)
 {
     if (field)
     {
-        pointVectorFields_.push_back(field);
-        pointVectorFieldCopies_.push_back(new pointVectorField(*field));
+        mPointVectorFields.push_back(field);
+        mPointVectorFieldCopies.push_back(new pointVectorField(*field));
         // TODO: Old time
         // pointVectorFieldsOld_.push_back(const_cast<pointVectorField&>(field->oldTime())));
         // pointVectorFieldCopiesOld_.push_back(new pointVectorField(field->oldTime()));
@@ -1077,8 +1077,8 @@ void preciceAdapter::Adapter::addCheckpointField(volTensorField* field)
 {
     if (field)
     {
-        volTensorFields_.push_back(field);
-        volTensorFieldCopies_.push_back(new volTensorField(*field));
+        mVolTensorFields.push_back(field);
+        mVolTensorFieldCopies.push_back(new volTensorField(*field));
     }
 }
 
@@ -1086,8 +1086,8 @@ void preciceAdapter::Adapter::addCheckpointField(surfaceTensorField* field)
 {
     if (field)
     {
-        surfaceTensorFields_.push_back(field);
-        surfaceTensorFieldCopies_.push_back(new surfaceTensorField(*field));
+        mSurfaceTensorFields.push_back(field);
+        mSurfaceTensorFieldCopies.push_back(new surfaceTensorField(*field));
     }
 }
 
@@ -1095,7 +1095,7 @@ void preciceAdapter::Adapter::addCheckpointField(pointTensorField* field)
 {
     if (field)
     {
-        pointTensorFields_.push_back(field);
+        mPointTensorFields.push_back(field);
         pointTensorFieldCopies_.push_back(new pointTensorField(*field));
     }
 }
@@ -1133,152 +1133,152 @@ void preciceAdapter::Adapter::readCheckpoint()
     }
 
     // Reload all the fields of type volScalarField
-    for (uint i = 0; i < volScalarFields_.size(); i++)
+    for (uint i = 0; i < mVolScalarFields.size(); i++)
     {
         // Load the volume field
-        *(volScalarFields_.at(i)) == *(volScalarFieldCopies_.at(i));
+        *(mVolScalarFields.at(i)) == *(mVolScalarFieldCopies.at(i));
         // TODO: Do we need this?
-        // *(volScalarFields_.at(i))->boundaryField() = *(volScalarFieldCopies_.at(i))->boundaryField();
+        // *(mVolScalarFields.at(i))->boundaryField() = *(mVolScalarFieldCopies.at(i))->boundaryField();
 
-        int nOldTimes(volScalarFields_.at(i)->nOldTimes());
+        int nOldTimes(mVolScalarFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            volScalarFields_.at(i)->oldTime() == volScalarFieldCopies_.at(i)->oldTime();
+            mVolScalarFields.at(i)->oldTime() == mVolScalarFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            volScalarFields_.at(i)->oldTime().oldTime() == volScalarFieldCopies_.at(i)->oldTime().oldTime();
+            mVolScalarFields.at(i)->oldTime().oldTime() == mVolScalarFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // Reload all the fields of type volVectorField
-    for (uint i = 0; i < volVectorFields_.size(); i++)
+    for (uint i = 0; i < mVolVectorFields.size(); i++)
     {
         // Load the volume field
-        *(volVectorFields_.at(i)) == *(volVectorFieldCopies_.at(i));
+        *(mVolVectorFields.at(i)) == *(mVolVectorFieldCopies.at(i));
 
-        int nOldTimes(volVectorFields_.at(i)->nOldTimes());
+        int nOldTimes(mVolVectorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            volVectorFields_.at(i)->oldTime() == volVectorFieldCopies_.at(i)->oldTime();
+            mVolVectorFields.at(i)->oldTime() == mVolVectorFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            volVectorFields_.at(i)->oldTime().oldTime() == volVectorFieldCopies_.at(i)->oldTime().oldTime();
+            mVolVectorFields.at(i)->oldTime().oldTime() == mVolVectorFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // Reload all the fields of type surfaceScalarField
-    for (uint i = 0; i < surfaceScalarFields_.size(); i++)
+    for (uint i = 0; i < mSurfaceScalarFields.size(); i++)
     {
-        *(surfaceScalarFields_.at(i)) == *(surfaceScalarFieldCopies_.at(i));
+        *(mSurfaceScalarFields.at(i)) == *(mSurfaceScalarFieldCopies.at(i));
 
-        int nOldTimes(surfaceScalarFields_.at(i)->nOldTimes());
+        int nOldTimes(mSurfaceScalarFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            surfaceScalarFields_.at(i)->oldTime() == surfaceScalarFieldCopies_.at(i)->oldTime();
+            mSurfaceScalarFields.at(i)->oldTime() == mSurfaceScalarFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            surfaceScalarFields_.at(i)->oldTime().oldTime() == surfaceScalarFieldCopies_.at(i)->oldTime().oldTime();
+            mSurfaceScalarFields.at(i)->oldTime().oldTime() == mSurfaceScalarFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // Reload all the fields of type surfaceVectorField
-    for (uint i = 0; i < surfaceVectorFields_.size(); i++)
+    for (uint i = 0; i < mSurfaceVectorFields.size(); i++)
     {
-        *(surfaceVectorFields_.at(i)) == *(surfaceVectorFieldCopies_.at(i));
+        *(mSurfaceVectorFields.at(i)) == *(mSurfaceVectorFieldCopies.at(i));
 
-        int nOldTimes(surfaceVectorFields_.at(i)->nOldTimes());
+        int nOldTimes(mSurfaceVectorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            surfaceVectorFields_.at(i)->oldTime() == surfaceVectorFieldCopies_.at(i)->oldTime();
+            mSurfaceVectorFields.at(i)->oldTime() == mSurfaceVectorFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            surfaceVectorFields_.at(i)->oldTime().oldTime() == surfaceVectorFieldCopies_.at(i)->oldTime().oldTime();
+            mSurfaceVectorFields.at(i)->oldTime().oldTime() == mSurfaceVectorFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // Reload all the fields of type pointScalarField
-    for (uint i = 0; i < pointScalarFields_.size(); i++)
+    for (uint i = 0; i < mPointScalarFields.size(); i++)
     {
-        *(pointScalarFields_.at(i)) == *(pointScalarFieldCopies_.at(i));
+        *(mPointScalarFields.at(i)) == *(mPointScalarFieldCopies.at(i));
 
-        int nOldTimes(pointScalarFields_.at(i)->nOldTimes());
+        int nOldTimes(mPointScalarFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            pointScalarFields_.at(i)->oldTime() == pointScalarFieldCopies_.at(i)->oldTime();
+            mPointScalarFields.at(i)->oldTime() == mPointScalarFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            pointScalarFields_.at(i)->oldTime().oldTime() == pointScalarFieldCopies_.at(i)->oldTime().oldTime();
+            mPointScalarFields.at(i)->oldTime().oldTime() == mPointScalarFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // Reload all the fields of type pointVectorField
-    for (uint i = 0; i < pointVectorFields_.size(); i++)
+    for (uint i = 0; i < mPointVectorFields.size(); i++)
     {
         // Load the volume field
-        *(pointVectorFields_.at(i)) == *(pointVectorFieldCopies_.at(i));
+        *(mPointVectorFields.at(i)) == *(mPointVectorFieldCopies.at(i));
 
-        int nOldTimes(pointVectorFields_.at(i)->nOldTimes());
+        int nOldTimes(mPointVectorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            pointVectorFields_.at(i)->oldTime() == pointVectorFieldCopies_.at(i)->oldTime();
+            mPointVectorFields.at(i)->oldTime() == mPointVectorFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            pointVectorFields_.at(i)->oldTime().oldTime() == pointVectorFieldCopies_.at(i)->oldTime().oldTime();
+            mPointVectorFields.at(i)->oldTime().oldTime() == mPointVectorFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // TODO Evaluate if all the tensor fields need to be in here.
     // Reload all the fields of type volTensorField
-    for (uint i = 0; i < volTensorFields_.size(); i++)
+    for (uint i = 0; i < mVolTensorFields.size(); i++)
     {
-        *(volTensorFields_.at(i)) == *(volTensorFieldCopies_.at(i));
+        *(mVolTensorFields.at(i)) == *(mVolTensorFieldCopies.at(i));
 
-        int nOldTimes(volTensorFields_.at(i)->nOldTimes());
+        int nOldTimes(mVolTensorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            volTensorFields_.at(i)->oldTime() == volTensorFieldCopies_.at(i)->oldTime();
+            mVolTensorFields.at(i)->oldTime() == mVolTensorFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            volTensorFields_.at(i)->oldTime().oldTime() == volTensorFieldCopies_.at(i)->oldTime().oldTime();
+            mVolTensorFields.at(i)->oldTime().oldTime() == mVolTensorFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // Reload all the fields of type surfaceTensorField
-    for (uint i = 0; i < surfaceTensorFields_.size(); i++)
+    for (uint i = 0; i < mSurfaceTensorFields.size(); i++)
     {
-        *(surfaceTensorFields_.at(i)) == *(surfaceTensorFieldCopies_.at(i));
+        *(mSurfaceTensorFields.at(i)) == *(mSurfaceTensorFieldCopies.at(i));
 
-        int nOldTimes(surfaceTensorFields_.at(i)->nOldTimes());
+        int nOldTimes(mSurfaceTensorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            surfaceTensorFields_.at(i)->oldTime() == surfaceTensorFieldCopies_.at(i)->oldTime();
+            mSurfaceTensorFields.at(i)->oldTime() == mSurfaceTensorFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            surfaceTensorFields_.at(i)->oldTime().oldTime() == surfaceTensorFieldCopies_.at(i)->oldTime().oldTime();
+            mSurfaceTensorFields.at(i)->oldTime().oldTime() == mSurfaceTensorFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // Reload all the fields of type pointTensorField
-    for (uint i = 0; i < pointTensorFields_.size(); i++)
+    for (uint i = 0; i < mPointTensorFields.size(); i++)
     {
-        *(pointTensorFields_.at(i)) == *(pointTensorFieldCopies_.at(i));
+        *(mPointTensorFields.at(i)) == *(pointTensorFieldCopies_.at(i));
 
-        int nOldTimes(pointTensorFields_.at(i)->nOldTimes());
+        int nOldTimes(mPointTensorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            pointTensorFields_.at(i)->oldTime() == pointTensorFieldCopies_.at(i)->oldTime();
+            mPointTensorFields.at(i)->oldTime() == pointTensorFieldCopies_.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            pointTensorFields_.at(i)->oldTime().oldTime() == pointTensorFieldCopies_.at(i)->oldTime().oldTime();
+            mPointTensorFields.at(i)->oldTime().oldTime() == pointTensorFieldCopies_.at(i)->oldTime().oldTime();
         }
     }
 
@@ -1325,21 +1325,21 @@ void preciceAdapter::Adapter::writeCheckpoint()
     }
 
     // Store all the fields of type volScalarField
-    for (uint i = 0; i < volScalarFields_.size(); i++)
+    for (uint i = 0; i < mVolScalarFields.size(); i++)
     {
-        *(volScalarFieldCopies_.at(i)) == *(volScalarFields_.at(i));
+        *(mVolScalarFieldCopies.at(i)) == *(mVolScalarFields.at(i));
     }
 
     // Store all the fields of type volVectorField
-    for (uint i = 0; i < volVectorFields_.size(); i++)
+    for (uint i = 0; i < mVolVectorFields.size(); i++)
     {
-        *(volVectorFieldCopies_.at(i)) == *(volVectorFields_.at(i));
+        *(mVolVectorFieldCopies.at(i)) == *(mVolVectorFields.at(i));
     }
 
     // Store all the fields of type volTensorField
-    for (uint i = 0; i < volTensorFields_.size(); i++)
+    for (uint i = 0; i < mVolTensorFields.size(); i++)
     {
-        *(volTensorFieldCopies_.at(i)) == *(volTensorFields_.at(i));
+        *(mVolTensorFieldCopies.at(i)) == *(mVolTensorFields.at(i));
     }
 
     // Store all the fields of type volSymmTensorField
@@ -1349,39 +1349,39 @@ void preciceAdapter::Adapter::writeCheckpoint()
     }
 
     // Store all the fields of type surfaceScalarField
-    for (uint i = 0; i < surfaceScalarFields_.size(); i++)
+    for (uint i = 0; i < mSurfaceScalarFields.size(); i++)
     {
-        *(surfaceScalarFieldCopies_.at(i)) == *(surfaceScalarFields_.at(i));
+        *(mSurfaceScalarFieldCopies.at(i)) == *(mSurfaceScalarFields.at(i));
     }
 
     // Store all the fields of type surfaceVectorField
-    for (uint i = 0; i < surfaceVectorFields_.size(); i++)
+    for (uint i = 0; i < mSurfaceVectorFields.size(); i++)
     {
-        *(surfaceVectorFieldCopies_.at(i)) == *(surfaceVectorFields_.at(i));
+        *(mSurfaceVectorFieldCopies.at(i)) == *(mSurfaceVectorFields.at(i));
     }
 
     // Store all the fields of type surfaceTensorField
-    for (uint i = 0; i < surfaceTensorFields_.size(); i++)
+    for (uint i = 0; i < mSurfaceTensorFields.size(); i++)
     {
-        *(surfaceTensorFieldCopies_.at(i)) == *(surfaceTensorFields_.at(i));
+        *(mSurfaceTensorFieldCopies.at(i)) == *(mSurfaceTensorFields.at(i));
     }
 
     // Store all the fields of type pointScalarField
-    for (uint i = 0; i < pointScalarFields_.size(); i++)
+    for (uint i = 0; i < mPointScalarFields.size(); i++)
     {
-        *(pointScalarFieldCopies_.at(i)) == *(pointScalarFields_.at(i));
+        *(mPointScalarFieldCopies.at(i)) == *(mPointScalarFields.at(i));
     }
 
     // Store all the fields of type pointVectorField
-    for (uint i = 0; i < pointVectorFields_.size(); i++)
+    for (uint i = 0; i < mPointVectorFields.size(); i++)
     {
-        *(pointVectorFieldCopies_.at(i)) == *(pointVectorFields_.at(i));
+        *(mPointVectorFieldCopies.at(i)) == *(mPointVectorFields.at(i));
     }
 
     // Store all the fields of type pointTensorField
-    for (uint i = 0; i < pointTensorFields_.size(); i++)
+    for (uint i = 0; i < mPointTensorFields.size(); i++)
     {
-        *(pointTensorFieldCopies_.at(i)) == *(pointTensorFields_.at(i));
+        *(pointTensorFieldCopies_.at(i)) == *(mPointTensorFields.at(i));
     }
     // NOTE: Add here other types to write, if needed.
 
@@ -1397,18 +1397,18 @@ void preciceAdapter::Adapter::readMeshCheckpoint()
     DEBUG(adapterInfo("Reading a mesh checkpoint..."));
 
     // Only the meshPhi field is here, which is a surfaceScalarField.
-    for (uint i = 0; i < meshSurfaceScalarFields_.size(); i++)
+    for (uint i = 0; i < mMeshSurfaceScalarFields.size(); i++)
     {
-        *(meshSurfaceScalarFields_.at(i)) == *(meshSurfaceScalarFieldCopies_.at(i));
+        *(mMeshSurfaceScalarFields.at(i)) == *(mMeshSurfaceScalarFieldCopies.at(i));
 
-        int nOldTimes(meshSurfaceScalarFields_.at(i)->nOldTimes());
+        int nOldTimes(mMeshSurfaceScalarFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            meshSurfaceScalarFields_.at(i)->oldTime() == meshSurfaceScalarFieldCopies_.at(i)->oldTime();
+            mMeshSurfaceScalarFields.at(i)->oldTime() == mMeshSurfaceScalarFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            meshSurfaceScalarFields_.at(i)->oldTime().oldTime() == meshSurfaceScalarFieldCopies_.at(i)->oldTime().oldTime();
+            mMeshSurfaceScalarFields.at(i)->oldTime().oldTime() == mMeshSurfaceScalarFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
@@ -1422,17 +1422,17 @@ void preciceAdapter::Adapter::writeMeshCheckpoint()
     DEBUG(adapterInfo("Writing a mesh checkpoint..."));
 
     // Store all the fields of type mesh surfaceScalar (phi)
-    for (uint i = 0; i < meshSurfaceScalarFields_.size(); i++)
+    for (uint i = 0; i < mMeshSurfaceScalarFields.size(); i++)
     {
-        *(meshSurfaceScalarFieldCopies_.at(i)) == *(meshSurfaceScalarFields_.at(i));
+        *(mMeshSurfaceScalarFieldCopies.at(i)) == *(mMeshSurfaceScalarFields.at(i));
     }
 
     DEBUG(adapterInfo("Storing mesh points..."));
 
     // Store mesh points
     // swap pointers
-    *(meshOldPoints_) = *(meshPoints_);
-    *(meshPoints_) = mMesh.points();
+    *(mMeshOldPoints) = *(mMeshPoints);
+    *(mMeshPoints) = mMesh.points();
 
     DEBUG(adapterInfo("Mesh checkpoint for time t = " + std::to_string(mRunTime.value()) + " was stored."));
 
@@ -1484,63 +1484,63 @@ void preciceAdapter::Adapter::teardown()
 
         // Fields
         // volScalarFields
-        for (uint i = 0; i < volScalarFieldCopies_.size(); i++)
+        for (uint i = 0; i < mVolScalarFieldCopies.size(); i++)
         {
-            delete volScalarFieldCopies_.at(i);
+            delete mVolScalarFieldCopies.at(i);
         }
-        volScalarFieldCopies_.clear();
+        mVolScalarFieldCopies.clear();
         // volVector
-        for (uint i = 0; i < volVectorFieldCopies_.size(); i++)
+        for (uint i = 0; i < mVolVectorFieldCopies.size(); i++)
         {
-            delete volVectorFieldCopies_.at(i);
+            delete mVolVectorFieldCopies.at(i);
         }
-        volVectorFieldCopies_.clear();
+        mVolVectorFieldCopies.clear();
         // surfaceScalar
-        for (uint i = 0; i < surfaceScalarFieldCopies_.size(); i++)
+        for (uint i = 0; i < mSurfaceScalarFieldCopies.size(); i++)
         {
-            delete surfaceScalarFieldCopies_.at(i);
+            delete mSurfaceScalarFieldCopies.at(i);
         }
-        surfaceScalarFieldCopies_.clear();
+        mSurfaceScalarFieldCopies.clear();
         // surfaceVector
-        for (uint i = 0; i < surfaceVectorFieldCopies_.size(); i++)
+        for (uint i = 0; i < mSurfaceVectorFieldCopies.size(); i++)
         {
-            delete surfaceVectorFieldCopies_.at(i);
+            delete mSurfaceVectorFieldCopies.at(i);
         }
-        surfaceVectorFieldCopies_.clear();
+        mSurfaceVectorFieldCopies.clear();
         // pointScalar
-        for (uint i = 0; i < pointScalarFieldCopies_.size(); i++)
+        for (uint i = 0; i < mPointScalarFieldCopies.size(); i++)
         {
-            delete pointScalarFieldCopies_.at(i);
+            delete mPointScalarFieldCopies.at(i);
         }
-        pointScalarFieldCopies_.clear();
+        mPointScalarFieldCopies.clear();
         // pointVector
-        for (uint i = 0; i < pointVectorFieldCopies_.size(); i++)
+        for (uint i = 0; i < mPointVectorFieldCopies.size(); i++)
         {
-            delete pointVectorFieldCopies_.at(i);
+            delete mPointVectorFieldCopies.at(i);
         }
-        pointVectorFieldCopies_.clear();
+        mPointVectorFieldCopies.clear();
 
         // Mesh fields
         // meshSurfaceScalar
-        for (uint i = 0; i < meshSurfaceScalarFieldCopies_.size(); i++)
+        for (uint i = 0; i < mMeshSurfaceScalarFieldCopies.size(); i++)
         {
-            delete meshSurfaceScalarFieldCopies_.at(i);
+            delete mMeshSurfaceScalarFieldCopies.at(i);
         }
-        meshSurfaceScalarFieldCopies_.clear();
+        mMeshSurfaceScalarFieldCopies.clear();
 
         // volTensorField
-        for (uint i = 0; i < volTensorFieldCopies_.size(); i++)
+        for (uint i = 0; i < mVolTensorFieldCopies.size(); i++)
         {
-            delete volTensorFieldCopies_.at(i);
+            delete mVolTensorFieldCopies.at(i);
         }
-        volTensorFieldCopies_.clear();
+        mVolTensorFieldCopies.clear();
 
         // surfaceTensorField
-        for (uint i = 0; i < surfaceTensorFieldCopies_.size(); i++)
+        for (uint i = 0; i < mSurfaceTensorFieldCopies.size(); i++)
         {
-            delete surfaceTensorFieldCopies_.at(i);
+            delete mSurfaceTensorFieldCopies.at(i);
         }
-        surfaceTensorFieldCopies_.clear();
+        mSurfaceTensorFieldCopies.clear();
 
         // pointTensorField
         for (uint i = 0; i < pointTensorFieldCopies_.size(); i++)
@@ -1560,8 +1560,8 @@ void preciceAdapter::Adapter::teardown()
 
         mCheckpointing = false;
 
-        delete meshPoints_;
-        delete meshOldPoints_;
+        delete mMeshPoints;
+        delete mMeshOldPoints;
     }
 
     // Delete the CHT module
