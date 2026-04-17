@@ -308,9 +308,10 @@ try
     DEBUG(adapterInfo("Creating the preCICE solver interface..."));
     DEBUG(adapterInfo("  Number of processes: " + std::to_string(Pstream::nProcs())));
     DEBUG(adapterInfo("  MPI rank: " + std::to_string(Pstream::myProcNo())));
-    mPrecice = new precice::Participant(mParticipantName, mCoSimIOConfigFilename, Pstream::myProcNo(), Pstream::nProcs());
+    //mPrecice = new precice::Participant(mParticipantName, mCoSimIOConfigFilename, Pstream::myProcNo(), Pstream::nProcs());
     ConnectSolverToCoSimIO();
     std::cout << "Connection successful" << std::endl;
+    exit(0);
     DEBUG(adapterInfo("  preCICE solver interface was created."));
 
     ACCUMULATE_TIMER(time_in_co_sim_io_construct);
