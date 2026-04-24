@@ -83,14 +83,14 @@ void preciceAdapter::Adapter::configFileRead()
 {
 
     SETUP_TIMER();
-    adapterInfo("Reading preciceDict...", "info");
+    adapterInfo("Reading CoSimIODict...", "info");
 
     // TODO: static is just a quick workaround to be able
     // to find the dictionary also out of scope (e.g. in KappaEffective).
     // We need a better solution.
     static IOdictionary preciceDict(
         IOobject(
-            "preciceDict",
+            "CoSimIODict",
             mRunTime.system(),
             mMesh,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -289,6 +289,7 @@ try
 {
     // Read the adapter's configuration file
     configFileRead();
+    exit(0);
 
     // Check the timestep type (fixed vs adjustable)
     DEBUG(adapterInfo("Checking the timestep type (fixed vs adjustable)..."));
@@ -1609,7 +1610,7 @@ try
     TIMING_MODE(
         // Continuing the output started in the destructor of preciceAdapterFunctionObject
         Info << "Time exclusively in the adapter: " << (time_in_config_read_ + time_in_mesh_setup + time_in_checkpointing_setup + time_in_write + time_in_read + time_in_checkpointing_write + time_in_checkpointing_read).str() << nl;
-        Info << "  (S) reading preciceDict:       " << time_in_config_read_.str() << nl;
+        Info << "  (S) reading CoSimIODict:       " << time_in_config_read_.str() << nl;
         Info << "  (S) constructing preCICE:      " << time_in_co_sim_io_construct.str() << nl;
         Info << "  (S) setting up the interfaces: " << time_in_mesh_setup.str() << nl;
         Info << "  (S) setting up checkpointing:  " << time_in_checkpointing_setup.str() << nl;
