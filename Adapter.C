@@ -88,7 +88,7 @@ void preciceAdapter::Adapter::configFileRead()
     // TODO: static is just a quick workaround to be able
     // to find the dictionary also out of scope (e.g. in KappaEffective).
     // We need a better solution.
-    static IOdictionary preciceDict(
+    static IOdictionary CoSimIODict(
         IOobject(
             "CoSimIODict",
             mRunTime.system(),
@@ -97,16 +97,16 @@ void preciceAdapter::Adapter::configFileRead()
             IOobject::NO_WRITE));
 
     // Read and display the preCICE configuration file name
-    mCoSimIOConfigFilename = preciceDict.get<fileName>("preciceConfig");
+    mCoSimIOConfigFilename = CoSimIODict.get<fileName>("preciceConfig");
     DEBUG(adapterInfo("  precice-config-file : " + mCoSimIOConfigFilename));
 
     // Read and display the participant name
-    mParticipantName = preciceDict.get<word>("participant");
+    mParticipantName = CoSimIODict.get<word>("participant");
     DEBUG(adapterInfo("  participant name    : " + mParticipantName));
 
     // Read and display the list of modules
     DEBUG(adapterInfo("  modules requested   : "));
-    auto modules_ = preciceDict.get<wordList>("modules");
+    auto modules_ = CoSimIODict.get<wordList>("modules");
     for (const auto& module : modules_)
     {
         DEBUG(adapterInfo("  - " + module + "\n"));
@@ -136,7 +136,7 @@ void preciceAdapter::Adapter::configFileRead()
     // Every interface is a subdictionary of "interfaces",
     // each with an arbitrary name. Read all of them and create
     // a list (here: pointer) of dictionaries.
-    const auto* interfaceDictPtr = preciceDict.findDict("interfaces");
+    const auto* interfaceDictPtr = CoSimIODict.findDict("interfaces");
     DEBUG(adapterInfo("  interfaces : "));
 
     // Check if we found any interfaces
@@ -225,7 +225,7 @@ void preciceAdapter::Adapter::configFileRead()
     if (mGenericModuleEnabled)
     {
         mGeneric = new Generic::GenericInterface(mMesh);
-        if (!mGeneric->configure(preciceDict))
+        if (!mGeneric->configure(CoSimIODict))
         {
             return;
         }
@@ -236,7 +236,7 @@ void preciceAdapter::Adapter::configFileRead()
     if (mCHTEnabled)
     {
         mCHT = new CHT::ConjugateHeatTransfer(mMesh);
-        if (!mCHT->configure(preciceDict))
+        if (!mCHT->configure(CoSimIODict))
         {
             adapterInfo("There was an error while configuring the CHT module",
                         "error");
@@ -249,7 +249,7 @@ void preciceAdapter::Adapter::configFileRead()
     if (mFSIEnabled)
     {
         mFSI = new FSI::FluidStructureInteraction(mMesh, mRunTime);
-        if (!mFSI->configure(preciceDict))
+        if (!mFSI->configure(CoSimIODict))
         {
             adapterInfo("There was an error while configuring the FSI module",
                         "error");
@@ -260,7 +260,7 @@ void preciceAdapter::Adapter::configFileRead()
     if (mFFenabled)
     {
         mFF = new FF::FluidFluid(mMesh);
-        if (!mFF->configure(preciceDict))
+        if (!mFF->configure(CoSimIODict))
         {
             adapterInfo("There was an error while configuring the FF module",
                         "error");
