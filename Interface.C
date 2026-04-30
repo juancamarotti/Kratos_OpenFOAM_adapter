@@ -87,6 +87,8 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
     // and meshes based on face nodes.
     // TODO: Reduce code duplication. In the meantime, take care to update
     // all the branches.
+    
+    // Create CoSimIO::ModelPart
 
     if (locationType_ == LocationType::faceCenters)
     {
@@ -131,9 +133,13 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 faceCenters -= cellDisplacement->boundaryField()[patchIDs_.at(j)];
 
             // Assign the (x,y,z) locations to the vertices
+            // id = 0
             for (int i = 0; i < faceCenters.size(); i++)
                 for (unsigned int d = 0; d < dim_; ++d)
                     vertices[verticesIndex++] = faceCenters[i][d];
+                    // We populate the created model part with the nodes defining te face centers
+                    // created_model_part->CreateNewNode(id, nodePosition[0], nodePosition[1], nodePosition[2]);
+                    // id += 1;
 
             // Check if we are in the right layer in case of preCICE dimension 2
             // If there is at least one node with a different z-coordinate, then the (2D) geometry is not on the xy-plane, as required.
@@ -188,6 +194,11 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
 
         // Pass the mesh vertices information to preCICE
         precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
+        // For CoSimIO
+        //info.Clear();
+        //info.Set("identifier", interfaces_.at(j).nameOfInterface);
+        //info.Set("connection_name", connection_name);
+        //auto export_info = CoSimIO::ExportMesh(info, *model_part_interfaces_.at(j));
     }
     else if (locationType_ == LocationType::faceNodes)
     {
