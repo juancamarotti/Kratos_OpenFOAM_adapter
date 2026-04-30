@@ -217,13 +217,13 @@ private:
     std::vector<Foam::pointTensorField*> mPointTensorFields;
 
     //- Checkpointed pointTensorField fields (copies)
-    std::vector<Foam::pointTensorField*> pointTensorFieldCopies_;
+    std::vector<Foam::pointTensorField*> mPointTensorFieldCopies;
 
     //- Checkpointed volSymmTensorField fields
-    std::vector<Foam::volSymmTensorField*> volSymmTensorFields_;
+    std::vector<Foam::volSymmTensorField*> mVolSymmTensorFields;
 
     //- Checkpointed volSymmTensorField fields (copies)
-    std::vector<Foam::volSymmTensorField*> volSymmTensorFieldCopies_;
+    std::vector<Foam::volSymmTensorField*> mVolSymmTensorFieldCopies;
 
 
     // NOTE: Declare additional vectors for any other types required.
@@ -231,47 +231,47 @@ private:
     // Configuration
 
     //- Read the adapter's configuration file
-    void configFileRead();
+    void ConfigFileRead();
 
     //- Helper to read a list of field configurations, which can contain either words, dictionaries, or both
-    void readFieldConfigs(const std::string& listName, Foam::ITstream& stream, std::vector<FieldConfig>& configs);
+    void ReadFieldConfigs(const std::string& listName, Foam::ITstream& stream, std::vector<FieldConfig>& configs);
 
     //- Check the adapter's configuration file
-    bool configFileCheck(const std::string adapterConfigFileName);
+    bool ConfigFileCheck(const std::string adapterConfigFileName);
 
     // Methods communicating with CoSimIO
     void ConnectSolverToCoSimIO();
 
     //- Initialize preCICE and exchange the first data
-    void initialize();
+    void Initialize();
 
     //- Finalize and destroy preCICE
-    void finalize();
+    void Finalize();
 
     //- Advance preCICE
-    void advance();
+    void Advance();
 
     //- Read the coupling data at each interface
-    void readCouplingData(double relativeReadTime);
+    void ReadCouplingData(double relativeReadTime);
 
     //- Write the coupling data at each interface
-    void writeCouplingData();
+    void WriteCouplingData();
 
     //- Adjust the timestep of the solver according to preCICE
     // and read data associated to the calculated time step length
-    void adjustSolverTimeStepAndReadData();
+    void AdjustSolverTimeStepAndReadData();
 
     //- Determine if the coupling is still happening
-    bool isCouplingOngoing();
+    bool IsCouplingOngoing();
 
     //- Determine if the coupling timestep has been completed
-    bool isCouplingTimeWindowComplete();
+    bool IsCouplingTimeWindowComplete();
 
     //- Determine if a checkpoint must be read
-    bool requiresReadingCheckpoint();
+    bool RequiresReadingCheckpoint();
 
     //- Determine if a checkpoint must be written
-    bool requiresWritingCheckpoint();
+    bool RequiresWritingCheckpoint();
 
     // Methods for checkpointing
 

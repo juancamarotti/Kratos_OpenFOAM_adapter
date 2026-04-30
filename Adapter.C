@@ -16,7 +16,7 @@ preciceAdapter::Adapter::Adapter(const Time& runTime, const fvMesh& mesh)
     return;
 }
 
-void preciceAdapter::Adapter::readFieldConfigs(const std::string& listName, Foam::ITstream& stream, std::vector<FieldConfig>& configs)
+void preciceAdapter::Adapter::ReadFieldConfigs(const std::string& listName, Foam::ITstream& stream, std::vector<FieldConfig>& configs)
 {
     // Perform check on whether read/WriteData is a list
     if (stream.peek() == token::BEGIN_LIST)
@@ -79,7 +79,7 @@ void preciceAdapter::Adapter::readFieldConfigs(const std::string& listName, Foam
     }
 }
 
-void preciceAdapter::Adapter::configFileRead()
+void preciceAdapter::Adapter::ConfigFileRead()
 {
 
     SETUP_TIMER();
@@ -205,14 +205,14 @@ void preciceAdapter::Adapter::configFileRead()
                 {
                     DEBUG(adapterInfo("    WriteData    : "));
                     ITstream writeDataStream = interfaceDict.lookup("WriteData");
-                    readFieldConfigs("WriteData", writeDataStream, interfaceConfig.WriteData);
+                    ReadFieldConfigs("WriteData", writeDataStream, interfaceConfig.WriteData);
                 }
 
                 if (interfaceDict.found("ReadData"))
                 {
                     DEBUG(adapterInfo("    ReadData     : "));
                     ITstream readDataStream = interfaceDict.lookup("ReadData");
-                    readFieldConfigs("ReadData", readDataStream, interfaceConfig.ReadData);
+                    ReadFieldConfigs("ReadData", readDataStream, interfaceConfig.ReadData);
                 }
 
                 mInterfacesConfig.push_back(interfaceConfig);
@@ -288,8 +288,7 @@ void preciceAdapter::Adapter::configure()
 try
 {
     // Read the adapter's configuration file
-    configFileRead();
-    exit(0);
+    ConfigFileRead();
 
     // Check the timestep type (fixed vs adjustable)
     DEBUG(adapterInfo("Checking the timestep type (fixed vs adjustable)..."));
@@ -440,11 +439,11 @@ try
     ACCUMULATE_TIMER(time_in_mesh_setup);
 
     // Initialize preCICE and exchange the first coupling data
-    initialize();
+    Initialize();
 
     // If checkpointing is required, specify the checkpointed fields
     // and write the first checkpoint
-    if (requiresWritingCheckpoint())
+    if (RequiresWritingCheckpoint())
     {
         mCheckpointing = true;
 
@@ -458,7 +457,7 @@ try
     // Adjust the timestep for the first iteration, if it is fixed
     if (!mAdjustableTimestep)
     {
-        adjustSolverTimeStepAndReadData();
+        AdjustSolverTimeStepAndReadData();
     }
 
     // If the solver tries to end before the coupling is complete,
@@ -498,20 +497,20 @@ try
     // if (ncheckpointed is nregisterdobjects. )
 
     // Write the coupling data in the buffer
-    writeCouplingData();
+    WriteCouplingData();
 
     // Advance preCICE
-    advance();
+    Advance();
 
     // Read checkpoint if required
-    if (requiresReadingCheckpoint())
+    if (RequiresReadingCheckpoint())
     {
         pruneCheckpointedFields();
         readCheckpoint();
     }
 
     // Write checkpoint if required
-    if (requiresWritingCheckpoint())
+    if (RequiresWritingCheckpoint())
     {
         writeCheckpoint();
     }
@@ -522,7 +521,7 @@ try
     // Check the behavior e.g. by using watch on a result file:
     //     watch -n 0.1 -d ls --full-time Fluid/0.01/T.gz
     SETUP_TIMER();
-    if (mCheckpointing && isCouplingTimeWindowComplete())
+    if (mCheckpointing && IsCouplingTimeWindowComplete())
     {
         // Check if the time directory already exists
         // (i.e. the solver wrote results that need to be updated)
@@ -540,17 +539,17 @@ try
     // Adjust the timestep, if it is fixed
     if (!mAdjustableTimestep)
     {
-        adjustSolverTimeStepAndReadData();
+        AdjustSolverTimeStepAndReadData();
     }
 
     // If the coupling is not going to continue, tear down everything
     // and stop the simulation.
-    if (!isCouplingOngoing())
+    if (!IsCouplingOngoing())
     {
         adapterInfo("The coupling completed.", "info");
 
         // Finalize the preCICE solver interface and delete data
-        finalize();
+        Finalize();
 
         // Tell OpenFOAM to stop the simulation.
         // Set the solver's endTime to now. The next evaluation of
@@ -578,7 +577,7 @@ catch (const CoSimIOError& e)
 void preciceAdapter::Adapter::adjustTimeStep()
 try
 {
-    adjustSolverTimeStepAndReadData();
+    AdjustSolverTimeStepAndReadData();
 
     return;
 }
@@ -587,7 +586,7 @@ catch (const CoSimIOError& e)
     std::exit(EXIT_FAILURE);
 }
 
-void preciceAdapter::Adapter::readCouplingData(double relativeReadTime)
+void preciceAdapter::Adapter::ReadCouplingData(double relativeReadTime)
 {
     SETUP_TIMER();
     DEBUG(adapterInfo("Reading coupling data..."));
@@ -602,7 +601,7 @@ void preciceAdapter::Adapter::readCouplingData(double relativeReadTime)
     return;
 }
 
-void preciceAdapter::Adapter::writeCouplingData()
+void preciceAdapter::Adapter::WriteCouplingData()
 {
     SETUP_TIMER();
     DEBUG(adapterInfo("Writing coupling data..."));
@@ -644,7 +643,7 @@ void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
     return;
 }
 
-void preciceAdapter::Adapter::initialize()
+void preciceAdapter::Adapter::Initialize()
 {
     DEBUG(adapterInfo("Initializing the preCICE solver interface..."));
     SETUP_TIMER();
@@ -652,7 +651,7 @@ void preciceAdapter::Adapter::initialize()
     if (mPrecice->requiresInitialData())
     {
         DEBUG(adapterInfo("Initializing preCICE data..."));
-        writeCouplingData();
+        WriteCouplingData();
     }
 
     mPrecice->initialize();
@@ -664,9 +663,9 @@ void preciceAdapter::Adapter::initialize()
     return;
 }
 
-void preciceAdapter::Adapter::finalize()
+void preciceAdapter::Adapter::Finalize()
 {
-    if (nullptr != mPrecice && mCoSimIOInitialized && !isCouplingOngoing())
+    if (nullptr != mPrecice && mCoSimIOInitialized && !IsCouplingOngoing())
     {
         DEBUG(adapterInfo("Finalizing the preCICE solver interface..."));
 
@@ -688,7 +687,7 @@ void preciceAdapter::Adapter::finalize()
     return;
 }
 
-void preciceAdapter::Adapter::advance()
+void preciceAdapter::Adapter::Advance()
 {
     DEBUG(adapterInfo("Advancing preCICE..."));
 
@@ -699,7 +698,7 @@ void preciceAdapter::Adapter::advance()
     return;
 }
 
-void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
+void preciceAdapter::Adapter::AdjustSolverTimeStepAndReadData()
 {
     DEBUG(adapterInfo("Adjusting the solver's timestep..."));
 
@@ -775,7 +774,7 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
     else if (timestepSolverDetermined - mPrecice->getMaxTimeStepSize() > tolerance)
     {
         // In the last time-step, we adjust to dt = 0, but we don't need to trigger the warning here
-        if (isCouplingOngoing())
+        if (IsCouplingOngoing())
         {
             adapterInfo(
                 "The solver's timestep cannot be larger than the coupling timestep."
@@ -801,13 +800,13 @@ void preciceAdapter::Adapter::adjustSolverTimeStepAndReadData()
 
     // Read the received coupling data from the buffer
     // Fits to an implicit Euler
-    readCouplingData(mRunTime.deltaT().value());
+    ReadCouplingData(mRunTime.deltaT().value());
     return;
 }
 
-bool preciceAdapter::Adapter::isCouplingOngoing()
+bool preciceAdapter::Adapter::IsCouplingOngoing()
 {
-    bool isCouplingOngoing = false;
+    bool IsCouplingOngoing = false;
 
     // If the coupling ends before the solver ends,
     // the solver would try to access this method again,
@@ -815,23 +814,23 @@ bool preciceAdapter::Adapter::isCouplingOngoing()
     // was not available.
     if (nullptr != mPrecice)
     {
-        isCouplingOngoing = mPrecice->isCouplingOngoing();
+        IsCouplingOngoing = mPrecice->isCouplingOngoing();
     }
 
-    return isCouplingOngoing;
+    return IsCouplingOngoing;
 }
 
-bool preciceAdapter::Adapter::isCouplingTimeWindowComplete()
+bool preciceAdapter::Adapter::IsCouplingTimeWindowComplete()
 {
     return mPrecice->isTimeWindowComplete();
 }
 
-bool preciceAdapter::Adapter::requiresReadingCheckpoint()
+bool preciceAdapter::Adapter::RequiresReadingCheckpoint()
 {
     return mPrecice->requiresReadingCheckpoint();
 }
 
-bool preciceAdapter::Adapter::requiresWritingCheckpoint()
+bool preciceAdapter::Adapter::RequiresWritingCheckpoint()
 {
     return mPrecice->requiresWritingCheckpoint();
 }
@@ -996,7 +995,7 @@ void preciceAdapter::Adapter::pruneCheckpointedFields()
     doLocalCode(volScalarField, mVolScalarFields, mVolScalarFieldCopies);
     doLocalCode(volVectorField, mVolVectorFields, mVolVectorFieldCopies);
     doLocalCode(volTensorField, mVolTensorFields, mVolTensorFieldCopies);
-    doLocalCode(volSymmTensorField, volSymmTensorFields_, volSymmTensorFieldCopies_);
+    doLocalCode(volSymmTensorField, mVolSymmTensorFields, mVolSymmTensorFieldCopies);
 
     doLocalCode(surfaceScalarField, mSurfaceScalarFields, mSurfaceScalarFieldCopies);
     doLocalCode(surfaceVectorField, mSurfaceVectorFields, mSurfaceVectorFieldCopies);
@@ -1004,7 +1003,7 @@ void preciceAdapter::Adapter::pruneCheckpointedFields()
 
     doLocalCode(pointScalarField, mPointScalarFields, mPointScalarFieldCopies);
     doLocalCode(pointVectorField, mPointVectorFields, mPointVectorFieldCopies);
-    doLocalCode(pointTensorField, mPointTensorFields, pointTensorFieldCopies_);
+    doLocalCode(pointTensorField, mPointTensorFields, mPointTensorFieldCopies);
 
 #undef doLocalCode
 }
@@ -1097,7 +1096,7 @@ void preciceAdapter::Adapter::addCheckpointField(pointTensorField* field)
     if (field)
     {
         mPointTensorFields.push_back(field);
-        pointTensorFieldCopies_.push_back(new pointTensorField(*field));
+        mPointTensorFieldCopies.push_back(new pointTensorField(*field));
     }
 }
 
@@ -1105,8 +1104,8 @@ void preciceAdapter::Adapter::addCheckpointField(volSymmTensorField* field)
 {
     if (field)
     {
-        volSymmTensorFields_.push_back(field);
-        volSymmTensorFieldCopies_.push_back(new volSymmTensorField(*field));
+        mVolSymmTensorFields.push_back(field);
+        mVolSymmTensorFieldCopies.push_back(new volSymmTensorField(*field));
     }
 }
 
@@ -1270,33 +1269,33 @@ void preciceAdapter::Adapter::readCheckpoint()
     // Reload all the fields of type pointTensorField
     for (uint i = 0; i < mPointTensorFields.size(); i++)
     {
-        *(mPointTensorFields.at(i)) == *(pointTensorFieldCopies_.at(i));
+        *(mPointTensorFields.at(i)) == *(mPointTensorFieldCopies.at(i));
 
         int nOldTimes(mPointTensorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            mPointTensorFields.at(i)->oldTime() == pointTensorFieldCopies_.at(i)->oldTime();
+            mPointTensorFields.at(i)->oldTime() == mPointTensorFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            mPointTensorFields.at(i)->oldTime().oldTime() == pointTensorFieldCopies_.at(i)->oldTime().oldTime();
+            mPointTensorFields.at(i)->oldTime().oldTime() == mPointTensorFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
     // TODO volSymmTensorField is new.
     // Reload all the fields of type volSymmTensorField
-    for (uint i = 0; i < volSymmTensorFields_.size(); i++)
+    for (uint i = 0; i < mVolSymmTensorFields.size(); i++)
     {
-        *(volSymmTensorFields_.at(i)) == *(volSymmTensorFieldCopies_.at(i));
+        *(mVolSymmTensorFields.at(i)) == *(mVolSymmTensorFieldCopies.at(i));
 
-        int nOldTimes(volSymmTensorFields_.at(i)->nOldTimes());
+        int nOldTimes(mVolSymmTensorFields.at(i)->nOldTimes());
         if (nOldTimes >= 1)
         {
-            volSymmTensorFields_.at(i)->oldTime() == volSymmTensorFieldCopies_.at(i)->oldTime();
+            mVolSymmTensorFields.at(i)->oldTime() == mVolSymmTensorFieldCopies.at(i)->oldTime();
         }
         if (nOldTimes == 2)
         {
-            volSymmTensorFields_.at(i)->oldTime().oldTime() == volSymmTensorFieldCopies_.at(i)->oldTime().oldTime();
+            mVolSymmTensorFields.at(i)->oldTime().oldTime() == mVolSymmTensorFieldCopies.at(i)->oldTime().oldTime();
         }
     }
 
@@ -1344,9 +1343,9 @@ void preciceAdapter::Adapter::writeCheckpoint()
     }
 
     // Store all the fields of type volSymmTensorField
-    for (uint i = 0; i < volSymmTensorFields_.size(); i++)
+    for (uint i = 0; i < mVolSymmTensorFields.size(); i++)
     {
-        *(volSymmTensorFieldCopies_.at(i)) == *(volSymmTensorFields_.at(i));
+        *(mVolSymmTensorFieldCopies.at(i)) == *(mVolSymmTensorFields.at(i));
     }
 
     // Store all the fields of type surfaceScalarField
@@ -1382,7 +1381,7 @@ void preciceAdapter::Adapter::writeCheckpoint()
     // Store all the fields of type pointTensorField
     for (uint i = 0; i < mPointTensorFields.size(); i++)
     {
-        *(pointTensorFieldCopies_.at(i)) == *(mPointTensorFields.at(i));
+        *(mPointTensorFieldCopies.at(i)) == *(mPointTensorFields.at(i));
     }
     // NOTE: Add here other types to write, if needed.
 
@@ -1444,7 +1443,7 @@ void preciceAdapter::Adapter::end()
 try
 {
     // Throw a warning if the simulation exited before the coupling was complete
-    if (nullptr != mPrecice && isCouplingOngoing())
+    if (nullptr != mPrecice && IsCouplingOngoing())
     {
         adapterInfo("The solver exited before the coupling was complete.", "warning");
     }
@@ -1459,7 +1458,7 @@ catch (const CoSimIOError& e)
 void preciceAdapter::Adapter::teardown()
 {
     // If the solver interface was not deleted before, delete it now.
-    // Normally it should be deleted when isCouplingOngoing() becomes false.
+    // Normally it should be deleted when IsCouplingOngoing() becomes false.
     if (nullptr != mPrecice)
     {
         DEBUG(adapterInfo("Destroying the preCICE solver interface..."));
@@ -1544,18 +1543,18 @@ void preciceAdapter::Adapter::teardown()
         mSurfaceTensorFieldCopies.clear();
 
         // pointTensorField
-        for (uint i = 0; i < pointTensorFieldCopies_.size(); i++)
+        for (uint i = 0; i < mPointTensorFieldCopies.size(); i++)
         {
-            delete pointTensorFieldCopies_.at(i);
+            delete mPointTensorFieldCopies.at(i);
         }
-        pointTensorFieldCopies_.clear();
+        mPointTensorFieldCopies.clear();
 
         // volSymmTensor
-        for (uint i = 0; i < volSymmTensorFieldCopies_.size(); i++)
+        for (uint i = 0; i < mVolSymmTensorFieldCopies.size(); i++)
         {
-            delete volSymmTensorFieldCopies_.at(i);
+            delete mVolSymmTensorFieldCopies.at(i);
         }
-        volSymmTensorFieldCopies_.clear();
+        mVolSymmTensorFieldCopies.clear();
 
         // NOTE: Add here delete for other types, if needed
 
