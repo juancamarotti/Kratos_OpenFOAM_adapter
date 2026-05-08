@@ -311,7 +311,7 @@ try
     //mPrecice = new precice::Participant(mParticipantName, mCoSimIOConfigFilename, Pstream::myProcNo(), Pstream::nProcs());
     ConnectSolverToCoSimIO();
     std::cout << "Connection successful" << std::endl;
-    exit(0);
+    // exit(0);
     DEBUG(adapterInfo("  preCICE solver interface was created."));
 
     ACCUMULATE_TIMER(time_in_co_sim_io_construct);
@@ -325,7 +325,7 @@ try
         std::string nameCellDisplacement = mFSIEnabled ? mFSI->getCellDisplacementFieldName() : "default";
         bool restartFromDeformed = mFSIEnabled ? mFSI->isRestartingFromDeformed() : false;
 
-        Interface* interface = new Interface(*mPrecice, mMesh, mInterfacesConfig.at(i).MeshName, mInterfacesConfig.at(i).LocationsType, mInterfacesConfig.at(i).PatchNames, mInterfacesConfig.at(i).CellSetNames, mInterfacesConfig.at(i).MeshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement);
+        Interface* interface = new Interface(*mPrecice, mMesh, mInterfacesConfig.at(i).MeshName, mInterfacesConfig.at(i).LocationsType, mInterfacesConfig.at(i).PatchNames, mInterfacesConfig.at(i).CellSetNames, mInterfacesConfig.at(i).MeshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement, mConnectionName);
         mInterfaces.push_back(interface);
         DEBUG(adapterInfo("Interface created on mesh " + mInterfacesConfig.at(i).MeshName));
 
@@ -638,7 +638,7 @@ void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
     //}
 
     //COSIMIO_CHECK_EQUAL(connect_info.Get<int>("connection_status"), CoSimIO::ConnectionStatus::Connected);
-    //connection_name = connect_info.Get<std::string>("connection_name");
+    mConnectionName = connect_info.Get<std::string>("connection_name");
 
     return;
 }

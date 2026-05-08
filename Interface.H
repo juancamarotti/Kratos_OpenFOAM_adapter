@@ -9,6 +9,10 @@
 
 #include "pointPatchField.H"
 
+// CoSimIO header file
+#include "co_sim_io.hpp"
+#include "co_sim_io_mpi.hpp"
+
 namespace preciceAdapter
 {
 
@@ -26,6 +30,15 @@ class Interface
 protected:
     //- preCICE solver interface
     precice::Participant& precice_;
+
+    //- Array of CoSimIO::Model parts(to store mesh info) for all coupling interfaces
+    std::unique_ptr<CoSimIO::ModelPart> mpModelPart;
+
+    //- CoSimIO info object
+    CoSimIO::Info info;
+
+    //- Member variables required for CoSimIO
+    std::string mConnectionName;
 
     //- Mesh name used in the preCICE configuration
     std::string meshName_;

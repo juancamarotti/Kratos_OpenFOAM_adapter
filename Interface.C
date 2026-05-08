@@ -19,13 +19,15 @@ preciceAdapter::Interface::Interface(
     bool meshConnectivity,
     bool restartFromDeformed,
     const std::string& namePointDisplacement,
-    const std::string& nameCellDisplacement)
+    const std::string& nameCellDisplacement,
+    std::string ConnectionName)
 : precice_(precice),
   meshName_(meshName),
   patchNames_(patchNames),
   cellSetNames_(cellSetNames),
   meshConnectivity_(meshConnectivity),
-  restartFromDeformed_(restartFromDeformed)
+  restartFromDeformed_(restartFromDeformed),
+  mConnectionName(ConnectionName)
 {
     dim_ = precice_.getMeshDimensions(meshName);
 
@@ -88,7 +90,8 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
     // TODO: Reduce code duplication. In the meantime, take care to update
     // all the branches.
     
-    // Create CoSimIO::ModelPart
+    // Make CoSimIO::ModelPart and push in the array of model_part_interfaces
+    mpModelPart = CoSimIO::make_unique<CoSimIO::ModelPart>(meshName_);
 
     if (locationType_ == LocationType::faceCenters)
     {
@@ -262,8 +265,19 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 {
                     vertices[verticesIndex++] = faceNodes[i][d];
                 }
+                // Pass the mesh vertices informtion to CoSimIO
+                mpModelPart->CreateNewNode( vertexIDs_[i], faceNodes[i][0], faceNodes[i][1], faceNodes[i][2]);
             }
         }
+
+        // For CoSimIO
+        info.Clear();
+        info.Set("identifier", meshName_);
+        info.Set("connection_name", mConnectionName);
+        auto export_info = CoSimIO::ExportMesh(info, *mpModelPart);
+        std::cout << "ExportMesh succesful!";
+        exit(0);
+        //debugInfo( "Finished Exporting interface Mesh " +  meshName_ + " to Kratos as a ModelPart "  , debugLevel);
 
         // Pass the mesh vertices information to preCICE
         precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
