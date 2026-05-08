@@ -29,7 +29,8 @@ preciceAdapter::Interface::Interface(
   restartFromDeformed_(restartFromDeformed),
   mConnectionName(ConnectionName)
 {
-    dim_ = precice_.getMeshDimensions(meshName);
+    // dim_ = precice_.getMeshDimensions(meshName);
+    dim_ = 3;
 
     if (dim_ == 2 && meshConnectivity_ == true)
     {
@@ -196,7 +197,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         }
 
         // Pass the mesh vertices information to preCICE
-        precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
+        //precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
         // For CoSimIO
         //info.Clear();
         //info.Set("identifier", interfaces_.at(j).nameOfInterface);
@@ -235,6 +236,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
 
         // Get the locations of the mesh vertices (here: face nodes)
         // for all the patches
+        int node_id = 1;
         for (uint j = 0; j < patchIDs_.size(); j++)
         {
             // Get the face nodes of the current patch
@@ -265,8 +267,13 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 {
                     vertices[verticesIndex++] = faceNodes[i][d];
                 }
+
+                vertexIDs_[node_id - 1] = node_id;
+                
                 // Pass the mesh vertices informtion to CoSimIO
-                mpModelPart->CreateNewNode( vertexIDs_[i], faceNodes[i][0], faceNodes[i][1], faceNodes[i][2]);
+                mpModelPart->CreateNewNode( node_id, faceNodes[i][0], faceNodes[i][1], faceNodes[i][2]);
+
+                node_id++;
             }
         }
 
