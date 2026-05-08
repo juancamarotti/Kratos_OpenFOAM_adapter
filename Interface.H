@@ -100,7 +100,8 @@ public:
         bool meshConnectivity,
         bool restartFromDeformed,
         const std::string& namePointDisplacement,
-        const std::string& nameCellDisplacement);
+        const std::string& nameCellDisplacement,
+        std::string ConnectionName);
 
     //- Add a CouplingDataUser to read data from the interface
     void addCouplingDataReader(
