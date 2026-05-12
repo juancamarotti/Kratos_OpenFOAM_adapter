@@ -283,11 +283,11 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         info.Set("connection_name", mConnectionName);
         auto export_info = CoSimIO::ExportMesh(info, *mpModelPart);
         std::cout << "ExportMesh succesful!";
-        exit(0);
+        //exit(0);
         //debugInfo( "Finished Exporting interface Mesh " +  meshName_ + " to Kratos as a ModelPart "  , debugLevel);
 
         // Pass the mesh vertices information to preCICE
-        precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
+        //precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
 
         if (meshConnectivity_)
         {
@@ -354,7 +354,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 DEBUG(adapterInfo("Number of triangles: " + std::to_string(faceField.size() * triaPerQuad)));
 
                 //Set Triangles
-                precice_.setMeshTriangles(meshName_, triVertIDs);
+                //precice_.setMeshTriangles(meshName_, triVertIDs);
             }
         }
     }
@@ -460,7 +460,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         }
 
         // Pass the mesh vertices information to preCICE
-        precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
+        //recice_.setMeshVertices(meshName_, vertices, vertexIDs_);
     }
 }
 
