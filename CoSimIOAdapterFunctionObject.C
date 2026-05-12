@@ -84,6 +84,8 @@ bool Foam::functionObjects::CoSimIOAdapterFunctionObject::read(const dictionary&
 #endif
 
     mAdapter.configure();
+    std::cout << "THE CONFIGURE OF THE ADAPTER WAS SUCCESSFUL" << std::endl;
+    std::exit(0);
 
 #ifdef ADAPTER_ENABLE_TIMINGS
     // Accumulate the time in this section into a global timer.
