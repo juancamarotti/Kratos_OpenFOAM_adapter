@@ -437,28 +437,29 @@ try
         interface->createBuffer();
     }
     ACCUMULATE_TIMER(time_in_mesh_setup);
+    std::cout << "THE READERS AND WRITERS WERE CREATED SUCCESSFULLY" << std::endl;
 
     // Initialize preCICE and exchange the first coupling data
     Initialize();
 
     // If checkpointing is required, specify the checkpointed fields
     // and write the first checkpoint
-    if (RequiresWritingCheckpoint())
-    {
-        mCheckpointing = true;
+    // if (RequiresWritingCheckpoint())
+    // {
+    //     mCheckpointing = true;
 
-        // Setup the checkpointing (find and add fields to checkpoint)
-        setupCheckpointing();
+    //     // Setup the checkpointing (find and add fields to checkpoint)
+    //     setupCheckpointing();
 
-        // Write checkpoint (for the first iteration)
-        writeCheckpoint();
-    }
+    //     // Write checkpoint (for the first iteration)
+    //     writeCheckpoint();
+    // }
 
     // Adjust the timestep for the first iteration, if it is fixed
-    if (!mAdjustableTimestep)
-    {
-        AdjustSolverTimeStepAndReadData();
-    }
+    // if (!mAdjustableTimestep)
+    // {
+    //     AdjustSolverTimeStepAndReadData();
+    // }
 
     // If the solver tries to end before the coupling is complete,
     // e.g. because the solver's endTime was smaller or (in implicit
@@ -648,13 +649,13 @@ void preciceAdapter::Adapter::Initialize()
     DEBUG(adapterInfo("Initializing the preCICE solver interface..."));
     SETUP_TIMER();
 
-    if (mPrecice->requiresInitialData())
-    {
-        DEBUG(adapterInfo("Initializing preCICE data..."));
-        WriteCouplingData();
-    }
+    // if (mPrecice->requiresInitialData())
+    // {
+    //     DEBUG(adapterInfo("Initializing preCICE data..."));
+    //     WriteCouplingData();
+    // }
 
-    mPrecice->initialize();
+    // mPrecice->initialize();
     mCoSimIOInitialized = true;
     ACCUMULATE_TIMER(time_in_initialize);
 
