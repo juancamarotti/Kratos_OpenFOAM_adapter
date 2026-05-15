@@ -279,80 +279,80 @@ private:
     // Methods for checkpointing
 
     //- Configure the mesh checkpointing
-    void setupMeshCheckpointing();
+    void SetupMeshCheckpointing();
 
     //- Configure the checkpointing
-    void setupCheckpointing();
+    void SetupCheckpointing();
 
     //- Remove checkpointed fields which are not used by OpenFOAM anymore
-    void pruneCheckpointedFields();
+    void PruneCheckpointedFields();
 
 
     //- Make a copy of the runTime object
-    void storeCheckpointTime();
+    void StoreCheckpointTime();
 
     //- Restore the copy of the runTime object
-    void reloadCheckpointTime();
+    void ReloadCheckpointTime();
 
     //- Store the locations of the mesh points
-    void storeMeshPoints();
+    void StoreMeshPoints();
 
     //- Restore the locations of the mesh points
-    void reloadMeshPoints();
+    void ReloadMeshPoints();
 
     // Add mesh checkpoint fields, depending on the type
 
     //- Add a surfaceScalarField mesh field (phi)
-    void addMeshCheckpointField(Foam::surfaceScalarField& field);
+    void AddMeshCheckpointField(Foam::surfaceScalarField& field);
 
     //- Add a volScalarField to checkpoint
-    void addCheckpointField(volScalarField* field);
+    void AddCheckpointField(volScalarField* field);
 
     //- Add a volVectorField to checkpoint
-    void addCheckpointField(volVectorField* field);
+    void AddCheckpointField(volVectorField* field);
 
     //- Add a surfaceScalarField to checkpoint
-    void addCheckpointField(surfaceScalarField* field);
+    void AddCheckpointField(surfaceScalarField* field);
 
     //- Add a surfaceVectorField to checkpoint
-    void addCheckpointField(surfaceVectorField* field);
+    void AddCheckpointField(surfaceVectorField* field);
 
     //- Add a pointScalarField to checkpoint
-    void addCheckpointField(pointScalarField* field);
+    void AddCheckpointField(pointScalarField* field);
 
     //- Add a pointVectorField to checkpoint
-    void addCheckpointField(pointVectorField* field);
+    void AddCheckpointField(pointVectorField* field);
 
     // NOTE: Add here methods to add other object types to checkpoint,
     // if needed.
 
     //- Add a volTensorField to checkpoint
-    void addCheckpointField(volTensorField* field);
+    void AddCheckpointField(volTensorField* field);
 
     //- Add a surfaceTensorField to checkpoint
-    void addCheckpointField(surfaceTensorField* field);
+    void AddCheckpointField(surfaceTensorField* field);
 
     //- Add a pointTensorField to checkpoint
-    void addCheckpointField(pointTensorField* field);
+    void AddCheckpointField(pointTensorField* field);
 
     //- Add a volSymmTensorField to checkpoint
-    void addCheckpointField(volSymmTensorField* field);
+    void AddCheckpointField(volSymmTensorField* field);
 
     //- Read the checkpoint - restore the mesh fields and time
-    void readMeshCheckpoint();
+    void ReadMeshCheckpoint();
 
     //- Read the checkpoint - restore the fields and time
-    void readCheckpoint();
+    void ReadCheckpoint();
 
     //- Write the checkpoint - store the mesh fields and time
-    void writeMeshCheckpoint();
+    void WriteMeshCheckpoint();
 
     //- Write the checkpoint - store the fields and time
-    void writeCheckpoint();
+    void WriteCheckpoint();
 
     //- Destroy the preCICE interface and delete the allocated
     //  memory in a proper way. Called by the destructor.
-    void teardown();
+    void Teardown();
 
 public:
     // Methods called by the functionObject

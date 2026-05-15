@@ -449,10 +449,10 @@ try
     //     mCheckpointing = true;
 
     //     // Setup the checkpointing (find and add fields to checkpoint)
-    //     setupCheckpointing();
+    //     SetupCheckpointing();
 
     //     // Write checkpoint (for the first iteration)
-    //     writeCheckpoint();
+    //     WriteCheckpoint();
     // }
 
     // Adjust the timestep for the first iteration, if it is fixed
@@ -506,14 +506,14 @@ try
     // Read checkpoint if required
     if (RequiresReadingCheckpoint())
     {
-        pruneCheckpointedFields();
-        readCheckpoint();
+        PruneCheckpointedFields();
+        ReadCheckpoint();
     }
 
     // Write checkpoint if required
     if (RequiresWritingCheckpoint())
     {
-        writeCheckpoint();
+        WriteCheckpoint();
     }
 
     // As soon as OpenFOAM writes the results, it will not try to write again
@@ -678,7 +678,7 @@ void preciceAdapter::Adapter::Finalize()
         mCoSimIOInitialized = false;
 
         // Delete the solver interface and all the related data
-        teardown();
+        Teardown();
     }
     else
     {
@@ -837,7 +837,7 @@ bool preciceAdapter::Adapter::RequiresWritingCheckpoint()
 }
 
 
-void preciceAdapter::Adapter::storeCheckpointTime()
+void preciceAdapter::Adapter::StoreCheckpointTime()
 {
     mCouplingIterationTimeIndex = mRunTime.timeIndex();
     mCouplingIterationTimeValue = mRunTime.value();
@@ -846,7 +846,7 @@ void preciceAdapter::Adapter::storeCheckpointTime()
     return;
 }
 
-void preciceAdapter::Adapter::reloadCheckpointTime()
+void preciceAdapter::Adapter::ReloadCheckpointTime()
 {
     const_cast<Time&>(mRunTime).setTime(mCouplingIterationTimeValue, mCouplingIterationTimeIndex);
     // TODO also reset the current iteration?!
@@ -855,7 +855,7 @@ void preciceAdapter::Adapter::reloadCheckpointTime()
     return;
 }
 
-void preciceAdapter::Adapter::storeMeshPoints()
+void preciceAdapter::Adapter::StoreMeshPoints()
 {
     if (!mMeshPoints)
     {
@@ -870,14 +870,14 @@ void preciceAdapter::Adapter::storeMeshPoints()
         if (!mMeshCheckPointed)
         {
             // Set up the checkpoint for the mesh flux: meshPhi
-            setupMeshCheckpointing();
+            SetupMeshCheckpointing();
             mMeshCheckPointed = true;
         }
-        writeMeshCheckpoint();
+        WriteMeshCheckpoint();
     }
 }
 
-void preciceAdapter::Adapter::reloadMeshPoints()
+void preciceAdapter::Adapter::ReloadMeshPoints()
 {
     if (!mMesh.moving())
     {
@@ -892,12 +892,12 @@ void preciceAdapter::Adapter::reloadMeshPoints()
     // if (curMotionTimeIndex_ != time().timeIndex())
     const_cast<pointField&>(mMesh.oldPoints()) = *mMeshOldPoints;
 
-    readMeshCheckpoint();
+    ReadMeshCheckpoint();
 
     DEBUG(adapterInfo("Moved mesh points to their previous locations."));
 }
 
-void preciceAdapter::Adapter::setupMeshCheckpointing()
+void preciceAdapter::Adapter::SetupMeshCheckpointing()
 {
     // The other mesh <type>Fields:
     //      C
@@ -908,13 +908,13 @@ void preciceAdapter::Adapter::setupMeshCheckpointing()
     // are updated by the function fvMesh::movePoints. Only the meshPhi needs checkpointing.
     DEBUG(adapterInfo("Creating a list of the mesh checkpointed fields..."));
     // Add meshPhi (Face motion flux)
-    addMeshCheckpointField(const_cast<surfaceScalarField&>(mMesh.phi()));
+    AddMeshCheckpointField(const_cast<surfaceScalarField&>(mMesh.phi()));
 
     DEBUG(adapterInfo("Added " + mMesh.phi().name() + " to the list of checkpointed fields."));
 }
 
 
-void preciceAdapter::Adapter::setupCheckpointing()
+void preciceAdapter::Adapter::SetupCheckpointing()
 {
     SETUP_TIMER();
 
@@ -926,7 +926,7 @@ void preciceAdapter::Adapter::setupCheckpointing()
     /* Checkpoint registered GeomFieldType objects */                        \
     for (const word& obj : mMesh.sortedNames<GeomFieldType>())               \
     {                                                                        \
-        addCheckpointField(mMesh.thisDb().getObjectPtr<GeomFieldType>(obj)); \
+        AddCheckpointField(mMesh.thisDb().getObjectPtr<GeomFieldType>(obj)); \
         DEBUG(adapterInfo("Checkpoint " + obj + " : " #GeomFieldType));      \
     }
 
@@ -950,7 +950,7 @@ void preciceAdapter::Adapter::setupCheckpointing()
     ACCUMULATE_TIMER(time_in_checkpointing_setup);
 }
 
-void preciceAdapter::Adapter::pruneCheckpointedFields()
+void preciceAdapter::Adapter::PruneCheckpointedFields()
 {
     // Check if checkpointed fields exist in OpenFOAM registry
     // If not, remove them from the checkpointed fields vector
@@ -1011,13 +1011,13 @@ void preciceAdapter::Adapter::pruneCheckpointedFields()
 
 // All mesh checkpointed fields
 
-void preciceAdapter::Adapter::addMeshCheckpointField(surfaceScalarField& field)
+void preciceAdapter::Adapter::AddMeshCheckpointField(surfaceScalarField& field)
 {
     mMeshSurfaceScalarFields.push_back(&field);
     mMeshSurfaceScalarFieldCopies.push_back(new surfaceScalarField(field));
 }
 
-void preciceAdapter::Adapter::addCheckpointField(volScalarField* field)
+void preciceAdapter::Adapter::AddCheckpointField(volScalarField* field)
 {
     if (field)
     {
@@ -1026,7 +1026,7 @@ void preciceAdapter::Adapter::addCheckpointField(volScalarField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(volVectorField* field)
+void preciceAdapter::Adapter::AddCheckpointField(volVectorField* field)
 {
     if (field)
     {
@@ -1035,7 +1035,7 @@ void preciceAdapter::Adapter::addCheckpointField(volVectorField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(surfaceScalarField* field)
+void preciceAdapter::Adapter::AddCheckpointField(surfaceScalarField* field)
 {
     if (field)
     {
@@ -1044,7 +1044,7 @@ void preciceAdapter::Adapter::addCheckpointField(surfaceScalarField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(surfaceVectorField* field)
+void preciceAdapter::Adapter::AddCheckpointField(surfaceVectorField* field)
 {
     if (field)
     {
@@ -1053,7 +1053,7 @@ void preciceAdapter::Adapter::addCheckpointField(surfaceVectorField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(pointScalarField* field)
+void preciceAdapter::Adapter::AddCheckpointField(pointScalarField* field)
 {
     if (field)
     {
@@ -1062,7 +1062,7 @@ void preciceAdapter::Adapter::addCheckpointField(pointScalarField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(pointVectorField* field)
+void preciceAdapter::Adapter::AddCheckpointField(pointVectorField* field)
 {
     if (field)
     {
@@ -1074,7 +1074,7 @@ void preciceAdapter::Adapter::addCheckpointField(pointVectorField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(volTensorField* field)
+void preciceAdapter::Adapter::AddCheckpointField(volTensorField* field)
 {
     if (field)
     {
@@ -1083,7 +1083,7 @@ void preciceAdapter::Adapter::addCheckpointField(volTensorField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(surfaceTensorField* field)
+void preciceAdapter::Adapter::AddCheckpointField(surfaceTensorField* field)
 {
     if (field)
     {
@@ -1092,7 +1092,7 @@ void preciceAdapter::Adapter::addCheckpointField(surfaceTensorField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(pointTensorField* field)
+void preciceAdapter::Adapter::AddCheckpointField(pointTensorField* field)
 {
     if (field)
     {
@@ -1101,7 +1101,7 @@ void preciceAdapter::Adapter::addCheckpointField(pointTensorField* field)
     }
 }
 
-void preciceAdapter::Adapter::addCheckpointField(volSymmTensorField* field)
+void preciceAdapter::Adapter::AddCheckpointField(volSymmTensorField* field)
 {
     if (field)
     {
@@ -1113,7 +1113,7 @@ void preciceAdapter::Adapter::addCheckpointField(volSymmTensorField* field)
 
 // NOTE: Add here methods to add other object types to checkpoint, if needed.
 
-void preciceAdapter::Adapter::readCheckpoint()
+void preciceAdapter::Adapter::ReadCheckpoint()
 {
     SETUP_TIMER();
 
@@ -1125,12 +1125,12 @@ void preciceAdapter::Adapter::readCheckpoint()
     DEBUG(adapterInfo("Reading a checkpoint..."));
 
     // Reload the runTime
-    reloadCheckpointTime();
+    ReloadCheckpointTime();
 
     // Reload the meshPoints (if FSI is enabled)
     if (mFSIEnabled)
     {
-        reloadMeshPoints();
+        ReloadMeshPoints();
     }
 
     // Reload all the fields of type volScalarField
@@ -1310,19 +1310,19 @@ void preciceAdapter::Adapter::readCheckpoint()
 }
 
 
-void preciceAdapter::Adapter::writeCheckpoint()
+void preciceAdapter::Adapter::WriteCheckpoint()
 {
     SETUP_TIMER();
 
     DEBUG(adapterInfo("Writing a checkpoint..."));
 
     // Store the runTime
-    storeCheckpointTime();
+    StoreCheckpointTime();
 
     // Store the meshPoints (if FSI is enabled)
     if (mFSIEnabled)
     {
-        storeMeshPoints();
+        StoreMeshPoints();
     }
 
     // Store all the fields of type volScalarField
@@ -1393,7 +1393,7 @@ void preciceAdapter::Adapter::writeCheckpoint()
     return;
 }
 
-void preciceAdapter::Adapter::readMeshCheckpoint()
+void preciceAdapter::Adapter::ReadMeshCheckpoint()
 {
     DEBUG(adapterInfo("Reading a mesh checkpoint..."));
 
@@ -1418,7 +1418,7 @@ void preciceAdapter::Adapter::readMeshCheckpoint()
     return;
 }
 
-void preciceAdapter::Adapter::writeMeshCheckpoint()
+void preciceAdapter::Adapter::WriteMeshCheckpoint()
 {
     DEBUG(adapterInfo("Writing a mesh checkpoint..."));
 
@@ -1456,7 +1456,7 @@ catch (const CoSimIOError& e)
     std::exit(EXIT_FAILURE);
 }
 
-void preciceAdapter::Adapter::teardown()
+void preciceAdapter::Adapter::Teardown()
 {
     // If the solver interface was not deleted before, delete it now.
     // Normally it should be deleted when IsCouplingOngoing() becomes false.
@@ -1605,7 +1605,7 @@ void preciceAdapter::Adapter::teardown()
 preciceAdapter::Adapter::~Adapter()
 try
 {
-    teardown();
+    Teardown();
 
     TIMING_MODE(
         // Continuing the output started in the destructor of preciceAdapterFunctionObject
