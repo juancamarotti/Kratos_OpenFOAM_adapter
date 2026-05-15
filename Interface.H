@@ -29,25 +29,25 @@ class Interface
 {
 protected:
     //- preCICE solver interface
-    precice::Participant& precice_;
+    precice::Participant& mPrecice;
 
     //- Array of CoSimIO::Model parts(to store mesh info) for all coupling interfaces
     std::unique_ptr<CoSimIO::ModelPart> mpModelPart;
 
     //- CoSimIO info object
-    CoSimIO::Info info;
+    CoSimIO::Info mInfo;
 
     //- Member variables required for CoSimIO
     std::string mConnectionName;
 
     //- Mesh name used in the preCICE configuration
-    std::string meshName_;
+    std::string mMeshName;
 
     //- Point locations type (faceCenters vs faceNodes)
-    LocationType locationType_ {LocationType::none};
+    LocationType mLocationType {LocationType::none};
 
     //- Mesh ID assigned by preCICE to the interface
-    int meshID_;
+    int mMeshID;
 
     //- Names of the OpenFOAM patches that form the interface
     std::vector<std::string> patchNames_;

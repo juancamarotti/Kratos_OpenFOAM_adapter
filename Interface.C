@@ -21,15 +21,15 @@ preciceAdapter::Interface::Interface(
     const std::string& namePointDisplacement,
     const std::string& nameCellDisplacement,
     std::string ConnectionName)
-: precice_(precice),
-  meshName_(meshName),
+: mPrecice(precice),
+  mMeshName(meshName),
   patchNames_(patchNames),
   cellSetNames_(cellSetNames),
   meshConnectivity_(meshConnectivity),
   restartFromDeformed_(restartFromDeformed),
   mConnectionName(ConnectionName)
 {
-    // dim_ = precice_.getMeshDimensions(meshName);
+    // dim_ = mPrecice.getMeshDimensions(meshName);
     dim_ = 3;
 
     if (dim_ == 2 && meshConnectivity_ == true)
@@ -42,15 +42,15 @@ preciceAdapter::Interface::Interface(
 
     if (locationsType == "faceCenters" || locationsType == "faceCentres")
     {
-        locationType_ = LocationType::faceCenters;
+        mLocationType = LocationType::faceCenters;
     }
     else if (locationsType == "faceNodes")
     {
-        locationType_ = LocationType::faceNodes;
+        mLocationType = LocationType::faceNodes;
     }
     else if (locationsType == "volumeCenters" || locationsType == "volumeCentres")
     {
-        locationType_ = LocationType::volumeCenters;
+        mLocationType = LocationType::volumeCenters;
     }
     else
     {
@@ -92,9 +92,9 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
     // all the branches.
     
     // Make CoSimIO::ModelPart and push in the array of model_part_interfaces
-    mpModelPart = CoSimIO::make_unique<CoSimIO::ModelPart>(meshName_);
+    mpModelPart = CoSimIO::make_unique<CoSimIO::ModelPart>(mMeshName);
 
-    if (locationType_ == LocationType::faceCenters)
+    if (mLocationType == LocationType::faceCenters)
     {
         // Count the data locations for all the patches
         for (uint j = 0; j < patchIDs_.size(); j++)
@@ -197,14 +197,14 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         }
 
         // Pass the mesh vertices information to preCICE
-        //precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
+        //mPrecice.setMeshVertices(mMeshName, vertices, vertexIDs_);
         // For CoSimIO
-        //info.Clear();
-        //info.Set("identifier", interfaces_.at(j).nameOfInterface);
-        //info.Set("connection_name", connection_name);
-        //auto export_info = CoSimIO::ExportMesh(info, *model_part_interfaces_.at(j));
+        //mInfo.Clear();
+        //mInfo.Set("identifier", interfaces_.at(j).nameOfInterface);
+        //mInfo.Set("connection_name", connection_name);
+        //auto export_info = CoSimIO::ExportMesh(mInfo, *model_part_interfaces_.at(j));
     }
-    else if (locationType_ == LocationType::faceNodes)
+    else if (mLocationType == LocationType::faceNodes)
     {
         // Count the data locations for all the patches
         for (uint j = 0; j < patchIDs_.size(); j++)
@@ -278,16 +278,16 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         }
 
         // For CoSimIO
-        info.Clear();
-        info.Set("identifier", meshName_);
-        info.Set("connection_name", mConnectionName);
-        auto export_info = CoSimIO::ExportMesh(info, *mpModelPart);
+        mInfo.Clear();
+        mInfo.Set("identifier", mMeshName);
+        mInfo.Set("connection_name", mConnectionName);
+        auto export_info = CoSimIO::ExportMesh(mInfo, *mpModelPart);
         std::cout << "ExportMesh succesful!";
         //exit(0);
-        //debugInfo( "Finished Exporting interface Mesh " +  meshName_ + " to Kratos as a ModelPart "  , debugLevel);
+        //debugInfo( "Finished Exporting interface Mesh " +  mMeshName + " to Kratos as a ModelPart "  , debugLevel);
 
         // Pass the mesh vertices information to preCICE
-        //precice_.setMeshVertices(meshName_, vertices, vertexIDs_);
+        //mPrecice.setMeshVertices(mMeshName, vertices, vertexIDs_);
 
         if (meshConnectivity_)
         {
@@ -354,11 +354,11 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 DEBUG(adapterInfo("Number of triangles: " + std::to_string(faceField.size() * triaPerQuad)));
 
                 //Set Triangles
-                //precice_.setMeshTriangles(meshName_, triVertIDs);
+                //mPrecice.setMeshTriangles(mMeshName, triVertIDs);
             }
         }
     }
-    else if (locationType_ == LocationType::volumeCenters)
+    else if (mLocationType == LocationType::volumeCenters)
     {
         // The volume coupling implementation considers the mesh points in the volume and
         // on the boundary patches in order to take the boundary conditions into account
@@ -460,7 +460,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         }
 
         // Pass the mesh vertices information to preCICE
-        //recice_.setMeshVertices(meshName_, vertices, vertexIDs_);
+        //recice_.setMeshVertices(mMeshName, vertices, vertexIDs_);
     }
 }
 
@@ -482,7 +482,7 @@ void preciceAdapter::Interface::addCouplingDataWriter(
     couplingDataWriter->setCellSetNames(cellSetNames_);
 
     // Set the location type in the CouplingDataUser class
-    couplingDataWriter->setLocationsType(locationType_);
+    couplingDataWriter->setLocationsType(mLocationType);
 
     // Set the location type in the CouplingDataUser class
     couplingDataWriter->checkDataLocation(meshConnectivity_);
@@ -509,7 +509,7 @@ void preciceAdapter::Interface::addCouplingDataReader(
     couplingDataReader->setPatchIDs(patchIDs_);
 
     // Set the location type in the CouplingDataUser class
-    couplingDataReader->setLocationsType(locationType_);
+    couplingDataReader->setLocationsType(mLocationType);
 
     // Set the names of the cell sets to be coupled (for volume coupling)
     couplingDataReader->setCellSetNames(cellSetNames_);
@@ -575,13 +575,13 @@ void preciceAdapter::Interface::readCouplingData(double relativeReadTime)
 
         // Make preCICE read vector or scalar data
         // and fill the adapter's buffer
-        std::size_t nReadData = vertexIDs_.size() * precice_.getDataDimensions(meshName_, couplingDataReader->dataName());
+        std::size_t nReadData = vertexIDs_.size() * mPrecice.getDataDimensions(mMeshName, couplingDataReader->dataName());
         // We could add a sanity check here
         // nReadData == vertexIDs_.size() * (1 + (dim_ - 1) * static_cast<int>(couplingDataReader->hasVectorData()));
 
         precice::span<double> dataSpanRead {dataBuffer_.data(), nReadData};
-        precice_.readData(
-            meshName_,
+        mPrecice.readData(
+            mMeshName,
             couplingDataReader->dataName(),
             vertexIDs_,
             relativeReadTime,
@@ -613,8 +613,8 @@ void preciceAdapter::Interface::writeCouplingData()
         couplingDataWriter->applyFlipNormal(dataSpanWritten);
 
         // Make preCICE write vector or scalar data
-        precice_.writeData(
-            meshName_,
+        mPrecice.writeData(
+            mMeshName,
             couplingDataWriter->dataName(),
             vertexIDs_,
             dataSpanWritten);
