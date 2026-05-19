@@ -499,6 +499,7 @@ try
 
     // Write the coupling data in the buffer
     WriteCouplingData();
+    std::cout << "The data export to co sim io was successful" << std::endl;
 
     // Advance preCICE
     Advance();
@@ -515,6 +516,7 @@ try
     {
         WriteCheckpoint();
     }
+    exit(0);
 
     // As soon as OpenFOAM writes the results, it will not try to write again
     // if the time takes the same value again. Therefore, during an implicit
@@ -609,6 +611,7 @@ void preciceAdapter::Adapter::WriteCouplingData()
 
     for (uint i = 0; i < mInterfaces.size(); i++)
     {
+        std::cout << "EXPORTING LOADS TO CO SIM IO" << std::endl;
         mInterfaces.at(i)->writeCouplingData();
     }
 
