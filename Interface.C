@@ -123,6 +123,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
 
         // Get the locations of the mesh vertices (here: face centers)
         // for all the patches
+        int node_id = 1;
         for (uint j = 0; j < patchIDs_.size(); j++)
         {
             // Get the face centers of the current patch
@@ -138,12 +139,24 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
 
             // Assign the (x,y,z) locations to the vertices
             // id = 0
-            for (int i = 0; i < faceCenters.size(); i++)
+            for (int i = 0; i < faceCenters.size(); i++){
                 for (unsigned int d = 0; d < dim_; ++d)
+                {
                     vertices[verticesIndex++] = faceCenters[i][d];
-                    // We populate the created model part with the nodes defining te face centers
-                    // created_model_part->CreateNewNode(id, nodePosition[0], nodePosition[1], nodePosition[2]);
-                    // id += 1;
+                }
+
+                vertexIDs_[node_id - 1] = node_id;
+
+                mpModelPart->CreateNewNode(
+                    node_id,
+                    faceCenters[i][0],
+                    faceCenters[i][1],
+                    faceCenters[i][2]
+                );
+
+                node_id++;
+            }
+            
 
             // Check if we are in the right layer in case of preCICE dimension 2
             // If there is at least one node with a different z-coordinate, then the (2D) geometry is not on the xy-plane, as required.
@@ -199,10 +212,11 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         // Pass the mesh vertices information to preCICE
         //mPrecice.setMeshVertices(mMeshName, vertices, vertexIDs_);
         // For CoSimIO
-        //mInfo.Clear();
-        //mInfo.Set("identifier", interfaces_.at(j).nameOfInterface);
-        //mInfo.Set("connection_name", connection_name);
-        //auto export_info = CoSimIO::ExportMesh(mInfo, *model_part_interfaces_.at(j));
+        mInfo.Clear();
+        mInfo.Set("identifier", mMeshName);
+        mInfo.Set("connection_name", mConnectionName);
+        auto export_info = CoSimIO::ExportMesh(mInfo, *mpModelPart);
+        std::cout << "ExportMesh succesful!";
     }
     else if (mLocationType == LocationType::faceNodes)
     {
@@ -402,7 +416,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         vertexIDs_.resize(numDataLocations_);
 
         // Initialize the index of the vertices array
-        int verticesIndex = 0;
+        int verticesIndex = 1;
 
         if (!cellSetNames_.empty())
         {
@@ -415,12 +429,14 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 // Get the coordinates of the cells of the current cellSet.
                 for (int i = 0; i < cells.size(); i++)
                 {
-                    vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].x();
-                    vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].y();
-                    if (dim_ == 3)
-                    {
-                        vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].z();
-                    }
+                    // vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].x();
+                    // vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].y();
+                    // if (dim_ == 3)
+                    // {
+                    //     vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].z();
+                    // }
+                    mpModelPart->CreateNewNode( verticesIndex, mesh.C().internalField()[cells[i]].x(), mesh.C().internalField()[cells[i]].y(), mesh.C().internalField()[cells[i]].z());
+                    verticesIndex++;
                 }
             }
         }
@@ -597,6 +613,12 @@ void preciceAdapter::Interface::readCouplingData(double relativeReadTime)
 
 void preciceAdapter::Interface::writeCouplingData()
 {
+    std::cout << "INSIDE writeCouplingData()" << std::endl;
+
+    std::cout << "Number of writers = "
+              << couplingDataWriters_.size()
+              << std::endl;
+              
     // Make every coupling data writer write
     for (uint i = 0; i < couplingDataWriters_.size(); i++)
     {
@@ -612,12 +634,33 @@ void preciceAdapter::Interface::writeCouplingData()
         // Apply flip normal if required
         couplingDataWriter->applyFlipNormal(dataSpanWritten);
 
-        // Make preCICE write vector or scalar data
-        mPrecice.writeData(
-            mMeshName,
-            couplingDataWriter->dataName(),
-            vertexIDs_,
-            dataSpanWritten);
+        // Convert span/buffer into std::vector<double> for CoSimIO
+        std::vector<double> data_to_send(
+            dataBuffer_.begin(),
+            dataBuffer_.begin() + nWrittenData
+        );
+        
+        std::cout << data_to_send.size() << std::endl;
+        for (auto force : data_to_send)
+        {
+            std::cout << force << std::endl;
+        }
+
+        CoSimIO::Info export_info;
+        export_info.Set("connection_name", mConnectionName);
+        export_info.Set("identifier", couplingDataWriter->dataName());
+
+        export_info = CoSimIO::ExportData(
+            export_info,
+            data_to_send
+        );
+
+        // // Make preCICE write vector or scalar data
+        // mPrecice.writeData(
+        //     mMeshName,
+        //     couplingDataWriter->dataName(),
+        //     vertexIDs_,
+        //     dataSpanWritten);
     }
 }
 
