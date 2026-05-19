@@ -115,7 +115,7 @@ std::string preciceAdapter::FF::FluidFluid::determineSolverType()
     if (solverType == "unknown")
         adapterInfo("Failed to determine the solver type. "
                     "Please specify your solver type in the FF section of the "
-                    "preciceDict. Known solver types for FF are: "
+                    "CoSimIODict. Known solver types for FF are: "
                     "incompressible and "
                     "compressible",
                     "error");

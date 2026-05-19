@@ -118,7 +118,7 @@ std::string preciceAdapter::FSI::FluidStructureInteraction::determineSolverType(
     {
         adapterInfo("Failed to determine the solver type. "
                     "Please specify your solver type in the FSI section of the "
-                    "preciceDict. Known solver types for FSI are: "
+                    "CoSimIODict. Known solver types for FSI are: "
                     "incompressible and "
                     "compressible",
                     "error");
