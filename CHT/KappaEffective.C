@@ -61,15 +61,15 @@ preciceAdapter::CHT::KappaEff_Incompressible::KappaEff_Incompressible(
     DEBUG(adapterInfo("  Name of Prandl number: " + namePr_));
     DEBUG(adapterInfo("  Name of turbulent thermal diffusivity: " + nameAlphat_));
 
-    // Get the preciceDict/CHT dictionary
+    // Get the CoSimIODict/CHT dictionary
     const dictionary& CHTDict =
-        mesh_.lookupObject<IOdictionary>("preciceDict").subOrEmptyDict("CHT");
+        mesh_.lookupObject<IOdictionary>("CoSimIODict").subOrEmptyDict("CHT");
 
     // Read the Prandtl number
     if (!CHTDict.readIfPresent<dimensionedScalar>(namePr_, Pr_))
     {
         adapterInfo(
-            "Cannot find the Prandtl number in preciceDict/CHT using the name " + namePr_,
+            "Cannot find the Prandtl number in CoSimIODict/CHT using the name " + namePr_,
             "error");
     }
     else
@@ -81,7 +81,7 @@ preciceAdapter::CHT::KappaEff_Incompressible::KappaEff_Incompressible(
     if (!CHTDict.readIfPresent<dimensionedScalar>(nameRho_, rho_))
     {
         adapterInfo(
-            "Cannot find the density in preciceDict/CHT using the name " + nameRho_,
+            "Cannot find the density in CoSimIODict/CHT using the name " + nameRho_,
             "error");
     }
     else
@@ -93,7 +93,7 @@ preciceAdapter::CHT::KappaEff_Incompressible::KappaEff_Incompressible(
     if (!CHTDict.readIfPresent<dimensionedScalar>(nameCp_, Cp_))
     {
         adapterInfo(
-            "Cannot find the heat capacity in preciceDict/CHT using the name " + nameCp_,
+            "Cannot find the heat capacity in CoSimIODict/CHT using the name " + nameCp_,
             "error");
     }
     else
@@ -166,15 +166,15 @@ preciceAdapter::CHT::KappaEff_Basic::KappaEff_Basic(
     DEBUG(adapterInfo("Constructed KappaEff_Basic."));
     DEBUG(adapterInfo("  Name of conductivity: " + nameKappa_));
 
-    // Get the preciceDict/CHT dictionary
+    // Get the CoSimIODict/CHT dictionary
     const dictionary& CHTDict =
-        mesh_.lookupObject<IOdictionary>("preciceDict").subOrEmptyDict("CHT");
+        mesh_.lookupObject<IOdictionary>("CoSimIODict").subOrEmptyDict("CHT");
 
     // Read the conductivity
     if (!CHTDict.readIfPresent<dimensionedScalar>(nameKappa_, kappaEff_))
     {
         adapterInfo(
-            "Cannot find the conductivity in preciceDict/CHT using the name " + nameKappa_,
+            "Cannot find the conductivity in CoSimIODict/CHT using the name " + nameKappa_,
             "error");
     }
     else
