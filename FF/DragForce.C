@@ -32,7 +32,7 @@ std::size_t preciceAdapter::FF::DragForce::write(double* buffer, bool meshConnec
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -110,7 +110,7 @@ void preciceAdapter::FF::DragForce::read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -193,7 +193,7 @@ bool preciceAdapter::FF::DragForce::isLocationTypeSupported(const bool meshConne
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::volumeCenters);
+        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
     }
 }
 

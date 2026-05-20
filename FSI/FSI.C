@@ -138,7 +138,7 @@ bool preciceAdapter::FSI::FluidStructureInteraction::addWriters(const preciceAda
 
     if (matchingStrings(dataName, "Force"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Force(mesh_, solverType_, nameForce_) /* TODO: Add any other arguments here */
         );
@@ -146,21 +146,21 @@ bool preciceAdapter::FSI::FluidStructureInteraction::addWriters(const preciceAda
     }
     else if (matchingStrings(dataName, "DisplacementDelta"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new DisplacementDelta(mesh_, namePointDisplacement_, nameCellDisplacement_));
         DEBUG(adapterInfo("Added writer: DisplacementDelta."));
     }
     else if (matchingStrings(dataName, "Displacement"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Displacement(mesh_, namePointDisplacement_, nameCellDisplacement_));
         DEBUG(adapterInfo("Added writer: Displacement."));
     }
     else if (matchingStrings(dataName, "Stress"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Stress(mesh_, solverType_) /* TODO: Add any other arguments here */
         );
@@ -188,7 +188,7 @@ bool preciceAdapter::FSI::FluidStructureInteraction::addReaders(const preciceAda
 
     if (matchingStrings(dataName, "Force"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Force(mesh_, solverType_, nameForce_) /* TODO: Add any other arguments here */
         );
@@ -196,21 +196,21 @@ bool preciceAdapter::FSI::FluidStructureInteraction::addReaders(const preciceAda
     }
     else if (matchingStrings(dataName, "DisplacementDelta"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new DisplacementDelta(mesh_, namePointDisplacement_, nameCellDisplacement_));
         DEBUG(adapterInfo("Added reader: DisplacementDelta."));
     }
     else if (matchingStrings(dataName, "Displacement"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Displacement(mesh_, namePointDisplacement_, nameCellDisplacement_));
         DEBUG(adapterInfo("Added reader: Displacement."));
     }
     else if (matchingStrings(dataName, "Stress"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Stress(mesh_, solverType_) /* TODO: Add any other arguments here */
         );

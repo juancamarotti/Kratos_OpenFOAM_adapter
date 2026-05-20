@@ -50,7 +50,7 @@ void preciceAdapter::FF::Phi::read(double* buffer, const unsigned int dim)
 
 bool preciceAdapter::FF::Phi::isLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::faceCenters);
+    return (this->locationType_ == LocationType::FaceCenters);
 }
 
 std::string preciceAdapter::FF::Phi::getDataName() const

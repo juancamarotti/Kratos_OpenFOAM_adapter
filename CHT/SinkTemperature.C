@@ -97,11 +97,11 @@ bool preciceAdapter::CHT::SinkTemperature::isLocationTypeSupported(const bool me
 {
     if (meshConnectivity)
     {
-        return (this->locationType_ == LocationType::faceNodes);
+        return (this->locationType_ == LocationType::FaceNodes);
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters);
+        return (this->locationType_ == LocationType::FaceCenters);
     }
 }
 

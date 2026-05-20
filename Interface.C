@@ -6,87 +6,90 @@
 #include "faceTriangulation.H"
 #include "cellSet.H"
 
+#include <thread>
+#include <chrono>
+
 
 using namespace Foam;
 
 preciceAdapter::Interface::Interface(
-    precice::Participant& precice,
-    const fvMesh& mesh,
-    std::string meshName,
-    std::string locationsType,
-    std::vector<std::string> patchNames,
-    std::vector<std::string> cellSetNames,
-    bool meshConnectivity,
-    bool restartFromDeformed,
-    const std::string& namePointDisplacement,
-    const std::string& nameCellDisplacement,
+    precice::Participant& Precice,
+    const fvMesh& Mesh,
+    std::string MeshName,
+    std::string LocationsType,
+    std::vector<std::string> PatchNames,
+    std::vector<std::string> CellSetNames,
+    bool MeshConnectivity,
+    bool RestartFromDeformed,
+    const std::string& NamePointDisplacement,
+    const std::string& NameCellDisplacement,
     std::string ConnectionName)
-: mPrecice(precice),
-  mMeshName(meshName),
-  patchNames_(patchNames),
-  cellSetNames_(cellSetNames),
-  meshConnectivity_(meshConnectivity),
-  restartFromDeformed_(restartFromDeformed),
+: mPrecice(Precice),
+  mMeshName(MeshName),
+  mPatchNames(PatchNames),
+  mCellSetNames(CellSetNames),
+  mMeshConnectivity(MeshConnectivity),
+  mRestartFromDeformed(RestartFromDeformed),
   mConnectionName(ConnectionName)
 {
-    // dim_ = mPrecice.getMeshDimensions(meshName);
-    dim_ = 3;
+    // mDim = mPrecice.getMeshDimensions(MeshName);
+    mDim = 3;
 
-    if (dim_ == 2 && meshConnectivity_ == true)
+    if (mDim == 2 && mMeshConnectivity == true)
     {
-        DEBUG(adapterInfo("meshConnectivity is currently only supported for 3D cases. \n"
+        DEBUG(adapterInfo("MeshConnectivity is currently only supported for 3D cases. \n"
                           "You might set up a 3D case and restrict the 3rd dimension by z-dead = true. \n"
                           "Have a look in the adapter documentation for detailed information.",
                           "warning"));
     }
 
-    if (locationsType == "faceCenters" || locationsType == "faceCentres")
+    if (LocationsType == "FaceCenters" || LocationsType == "FaceCentres")
     {
-        mLocationType = LocationType::faceCenters;
+        mLocationType = LocationType::FaceCenters;
     }
-    else if (locationsType == "faceNodes")
+    else if (LocationsType == "FaceNodes")
     {
-        mLocationType = LocationType::faceNodes;
+        mLocationType = LocationType::FaceNodes;
     }
-    else if (locationsType == "volumeCenters" || locationsType == "volumeCentres")
+    else if (LocationsType == "VolumeCenters" || LocationsType == "VolumeCentres")
     {
-        mLocationType = LocationType::volumeCenters;
+        mLocationType = LocationType::VolumeCenters;
     }
     else
     {
         adapterInfo("Interface points location type \""
                     "locations = "
-                        + locationsType + "\" is invalid.",
+                        + LocationsType + "\" is invalid.",
                     "error-deferred");
     }
 
 
     // For every patch that participates in the coupling
-    for (uint j = 0; j < patchNames.size(); j++)
+    for (uint j = 0; j < PatchNames.size(); j++)
     {
-        // Get the patchID
-        int patchID = mesh.boundaryMesh().findPatchID(patchNames.at(j));
+        // Get the patch_id
+        int patch_id = Mesh.boundaryMesh().findPatchID(PatchNames.at(j));
 
         // Throw an error if the patch was not found
-        if (patchID == -1)
+        if (patch_id == -1)
         {
             adapterInfo("Patch \""
-                            + patchNames.at(j) + "\" does not exist and therefore cannot be used as a coupling interface for mesh \""
-                            + meshName + "\". Check the system/preciceDict.",
+                            + PatchNames.at(j) + "\" does not exist and therefore cannot be used as a coupling interface for Mesh \""
+                            + MeshName + "\". Check the system/preciceDict.",
                         "error");
         }
 
         // Add the patch in the list
-        patchIDs_.push_back(patchID);
+        mPatchIDs.push_back(patch_id);
     }
 
-    // Configure the mesh (set the data locations)
-    configureMesh(mesh, namePointDisplacement, nameCellDisplacement);
+    // Configure the Mesh (set the data locations)
+    ConfigureMesh(Mesh, NamePointDisplacement, NameCellDisplacement);
 }
 
-void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::string& namePointDisplacement, const std::string& nameCellDisplacement)
+void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::string& NamePointDisplacement, const std::string& NameCellDisplacement)
 {
-    // The way we configure the mesh differs between meshes based on face centers
+    // The way we configure the Mesh differs between meshes based on face centers
     // and meshes based on face nodes.
     // TODO: Reduce code duplication. In the meantime, take care to update
     // all the branches.
@@ -94,64 +97,64 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
     // Make CoSimIO::ModelPart and push in the array of model_part_interfaces
     mpModelPart = CoSimIO::make_unique<CoSimIO::ModelPart>(mMeshName);
 
-    if (mLocationType == LocationType::faceCenters)
+    if (mLocationType == LocationType::FaceCenters)
     {
         // Count the data locations for all the patches
-        for (uint j = 0; j < patchIDs_.size(); j++)
+        for (uint j = 0; j < mPatchIDs.size(); j++)
         {
-            numDataLocations_ +=
-                mesh.boundaryMesh()[patchIDs_.at(j)].faceCentres().size();
+            mNumDataLocations +=
+                Mesh.boundaryMesh()[mPatchIDs.at(j)].faceCentres().size();
         }
-        DEBUG(adapterInfo("Number of face centres: " + std::to_string(numDataLocations_)));
+        DEBUG(adapterInfo("Number of face centres: " + std::to_string(mNumDataLocations)));
 
         // In case we want to perform the reset later on, look-up the corresponding data field name
-        Foam::volVectorField const* cellDisplacement = nullptr;
-        if (mesh.foundObject<volVectorField>(nameCellDisplacement))
-            cellDisplacement =
-                &mesh.lookupObject<volVectorField>(nameCellDisplacement);
+        Foam::volVectorField const* cell_displacement = nullptr;
+        if (Mesh.foundObject<volVectorField>(NameCellDisplacement))
+            cell_displacement =
+                &Mesh.lookupObject<volVectorField>(NameCellDisplacement);
 
-        // Array of the mesh vertices.
-        // One mesh is used for all the patches and each vertex has 3D coordinates.
-        std::vector<double> vertices(dim_ * numDataLocations_);
+        // Array of the Mesh vertices.
+        // One Mesh is used for all the patches and each vertex has 3D coordinates.
+        std::vector<double> vertices(mDim * mNumDataLocations);
 
-        // Array of the indices of the mesh vertices.
+        // Array of the indices of the Mesh vertices.
         // Each vertex has one index, but three coordinates.
-        vertexIDs_.resize(numDataLocations_);
+        mVertexIDs.resize(mNumDataLocations);
 
         // Initialize the index of the vertices array
-        int verticesIndex = 0;
+        int vertices_index = 0;
 
-        // Get the locations of the mesh vertices (here: face centers)
+        // Get the locations of the Mesh vertices (here: face centers)
         // for all the patches
         int node_id = 1;
-        for (uint j = 0; j < patchIDs_.size(); j++)
+        for (uint j = 0; j < mPatchIDs.size(); j++)
         {
             // Get the face centers of the current patch
-            vectorField faceCenters =
-                mesh.boundaryMesh()[patchIDs_.at(j)].faceCentres();
+            vectorField FaceCenters =
+                Mesh.boundaryMesh()[mPatchIDs.at(j)].faceCentres();
 
-            // Move the interface according to the current values of the cellDisplacement field,
+            // Move the interface according to the current values of the cell_displacement field,
             // to account for any displacements accumulated before restarting the simulation.
             // This is information that OpenFOAM reads from its result/restart files.
             // If the simulation is not restarted, the displacement should be zero and this line should have no effect.
-            if (cellDisplacement != nullptr && !restartFromDeformed_)
-                faceCenters -= cellDisplacement->boundaryField()[patchIDs_.at(j)];
+            if (cell_displacement != nullptr && !mRestartFromDeformed)
+                FaceCenters -= cell_displacement->boundaryField()[mPatchIDs.at(j)];
 
             // Assign the (x,y,z) locations to the vertices
             // id = 0
-            for (int i = 0; i < faceCenters.size(); i++){
-                for (unsigned int d = 0; d < dim_; ++d)
+            for (int i = 0; i < FaceCenters.size(); i++){
+                for (unsigned int d = 0; d < mDim; ++d)
                 {
-                    vertices[verticesIndex++] = faceCenters[i][d];
+                    vertices[vertices_index++] = FaceCenters[i][d];
                 }
 
-                vertexIDs_[node_id - 1] = node_id;
+                mVertexIDs[node_id - 1] = node_id;
 
                 mpModelPart->CreateNewNode(
                     node_id,
-                    faceCenters[i][0],
-                    faceCenters[i][1],
-                    faceCenters[i][2]
+                    FaceCenters[i][0],
+                    FaceCenters[i][1],
+                    FaceCenters[i][2]
                 );
 
                 node_id++;
@@ -160,40 +163,40 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
 
             // Check if we are in the right layer in case of preCICE dimension 2
             // If there is at least one node with a different z-coordinate, then the (2D) geometry is not on the xy-plane, as required.
-            if (dim_ == 2)
+            if (mDim == 2)
             {
-                const pointField faceNodes =
-                    mesh.boundaryMesh()[patchIDs_.at(j)].localPoints();
-                const auto faceNodesSize = faceNodes.size();
+                const pointField FaceNodes =
+                    Mesh.boundaryMesh()[mPatchIDs.at(j)].localPoints();
+                const auto FaceNodesSize = FaceNodes.size();
                 //Allocate memory for z-coordinates
                 std::array<double, 2> z_location({0, 0});
                 constexpr unsigned int z_axis = 2;
 
                 // Find out about the existing planes
                 // Store z-coordinate of the first layer
-                if (faceNodesSize > 0)
+                if (FaceNodesSize > 0)
                 {
-                    z_location[0] = faceNodes[0][z_axis];
+                    z_location[0] = FaceNodes[0][z_axis];
                 }
                 // Go through the remaining points until we find the second z-coordinate
                 // and store it (there are only two allowed in case we are in the xy-layer)
-                for (int i = 0; i < faceNodesSize; i++)
+                for (int i = 0; i < FaceNodesSize; i++)
                 {
-                    if (z_location[0] == faceNodes[i][z_axis])
+                    if (z_location[0] == FaceNodes[i][z_axis])
                     {
                         continue;
                     }
                     else
                     {
-                        z_location[1] = faceNodes[i][z_axis];
+                        z_location[1] = FaceNodes[i][z_axis];
                         break;
                     }
                 }
 
                 // Check if the z-coordinates of all nodes match the z-coordinates we have collected above
-                for (int i = 0; i < faceNodesSize; i++)
+                for (int i = 0; i < FaceNodesSize; i++)
                 {
-                    if (z_location[0] == faceNodes[i][z_axis] || z_location[1] == faceNodes[i][z_axis])
+                    if (z_location[0] == FaceNodes[i][z_axis] || z_location[1] == FaceNodes[i][z_axis])
                     {
                         continue;
                     }
@@ -209,8 +212,15 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
             }
         }
 
-        // Pass the mesh vertices information to preCICE
-        //mPrecice.setMeshVertices(mMeshName, vertices, vertexIDs_);
+        std::cout << "OPENFOAM: before Mesh export, sleeping..." << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+
+        std::cout << "OPENFOAM: now exporting Mesh" << std::endl;
+
+
+        // Pass the Mesh vertices information to preCICE
+        //mPrecice.setMeshVertices(mMeshName, vertices, mVertexIDs);
         // For CoSimIO
         mInfo.Clear();
         mInfo.Set("identifier", mMeshName);
@@ -218,74 +228,74 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         auto export_info = CoSimIO::ExportMesh(mInfo, *mpModelPart);
         std::cout << "ExportMesh succesful!";
     }
-    else if (mLocationType == LocationType::faceNodes)
+    else if (mLocationType == LocationType::FaceNodes)
     {
         // Count the data locations for all the patches
-        for (uint j = 0; j < patchIDs_.size(); j++)
+        for (uint j = 0; j < mPatchIDs.size(); j++)
         {
-            numDataLocations_ +=
-                mesh.boundaryMesh()[patchIDs_.at(j)].localPoints().size();
+            mNumDataLocations +=
+                Mesh.boundaryMesh()[mPatchIDs.at(j)].localPoints().size();
         }
-        DEBUG(adapterInfo("Number of face nodes: " + std::to_string(numDataLocations_)));
+        DEBUG(adapterInfo("Number of face nodes: " + std::to_string(mNumDataLocations)));
 
         // In case we want to perform the reset later on, look-up the corresponding data field name
         Foam::pointVectorField const* pointDisplacement = nullptr;
-        if (mesh.foundObject<pointVectorField>(namePointDisplacement))
+        if (Mesh.foundObject<pointVectorField>(NamePointDisplacement))
             pointDisplacement =
-                &mesh.lookupObject<pointVectorField>(namePointDisplacement);
+                &Mesh.lookupObject<pointVectorField>(NamePointDisplacement);
 
-        // Array of the mesh vertices.
-        // One mesh is used for all the patches and each vertex has 3D coordinates.
-        std::vector<double> vertices(dim_ * numDataLocations_);
+        // Array of the Mesh vertices.
+        // One Mesh is used for all the patches and each vertex has 3D coordinates.
+        std::vector<double> vertices(mDim * mNumDataLocations);
 
-        // Array of the indices of the mesh vertices.
+        // Array of the indices of the Mesh vertices.
         // Each vertex has one index, but three coordinates.
-        vertexIDs_.resize(numDataLocations_);
+        mVertexIDs.resize(mNumDataLocations);
 
         // Initialize the index of the vertices array
-        int verticesIndex = 0;
+        int vertices_index = 0;
 
         // Map between OpenFOAM vertices and preCICE vertex IDs
         std::map<std::tuple<double, double, double>, int> verticesMap;
 
-        // Get the locations of the mesh vertices (here: face nodes)
+        // Get the locations of the Mesh vertices (here: face nodes)
         // for all the patches
         int node_id = 1;
-        for (uint j = 0; j < patchIDs_.size(); j++)
+        for (uint j = 0; j < mPatchIDs.size(); j++)
         {
             // Get the face nodes of the current patch
             // TODO: Check if this is correct.
             // TODO: Check if this behaves correctly in parallel.
             // TODO: Check if this behaves correctly with multiple, connected patches.
             // TODO: Maybe this should be a pointVectorField?
-            pointField faceNodes =
-                mesh.boundaryMesh()[patchIDs_.at(j)].localPoints();
+            pointField FaceNodes =
+                Mesh.boundaryMesh()[mPatchIDs.at(j)].localPoints();
 
             // Similar to the cell displacement above:
-            // Move the interface according to the current values of the cellDisplacement field,
+            // Move the interface according to the current values of the cell_displacement field,
             // to account for any displacements accumulated before restarting the simulation.
             // This is information that OpenFOAM reads from its result/restart files.
             // If the simulation is not restarted, the displacement should be zero and this line should have no effect.
-            if (pointDisplacement != nullptr && !restartFromDeformed_)
+            if (pointDisplacement != nullptr && !mRestartFromDeformed)
             {
                 const vectorField& resetField = refCast<const vectorField>(
-                    pointDisplacement->boundaryField()[patchIDs_.at(j)]);
-                faceNodes -= resetField;
+                    pointDisplacement->boundaryField()[mPatchIDs.at(j)]);
+                FaceNodes -= resetField;
             }
 
             // Assign the (x,y,z) locations to the vertices
             // TODO: Ensure consistent order when writing/reading
-            for (int i = 0; i < faceNodes.size(); i++)
+            for (int i = 0; i < FaceNodes.size(); i++)
             {
-                for (unsigned int d = 0; d < dim_; ++d)
+                for (unsigned int d = 0; d < mDim; ++d)
                 {
-                    vertices[verticesIndex++] = faceNodes[i][d];
+                    vertices[vertices_index++] = FaceNodes[i][d];
                 }
 
-                vertexIDs_[node_id - 1] = node_id;
+                mVertexIDs[node_id - 1] = node_id;
                 
-                // Pass the mesh vertices informtion to CoSimIO
-                mpModelPart->CreateNewNode( node_id, faceNodes[i][0], faceNodes[i][1], faceNodes[i][2]);
+                // Pass the Mesh vertices informtion to CoSimIO
+                mpModelPart->CreateNewNode( node_id, FaceNodes[i][0], FaceNodes[i][1], FaceNodes[i][2]);
 
                 node_id++;
             }
@@ -300,17 +310,17 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
         //exit(0);
         //debugInfo( "Finished Exporting interface Mesh " +  mMeshName + " to Kratos as a ModelPart "  , debugLevel);
 
-        // Pass the mesh vertices information to preCICE
-        //mPrecice.setMeshVertices(mMeshName, vertices, vertexIDs_);
+        // Pass the Mesh vertices information to preCICE
+        //mPrecice.setMeshVertices(mMeshName, vertices, mVertexIDs);
 
-        if (meshConnectivity_)
+        if (mMeshConnectivity)
         {
-            for (std::size_t i = 0; i < vertexIDs_.size(); ++i)
+            for (std::size_t i = 0; i < mVertexIDs.size(); ++i)
             {
-                verticesMap.emplace(std::make_tuple(vertices[3 * i], vertices[3 * i + 1], vertices[3 * i + 2]), vertexIDs_[i]);
+                verticesMap.emplace(std::make_tuple(vertices[3 * i], vertices[3 * i + 1], vertices[3 * i + 2]), mVertexIDs[i]);
             }
 
-            for (uint j = 0; j < patchIDs_.size(); j++)
+            for (uint j = 0; j < mPatchIDs.size(); j++)
             {
                 // Define triangles
                 // This is done in the following way:
@@ -330,14 +340,14 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 const int nodesPerTria = 3;
 
                 // Get the list of faces and coordinates at the interface patch
-                const List<face> faceField = mesh.boundaryMesh()[patchIDs_.at(j)].localFaces();
-                Field<point> pointCoords = mesh.boundaryMesh()[patchIDs_.at(j)].localPoints();
+                const List<face> faceField = Mesh.boundaryMesh()[mPatchIDs.at(j)].localFaces();
+                Field<point> pointCoords = Mesh.boundaryMesh()[mPatchIDs.at(j)].localPoints();
 
                 // Subtract the displacement part in case we have deformation
-                if (pointDisplacement != nullptr && !restartFromDeformed_)
+                if (pointDisplacement != nullptr && !mRestartFromDeformed)
                 {
                     const vectorField& resetField = refCast<const vectorField>(
-                        pointDisplacement->boundaryField()[patchIDs_.at(j)]);
+                        pointDisplacement->boundaryField()[mPatchIDs.at(j)]);
                     pointCoords -= resetField;
                 }
 
@@ -346,7 +356,7 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 triVertIDs.reserve(faceField.size() * triaPerQuad * nodesPerTria);
 
                 // Triangulate all faces and collect set of nodes that form triangles,
-                // which are used to set mesh triangles in preCICE.
+                // which are used to set Mesh triangles in preCICE.
                 forAll(faceField, facei)
                 {
                     const face& faceQuad = faceField[facei];
@@ -372,56 +382,56 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
             }
         }
     }
-    else if (mLocationType == LocationType::volumeCenters)
+    else if (mLocationType == LocationType::VolumeCenters)
     {
-        // The volume coupling implementation considers the mesh points in the volume and
+        // The volume coupling implementation considers the Mesh points in the volume and
         // on the boundary patches in order to take the boundary conditions into account
 
         // Get the cell labels of the overlapping region
         std::vector<labelList> overlapCells;
 
-        if (!cellSetNames_.empty())
+        if (!mCellSetNames.empty())
         {
             // For every cellSet that participates in the coupling
-            for (uint j = 0; j < cellSetNames_.size(); j++)
+            for (uint j = 0; j < mCellSetNames.size(); j++)
             {
                 // Create a cell set
-                cellSet overlapRegion(mesh, cellSetNames_[j]);
+                cellSet overlapRegion(Mesh, mCellSetNames[j]);
 
                 // Add the cells IDs to the vector and count how many overlap cells the interface has
                 overlapCells.push_back(overlapRegion.toc());
-                numDataLocations_ += overlapCells[j].size();
+                mNumDataLocations += overlapCells[j].size();
             }
         }
         else
         {
-            numDataLocations_ = mesh.C().size();
+            mNumDataLocations = Mesh.C().size();
         }
 
         // Count the data locations for all the patches
-        // and add those to the previously determined number of mesh points in the volume
-        for (uint j = 0; j < patchIDs_.size(); j++)
+        // and add those to the previously determined number of Mesh points in the volume
+        for (uint j = 0; j < mPatchIDs.size(); j++)
         {
-            numDataLocations_ +=
-                mesh.boundaryMesh()[patchIDs_.at(j)].faceCentres().size();
+            mNumDataLocations +=
+                Mesh.boundaryMesh()[mPatchIDs.at(j)].faceCentres().size();
         }
-        DEBUG(adapterInfo("Number of coupling volumes: " + std::to_string(numDataLocations_)));
+        DEBUG(adapterInfo("Number of coupling volumes: " + std::to_string(mNumDataLocations)));
 
-        // Array of the mesh vertices.
-        // One mesh is used for all the patches and each vertex has 3D coordinates.
-        std::vector<double> vertices(dim_ * numDataLocations_);
+        // Array of the Mesh vertices.
+        // One Mesh is used for all the patches and each vertex has 3D coordinates.
+        std::vector<double> vertices(mDim * mNumDataLocations);
 
-        // Array of the indices of the mesh vertices.
+        // Array of the indices of the Mesh vertices.
         // Each vertex has one index, but three coordinates.
-        vertexIDs_.resize(numDataLocations_);
+        mVertexIDs.resize(mNumDataLocations);
 
         // Initialize the index of the vertices array
-        int verticesIndex = 1;
+        int vertices_index = 1;
 
-        if (!cellSetNames_.empty())
+        if (!mCellSetNames.empty())
         {
             // for all the overlapping cells (cellSets)
-            for (uint j = 0; j < cellSetNames_.size(); j++)
+            for (uint j = 0; j < mCellSetNames.size(); j++)
             {
                 // Get the cell centres of the current cellSet.
                 const labelList& cells = overlapCells.at(j);
@@ -429,59 +439,59 @@ void preciceAdapter::Interface::configureMesh(const fvMesh& mesh, const std::str
                 // Get the coordinates of the cells of the current cellSet.
                 for (int i = 0; i < cells.size(); i++)
                 {
-                    // vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].x();
-                    // vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].y();
-                    // if (dim_ == 3)
+                    // vertices[vertices_index++] = Mesh.C().internalField()[cells[i]].x();
+                    // vertices[vertices_index++] = Mesh.C().internalField()[cells[i]].y();
+                    // if (mDim == 3)
                     // {
-                    //     vertices[verticesIndex++] = mesh.C().internalField()[cells[i]].z();
+                    //     vertices[vertices_index++] = Mesh.C().internalField()[cells[i]].z();
                     // }
-                    mpModelPart->CreateNewNode( verticesIndex, mesh.C().internalField()[cells[i]].x(), mesh.C().internalField()[cells[i]].y(), mesh.C().internalField()[cells[i]].z());
-                    verticesIndex++;
+                    mpModelPart->CreateNewNode( vertices_index, Mesh.C().internalField()[cells[i]].x(), Mesh.C().internalField()[cells[i]].y(), Mesh.C().internalField()[cells[i]].z());
+                    vertices_index++;
                 }
             }
         }
         else
         {
-            const vectorField& CellCenters = mesh.C();
+            const vectorField& CellCenters = Mesh.C();
 
             for (int i = 0; i < CellCenters.size(); i++)
             {
-                vertices[verticesIndex++] = CellCenters[i].x();
-                vertices[verticesIndex++] = CellCenters[i].y();
-                if (dim_ == 3)
+                vertices[vertices_index++] = CellCenters[i].x();
+                vertices[vertices_index++] = CellCenters[i].y();
+                if (mDim == 3)
                 {
-                    vertices[verticesIndex++] = CellCenters[i].z();
+                    vertices[vertices_index++] = CellCenters[i].z();
                 }
             }
         }
 
-        // Get the locations of the mesh vertices (here: face centers)
+        // Get the locations of the Mesh vertices (here: face centers)
         // for all the patches
-        for (uint j = 0; j < patchIDs_.size(); j++)
+        for (uint j = 0; j < mPatchIDs.size(); j++)
         {
             // Get the face centers of the current patch
-            const vectorField faceCenters =
-                mesh.boundaryMesh()[patchIDs_.at(j)].faceCentres();
+            const vectorField FaceCenters =
+                Mesh.boundaryMesh()[mPatchIDs.at(j)].faceCentres();
 
             // Assign the (x,y,z) locations to the vertices
-            for (int i = 0; i < faceCenters.size(); i++)
+            for (int i = 0; i < FaceCenters.size(); i++)
             {
-                vertices[verticesIndex++] = faceCenters[i].x();
-                vertices[verticesIndex++] = faceCenters[i].y();
-                if (dim_ == 3)
+                vertices[vertices_index++] = FaceCenters[i].x();
+                vertices[vertices_index++] = FaceCenters[i].y();
+                if (mDim == 3)
                 {
-                    vertices[verticesIndex++] = faceCenters[i].z();
+                    vertices[vertices_index++] = FaceCenters[i].z();
                 }
             }
         }
 
-        // Pass the mesh vertices information to preCICE
-        //recice_.setMeshVertices(mMeshName, vertices, vertexIDs_);
+        // Pass the Mesh vertices information to preCICE
+        //recice_.setMeshVertices(mMeshName, vertices, mVertexIDs);
     }
 }
 
 
-void preciceAdapter::Interface::addCouplingDataWriter(
+void preciceAdapter::Interface::AddCouplingDataWriter(
     const FieldConfig& fieldConfig,
     CouplingDataUser* couplingDataWriter)
 {
@@ -492,26 +502,26 @@ void preciceAdapter::Interface::addCouplingDataWriter(
     couplingDataWriter->setFlipNormal(fieldConfig.flip_normal);
 
     // Set the patchIDs of the patches that form the interface
-    couplingDataWriter->setPatchIDs(patchIDs_);
+    couplingDataWriter->setPatchIDs(mPatchIDs);
 
     // Set the names of the cell sets to be coupled (for volume coupling)
-    couplingDataWriter->setCellSetNames(cellSetNames_);
+    couplingDataWriter->setCellSetNames(mCellSetNames);
 
     // Set the location type in the CouplingDataUser class
     couplingDataWriter->setLocationsType(mLocationType);
 
     // Set the location type in the CouplingDataUser class
-    couplingDataWriter->checkDataLocation(meshConnectivity_);
+    couplingDataWriter->checkDataLocation(mMeshConnectivity);
 
     // Initilaize class specific data
     couplingDataWriter->initialize();
 
     // Add the CouplingDataUser to the list of writers
-    couplingDataWriters_.push_back(couplingDataWriter);
+    mCouplingDataWriters.push_back(couplingDataWriter);
 }
 
 
-void preciceAdapter::Interface::addCouplingDataReader(
+void preciceAdapter::Interface::AddCouplingDataReader(
     const FieldConfig& fieldConfig,
     preciceAdapter::CouplingDataUser* couplingDataReader)
 {
@@ -522,43 +532,43 @@ void preciceAdapter::Interface::addCouplingDataReader(
     couplingDataReader->setFlipNormal(fieldConfig.flip_normal);
 
     // Add the CouplingDataUser to the list of readers
-    couplingDataReader->setPatchIDs(patchIDs_);
+    couplingDataReader->setPatchIDs(mPatchIDs);
 
     // Set the location type in the CouplingDataUser class
     couplingDataReader->setLocationsType(mLocationType);
 
     // Set the names of the cell sets to be coupled (for volume coupling)
-    couplingDataReader->setCellSetNames(cellSetNames_);
+    couplingDataReader->setCellSetNames(mCellSetNames);
 
     // Check, if the current location type is supported by the data type
-    couplingDataReader->checkDataLocation(meshConnectivity_);
+    couplingDataReader->checkDataLocation(mMeshConnectivity);
 
     // Initilaize class specific data
     couplingDataReader->initialize();
 
     // Add the CouplingDataUser to the list of readers
-    couplingDataReaders_.push_back(couplingDataReader);
+    mCouplingDataReaders.push_back(couplingDataReader);
 }
 
-void preciceAdapter::Interface::createBuffer()
+void preciceAdapter::Interface::CreateBuffer()
 {
     // Will the interface buffer need to store 3D vector data?
     bool needsVectorData = false;
     int dataBufferSize = 0;
 
     // Check all the coupling data readers
-    for (uint i = 0; i < couplingDataReaders_.size(); i++)
+    for (uint i = 0; i < mCouplingDataReaders.size(); i++)
     {
-        if (couplingDataReaders_.at(i)->hasVectorData())
+        if (mCouplingDataReaders.at(i)->hasVectorData())
         {
             needsVectorData = true;
         }
     }
 
     // Check all the coupling data writers
-    for (uint i = 0; i < couplingDataWriters_.size(); i++)
+    for (uint i = 0; i < mCouplingDataWriters.size(); i++)
     {
-        if (couplingDataWriters_.at(i)->hasVectorData())
+        if (mCouplingDataWriters.at(i)->hasVectorData())
         {
             needsVectorData = true;
         }
@@ -567,39 +577,39 @@ void preciceAdapter::Interface::createBuffer()
     // Set the appropriate buffer size
     if (needsVectorData)
     {
-        dataBufferSize = dim_ * numDataLocations_;
+        dataBufferSize = mDim * mNumDataLocations;
     }
     else
     {
-        dataBufferSize = numDataLocations_;
+        dataBufferSize = mNumDataLocations;
     }
 
     // Create the data buffer
     // An interface has only one data buffer, which is shared between several
     // CouplingDataUsers.
-    dataBuffer_.resize(dataBufferSize);
+    mDataBuffer.resize(dataBufferSize);
 }
 
-void preciceAdapter::Interface::readCouplingData(double relativeReadTime)
+void preciceAdapter::Interface::ReadCouplingData(double relativeReadTime)
 {
     // Make every coupling data reader read
-    for (uint i = 0; i < couplingDataReaders_.size(); i++)
+    for (uint i = 0; i < mCouplingDataReaders.size(); i++)
     {
         // Pointer to the current reader
         preciceAdapter::CouplingDataUser*
-            couplingDataReader = couplingDataReaders_.at(i);
+            couplingDataReader = mCouplingDataReaders.at(i);
 
         // Make preCICE read vector or scalar data
         // and fill the adapter's buffer
-        std::size_t nReadData = vertexIDs_.size() * mPrecice.getDataDimensions(mMeshName, couplingDataReader->dataName());
+        std::size_t nReadData = mVertexIDs.size() * mPrecice.getDataDimensions(mMeshName, couplingDataReader->dataName());
         // We could add a sanity check here
-        // nReadData == vertexIDs_.size() * (1 + (dim_ - 1) * static_cast<int>(couplingDataReader->hasVectorData()));
+        // nReadData == mVertexIDs.size() * (1 + (mDim - 1) * static_cast<int>(couplingDataReader->hasVectorData()));
 
-        precice::span<double> dataSpanRead {dataBuffer_.data(), nReadData};
+        precice::span<double> dataSpanRead {mDataBuffer.data(), nReadData};
         mPrecice.readData(
             mMeshName,
             couplingDataReader->dataName(),
-            vertexIDs_,
+            mVertexIDs,
             relativeReadTime,
             dataSpanRead);
 
@@ -607,37 +617,37 @@ void preciceAdapter::Interface::readCouplingData(double relativeReadTime)
         couplingDataReader->applyFlipNormal(dataSpanRead);
 
         // Read the received data from the buffer
-        couplingDataReader->read(dataBuffer_.data(), dim_);
+        couplingDataReader->read(mDataBuffer.data(), mDim);
     }
 }
 
-void preciceAdapter::Interface::writeCouplingData()
+void preciceAdapter::Interface::WriteCouplingData()
 {
-    std::cout << "INSIDE writeCouplingData()" << std::endl;
+    std::cout << "INSIDE WriteCouplingData()" << std::endl;
 
     std::cout << "Number of writers = "
-              << couplingDataWriters_.size()
+              << mCouplingDataWriters.size()
               << std::endl;
               
     // Make every coupling data writer write
-    for (uint i = 0; i < couplingDataWriters_.size(); i++)
+    for (uint i = 0; i < mCouplingDataWriters.size(); i++)
     {
         // Pointer to the current reader
         preciceAdapter::CouplingDataUser*
-            couplingDataWriter = couplingDataWriters_.at(i);
+            couplingDataWriter = mCouplingDataWriters.at(i);
 
         // Write the data into the adapter's buffer
-        auto nWrittenData = couplingDataWriter->write(dataBuffer_.data(), meshConnectivity_, dim_);
+        auto nWrittenData = couplingDataWriter->write(mDataBuffer.data(), mMeshConnectivity, mDim);
 
-        precice::span<double> dataSpanWritten {dataBuffer_.data(), nWrittenData};
+        precice::span<double> dataSpanWritten {mDataBuffer.data(), nWrittenData};
 
         // Apply flip normal if required
         couplingDataWriter->applyFlipNormal(dataSpanWritten);
 
         // Convert span/buffer into std::vector<double> for CoSimIO
         std::vector<double> data_to_send(
-            dataBuffer_.begin(),
-            dataBuffer_.begin() + nWrittenData
+            mDataBuffer.begin(),
+            mDataBuffer.begin() + nWrittenData
         );
         
         std::cout << data_to_send.size() << std::endl;
@@ -659,7 +669,7 @@ void preciceAdapter::Interface::writeCouplingData()
         // mPrecice.writeData(
         //     mMeshName,
         //     couplingDataWriter->dataName(),
-        //     vertexIDs_,
+        //     mVertexIDs,
         //     dataSpanWritten);
     }
 }
@@ -667,16 +677,16 @@ void preciceAdapter::Interface::writeCouplingData()
 preciceAdapter::Interface::~Interface()
 {
     // Delete all the coupling data readers
-    for (uint i = 0; i < couplingDataReaders_.size(); i++)
+    for (uint i = 0; i < mCouplingDataReaders.size(); i++)
     {
-        delete couplingDataReaders_.at(i);
+        delete mCouplingDataReaders.at(i);
     }
-    couplingDataReaders_.clear();
+    mCouplingDataReaders.clear();
 
     // Delete all the coupling data writers
-    for (uint i = 0; i < couplingDataWriters_.size(); i++)
+    for (uint i = 0; i < mCouplingDataWriters.size(); i++)
     {
-        delete couplingDataWriters_.at(i);
+        delete mCouplingDataWriters.at(i);
     }
-    couplingDataWriters_.clear();
+    mCouplingDataWriters.clear();
 }

@@ -75,6 +75,8 @@ private:
     //- Member variables required for CoSimIO
     std::string mConnectionName;
 
+    bool mStrongCoupling = false;
+
     //- OpenFOAM runTime object
     const Foam::Time& mRunTime;
 

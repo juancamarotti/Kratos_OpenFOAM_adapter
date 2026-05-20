@@ -24,7 +24,7 @@ std::size_t preciceAdapter::FF::PressureGradientFull::write(double* buffer, bool
     int bufferIndex = 0;
     gradP_ = fvc::grad(*p_);
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -123,7 +123,7 @@ void preciceAdapter::FF::PressureGradientFull::read(double* buffer, const unsign
 
 bool preciceAdapter::FF::PressureGradientFull::isLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::volumeCenters);
+    return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
 }
 
 std::string preciceAdapter::FF::PressureGradientFull::getDataName() const

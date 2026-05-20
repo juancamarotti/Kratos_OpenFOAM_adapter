@@ -64,7 +64,7 @@ void preciceAdapter::FF::TemperatureGradient::read(double* buffer, const unsigne
 
 bool preciceAdapter::FF::TemperatureGradient::isLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::faceCenters);
+    return (this->locationType_ == LocationType::FaceCenters);
 }
 
 std::string preciceAdapter::FF::TemperatureGradient::getDataName() const

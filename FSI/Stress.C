@@ -39,7 +39,7 @@ bool preciceAdapter::FSI::Stress::isLocationTypeSupported(const bool meshConnect
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters);
+        return (this->locationType_ == LocationType::FaceCenters);
     }
 }
 

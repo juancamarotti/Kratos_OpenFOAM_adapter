@@ -55,7 +55,7 @@ void preciceAdapter::FSI::Force::read(double* buffer, const unsigned int dim)
         // Get the ID of the current patch
         const unsigned int patchID = patchIDs_.at(j);
 
-        if (this->locationType_ == LocationType::faceCenters)
+        if (this->locationType_ == LocationType::FaceCenters)
         {
             // Make a force field
             vectorField& force = Force_->boundaryFieldRef()[patchID];
@@ -67,12 +67,12 @@ void preciceAdapter::FSI::Force::read(double* buffer, const unsigned int dim)
                     force[i][d] = buffer[bufferIndex++];
             }
         }
-        else if (this->locationType_ == LocationType::faceNodes)
+        else if (this->locationType_ == LocationType::FaceNodes)
         {
             // Here we could easily interpolate the face values to point values
             // and assign them to some field, but I guess there is no need
             // unless it will be used
-            notImplemented("Read forces not implemented for faceNodes!");
+            notImplemented("Read forces not implemented for FaceNodes!");
         }
     }
 }
@@ -85,7 +85,7 @@ bool preciceAdapter::FSI::Force::isLocationTypeSupported(const bool meshConnecti
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters);
+        return (this->locationType_ == LocationType::FaceCenters);
     }
 }
 

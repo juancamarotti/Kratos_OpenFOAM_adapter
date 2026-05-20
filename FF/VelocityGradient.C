@@ -97,7 +97,7 @@ void preciceAdapter::FF::VelocityGradient::read(double* buffer, const unsigned i
 
 bool preciceAdapter::FF::VelocityGradient::isLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::faceCenters);
+    return (this->locationType_ == LocationType::FaceCenters);
 }
 
 std::string preciceAdapter::FF::VelocityGradient::getDataName() const

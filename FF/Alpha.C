@@ -16,7 +16,7 @@ std::size_t preciceAdapter::FF::Alpha::write(double* buffer, bool meshConnectivi
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -61,7 +61,7 @@ void preciceAdapter::FF::Alpha::read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -106,7 +106,7 @@ bool preciceAdapter::FF::Alpha::isLocationTypeSupported(const bool meshConnectiv
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::volumeCenters);
+        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
     }
 }
 

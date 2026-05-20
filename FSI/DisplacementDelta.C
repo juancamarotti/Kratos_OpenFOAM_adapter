@@ -23,7 +23,7 @@ void preciceAdapter::FSI::DisplacementDelta::initialize()
 {
     // Initialize appropriate objects for each interface patch, namely the volField and the interpolation object
     // this is only necessary for face based FSI
-    if (this->locationType_ == LocationType::faceCenters)
+    if (this->locationType_ == LocationType::FaceCenters)
     {
         for (unsigned int j = 0; j < patchIDs_.size(); ++j)
         {
@@ -54,7 +54,7 @@ void preciceAdapter::FSI::DisplacementDelta::read(double* buffer, const unsigned
         // Get the ID of the current patch
         const unsigned int patchID = patchIDs_.at(j);
 
-        if (this->locationType_ == LocationType::faceCenters)
+        if (this->locationType_ == LocationType::FaceCenters)
         {
 
             // the boundaryCellDisplacement is a vector and ordered according to the iterator j
@@ -76,7 +76,7 @@ void preciceAdapter::FSI::DisplacementDelta::read(double* buffer, const unsigned
             // Afterwards, continue as usual
             pointDisplacementFluidPatch += interpolationObjects_[j]->faceToPointInterpolate(cellDisplacement_->boundaryField()[patchID]);
         }
-        else if (this->locationType_ == LocationType::faceNodes)
+        else if (this->locationType_ == LocationType::FaceNodes)
         {
 
             // Get the displacement on the patch
@@ -99,11 +99,11 @@ bool preciceAdapter::FSI::DisplacementDelta::isLocationTypeSupported(const bool 
     // Solid solver *could* allow connectivity for writing displacement
     if (meshConnectivity)
     {
-        return (this->locationType_ == LocationType::faceNodes);
+        return (this->locationType_ == LocationType::FaceNodes);
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::faceNodes);
+        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::FaceNodes);
     }
 }
 

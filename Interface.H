@@ -43,48 +43,48 @@ protected:
     //- Mesh name used in the preCICE configuration
     std::string mMeshName;
 
-    //- Point locations type (faceCenters vs faceNodes)
+    //- Point locations type (FaceCenters vs FaceNodes)
     LocationType mLocationType {LocationType::none};
 
     //- Mesh ID assigned by preCICE to the interface
     int mMeshID;
 
     //- Names of the OpenFOAM patches that form the interface
-    std::vector<std::string> patchNames_;
+    std::vector<std::string> mPatchNames;
 
     //- OpenFOAM patches that form the interface
-    std::vector<int> patchIDs_;
+    std::vector<int> mPatchIDs;
 
     //- Names of the OpenFOAM cell sets to be coupled (for volume coupling)
-    std::vector<std::string> cellSetNames_;
+    std::vector<std::string> mCellSetNames;
 
     //- Number of data points (cell centers) on the interface
-    int numDataLocations_ = 0;
+    int mNumDataLocations = 0;
 
     //- Vertex IDs assigned by preCICE
-    std::vector<int> vertexIDs_;
+    std::vector<int> mVertexIDs;
 
     //- Buffer for the coupling data
-    std::vector<double> dataBuffer_;
+    std::vector<double> mDataBuffer;
 
     //- Vector of CouplingDataReaders
-    std::vector<CouplingDataUser*> couplingDataReaders_;
+    std::vector<CouplingDataUser*> mCouplingDataReaders;
 
     //- Vector of CouplingDataWriters
-    std::vector<CouplingDataUser*> couplingDataWriters_;
+    std::vector<CouplingDataUser*> mCouplingDataWriters;
 
     //Switch for faceTriangulation (nearest projection)
-    bool meshConnectivity_;
+    bool mMeshConnectivity;
 
     //- Reset the displacement during interface definition
-    bool restartFromDeformed_;
+    bool mRestartFromDeformed;
 
     // Simulation dimension
-    unsigned int dim_;
+    unsigned int mDim;
 
     //- Extracts the locations of the face centers or face nodes
     //  and exposes them to preCICE with setMeshVertices
-    void configureMesh(const Foam::fvMesh& mesh,
+    void ConfigureMesh(const Foam::fvMesh& mesh,
                        const std::string& namePointDisplacement,
                        const std::string& nameCellDisplacement);
 
@@ -104,28 +104,28 @@ public:
         std::string ConnectionName);
 
     //- Add a CouplingDataUser to read data from the interface
-    void addCouplingDataReader(
+    void AddCouplingDataReader(
         const FieldConfig& fieldConfig,
         CouplingDataUser* couplingDataReader);
 
 
     //- Add a CouplingDataUser to write data on the interface
-    void addCouplingDataWriter(
+    void AddCouplingDataWriter(
         const FieldConfig& fieldConfig,
         CouplingDataUser* couplingDataWriter);
 
     //- Allocate an appropriate buffer for scalar or vector data.
     //  If at least one couplingDataUser has vector data, then
     //  define a buffer for 3D data. Otherwise, for 1D data.
-    void createBuffer();
+    void CreateBuffer();
 
     //- Call read() on each registered couplingDataReader to read the coupling
     //  data from the buffer and apply the boundary conditions
-    void readCouplingData(double relativeReadTime);
+    void ReadCouplingData(double relativeReadTime);
 
     //- Call write() on each registered couplingDataWriter to extract the boundary
     //  data and write them into the buffer
-    void writeCouplingData();
+    void WriteCouplingData();
 
     //- Destructor
     ~Interface();

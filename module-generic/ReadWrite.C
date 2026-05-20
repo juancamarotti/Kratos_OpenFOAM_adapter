@@ -25,9 +25,9 @@ void preciceAdapter::Generic::ScalarFieldCoupler::initialize()
 {
     if (fieldConfig_.operation == "surface-normal-gradient")
     {
-        if (this->locationType_ != LocationType::faceCenters)
+        if (this->locationType_ != LocationType::FaceCenters)
         {
-            adapterInfo("Generic module: The surface-normal-gradient operation is only supported for faceCenters location type.", "error");
+            adapterInfo("Generic module: The surface-normal-gradient operation is only supported for FaceCenters location type.", "error");
         }
     }
 
@@ -61,7 +61,7 @@ std::size_t preciceAdapter::Generic::ScalarFieldCoupler::write(double* buffer, b
         return bufferIndex;
     }
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -125,7 +125,7 @@ void preciceAdapter::Generic::ScalarFieldCoupler::read(double* buffer, const uns
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -188,11 +188,11 @@ bool preciceAdapter::Generic::ScalarFieldCoupler::isLocationTypeSupported(const 
 {
     if (meshConnectivity)
     {
-        return (this->locationType_ == LocationType::faceNodes);
+        return (this->locationType_ == LocationType::FaceNodes);
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::volumeCenters);
+        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
     }
 }
 
@@ -228,7 +228,7 @@ std::size_t preciceAdapter::Generic::VectorFieldCoupler::write(double* buffer, b
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -300,7 +300,7 @@ void preciceAdapter::Generic::VectorFieldCoupler::read(double* buffer, const uns
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -394,7 +394,7 @@ bool preciceAdapter::Generic::VectorFieldCoupler::isLocationTypeSupported(const 
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::volumeCenters);
+        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
     }
 }
 

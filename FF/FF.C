@@ -133,70 +133,70 @@ bool preciceAdapter::FF::FluidFluid::addWriters(const preciceAdapter::FieldConfi
 
     if (matchingStrings(dataName, "VelocityGradient"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new VelocityGradient(mesh_, nameU_));
         DEBUG(adapterInfo("Added writer: Velocity Gradient."));
     }
     else if (matchingStrings(dataName, "Velocity"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Velocity(mesh_, nameU_, namePhi_, fluxCorrection_));
         DEBUG(adapterInfo("Added writer: Velocity."));
     }
     else if (matchingStrings(dataName, "PressureGradientFull"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new PressureGradientFull(mesh_, nameP_));
         DEBUG(adapterInfo("Added writer: Full Pressure Gradient."));
     }
     else if (matchingStrings(dataName, "PressureGradient"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new PressureGradient(mesh_, nameP_));
         DEBUG(adapterInfo("Added writer: Pressure Gradient."));
     }
     else if (matchingStrings(dataName, "Pressure"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Pressure(mesh_, nameP_));
         DEBUG(adapterInfo("Added writer: Pressure."));
     }
     else if (matchingStrings(dataName, "FlowTemperatureGradient"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new TemperatureGradient(mesh_, nameT_));
         DEBUG(adapterInfo("Added writer: Flow Temperature Gradient."));
     }
     else if (matchingStrings(dataName, "FlowTemperature"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Temperature(mesh_, nameT_));
         DEBUG(adapterInfo("Added writer: Flow Temperature."));
     }
     else if (matchingStrings(dataName, "AlphaGradient"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new AlphaGradient(mesh_, nameAlpha_));
         DEBUG(adapterInfo("Added writer: Alpha Gradient."));
     }
     else if (matchingStrings(dataName, "Alpha"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Alpha(mesh_, nameAlpha_));
         DEBUG(adapterInfo("Added writer: Alpha."));
     }
     else if (matchingStrings(dataName, "Phi"))
     {
-        interface->addCouplingDataWriter(
+        interface->AddCouplingDataWriter(
             fieldConfig,
             new Phi(mesh_, namePhi_));
         DEBUG(adapterInfo("Added writer: Phi."));
@@ -223,84 +223,84 @@ bool preciceAdapter::FF::FluidFluid::addReaders(const preciceAdapter::FieldConfi
 
     if (matchingStrings(dataName, "VelocityGradient"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new VelocityGradient(mesh_, nameU_));
         DEBUG(adapterInfo("Added reader: VelocityGradient."));
     }
     else if (matchingStrings(dataName, "Velocity"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Velocity(mesh_, nameU_, namePhi_));
         DEBUG(adapterInfo("Added reader: Velocity."));
     }
     else if (matchingStrings(dataName, "PressureGradient"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new PressureGradient(mesh_, nameP_));
         DEBUG(adapterInfo("Added reader: Pressure Gradient."));
     }
     else if (matchingStrings(dataName, "Pressure"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Pressure(mesh_, nameP_));
         DEBUG(adapterInfo("Added reader: Pressure."));
     }
     else if (matchingStrings(dataName, "FlowTemperatureGradient"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new TemperatureGradient(mesh_, nameT_));
         DEBUG(adapterInfo("Added reader: Flow Temperature Gradient."));
     }
     else if (matchingStrings(dataName, "FlowTemperature"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Temperature(mesh_, nameT_));
         DEBUG(adapterInfo("Added reader: Flow Temperature."));
     }
     else if (matchingStrings(dataName, "AlphaGradient"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new AlphaGradient(mesh_, nameAlpha_));
         DEBUG(adapterInfo("Added reader: Alpha Gradient."));
     }
     else if (matchingStrings(dataName, "Alpha"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Alpha(mesh_, nameAlpha_));
         DEBUG(adapterInfo("Added reader: Alpha."));
     }
     else if (matchingStrings(dataName, "Phi"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new Phi(mesh_, namePhi_));
         DEBUG(adapterInfo("Added reader: Phi."));
     }
     else if (matchingStrings(dataName, "DragForce"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new DragForce(mesh_, nameDragForce_));
         DEBUG(adapterInfo("Added reader: DragForce."));
     }
     else if (matchingStrings(dataName, "ExplicitMomentum"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new ExplicitMomentum(mesh_, nameExplicitMomentum_));
         DEBUG(adapterInfo("Added reader: ExplicitMomentum."));
     }
     else if (matchingStrings(dataName, "ImplicitMomentum"))
     {
-        interface->addCouplingDataReader(
+        interface->AddCouplingDataReader(
             fieldConfig,
             new ImplicitMomentum(mesh_, nameImplicitMomentum_));
         DEBUG(adapterInfo("Added reader: ImplicitMomentum."));

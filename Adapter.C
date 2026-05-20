@@ -158,17 +158,17 @@ void preciceAdapter::Adapter::ConfigFileRead()
                 interfaceConfig.MeshName = interfaceDict.get<word>("mesh");
                 DEBUG(adapterInfo("  - mesh         : " + interfaceConfig.MeshName));
 
-                // By default, assume "faceCenters" as LocationsType
-                interfaceConfig.LocationsType = interfaceDict.lookupOrDefault<word>("locations", "faceCenters");
+                // By default, assume "FaceCenters" as LocationsType
+                interfaceConfig.LocationsType = interfaceDict.lookupOrDefault<word>("locations", "FaceCenters");
                 DEBUG(adapterInfo("    locations    : " + interfaceConfig.LocationsType));
 
                 // By default, assume that no mesh connectivity is required (i.e. no nearest-projection mapping)
                 interfaceConfig.MeshConnectivity = interfaceDict.lookupOrDefault<bool>("connectivity", false);
-                // Mesh connectivity only makes sense in case of faceNodes, check and raise a warning otherwise
-                if (interfaceConfig.MeshConnectivity && (interfaceConfig.LocationsType == "faceCenters" || interfaceConfig.LocationsType == "volumeCenters" || interfaceConfig.LocationsType == "volumeCentres"))
+                // Mesh connectivity only makes sense in case of FaceNodes, check and raise a warning otherwise
+                if (interfaceConfig.MeshConnectivity && (interfaceConfig.LocationsType == "FaceCenters" || interfaceConfig.LocationsType == "VolumeCenters" || interfaceConfig.LocationsType == "VolumeCentres"))
                 {
-                    DEBUG(adapterInfo("Mesh connectivity is not supported for faceCenters or volumeCenters. \n"
-                                      "Please configure the desired interface with the LocationsType faceNodes. \n"
+                    DEBUG(adapterInfo("Mesh connectivity is not supported for FaceCenters or VolumeCenters. \n"
+                                      "Please configure the desired interface with the LocationsType FaceNodes. \n"
                                       "Have a look in the adapter documentation for detailed information.",
                                       "error"));
                     return;
@@ -192,10 +192,10 @@ void preciceAdapter::Adapter::ConfigFileRead()
                     DEBUG(adapterInfo("      - " + cellSet));
                 }
 
-                if (!interfaceConfig.CellSetNames.empty() && !(interfaceConfig.LocationsType == "volumeCenters" || interfaceConfig.LocationsType == "volumeCentres"))
+                if (!interfaceConfig.CellSetNames.empty() && !(interfaceConfig.LocationsType == "VolumeCenters" || interfaceConfig.LocationsType == "VolumeCentres"))
                 {
-                    adapterInfo("Cell sets are not supported for locationType != volumeCenters. \n"
-                                "Please configure the desired interface with the LocationsType volumeCenters. \n"
+                    adapterInfo("Cell sets are not supported for locationType != VolumeCenters. \n"
+                                "Please configure the desired interface with the LocationsType VolumeCenters. \n"
                                 "Have a look in the adapter documentation for detailed information.",
                                 "error");
                     return;
@@ -434,7 +434,7 @@ try
         } // end add coupling data readers
 
         // Create the interface's data buffer
-        interface->createBuffer();
+        interface->CreateBuffer();
     }
     ACCUMULATE_TIMER(time_in_mesh_setup);
     std::cout << "THE READERS AND WRITERS WERE CREATED SUCCESSFULLY" << std::endl;
@@ -596,7 +596,7 @@ void preciceAdapter::Adapter::ReadCouplingData(double relativeReadTime)
 
     for (uint i = 0; i < mInterfaces.size(); i++)
     {
-        mInterfaces.at(i)->readCouplingData(relativeReadTime);
+        mInterfaces.at(i)->ReadCouplingData(relativeReadTime);
     }
 
     ACCUMULATE_TIMER(time_in_read);
@@ -612,7 +612,7 @@ void preciceAdapter::Adapter::WriteCouplingData()
     for (uint i = 0; i < mInterfaces.size(); i++)
     {
         std::cout << "EXPORTING LOADS TO CO SIM IO" << std::endl;
-        mInterfaces.at(i)->writeCouplingData();
+        mInterfaces.at(i)->WriteCouplingData();
     }
 
     ACCUMULATE_TIMER(time_in_write);
@@ -657,6 +657,32 @@ void preciceAdapter::Adapter::Initialize()
     //     DEBUG(adapterInfo("Initializing preCICE data..."));
     //     WriteCouplingData();
     // }
+    // CoSimIO::Info ctrlInfo;
+    // ctrlInfo.Set<std::string>("connection_name", mConnectionName);
+    // ctrlInfo.Set<std::string>("identifier", "run_control");
+
+    // Info << "OPENFOAM: waiting for run_control signal" << Foam::endl;
+
+    // CoSimIO::Info receivedInfo = CoSimIO::ImportInfo(ctrlInfo);
+
+    // const std::string controlSignal =
+    //     receivedInfo.Get<std::string>("control_signal");
+
+    // Info << "OPENFOAM: received control_signal = "
+    //     << controlSignal << Foam::endl;
+
+    // if (controlSignal == "isStrongCoupling")
+    // {
+    //     CoSimIO::Info settings =
+    //         receivedInfo.Get<CoSimIO::Info>("settings", CoSimIO::Info{});
+
+    //     mStrongCoupling =
+    //         settings.Get<bool>("isStrongCoupling");
+
+    //     Info << "OPENFOAM: isStrongCoupling = "
+    //         << mStrongCoupling << Foam::endl;
+    // }
+
 
     // mPrecice->initialize();
     mCoSimIOInitialized = true;

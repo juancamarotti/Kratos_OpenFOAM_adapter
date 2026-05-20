@@ -52,7 +52,7 @@ void preciceAdapter::FF::Temperature::read(double* buffer, const unsigned int di
 
 bool preciceAdapter::FF::Temperature::isLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::faceCenters);
+    return (this->locationType_ == LocationType::FaceCenters);
 }
 
 std::string preciceAdapter::FF::Temperature::getDataName() const

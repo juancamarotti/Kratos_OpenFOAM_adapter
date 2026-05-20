@@ -13,9 +13,9 @@ namespace preciceAdapter
 enum class LocationType
 {
     none,
-    faceCenters,
-    faceNodes,
-    volumeCenters
+    FaceCenters,
+    FaceNodes,
+    VolumeCenters
 };
 
 class CouplingDataUser

@@ -19,7 +19,7 @@ std::size_t preciceAdapter::CHT::Temperature::write(double* buffer, bool meshCon
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -86,7 +86,7 @@ void preciceAdapter::CHT::Temperature::read(double* buffer, const unsigned int d
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -130,11 +130,11 @@ bool preciceAdapter::CHT::Temperature::isLocationTypeSupported(const bool meshCo
 {
     if (meshConnectivity)
     {
-        return (this->locationType_ == LocationType::faceNodes);
+        return (this->locationType_ == LocationType::FaceNodes);
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::volumeCenters);
+        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
     }
 }
 

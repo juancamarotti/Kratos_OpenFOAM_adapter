@@ -41,7 +41,7 @@ interfaces
   {
     mesh              Fluid-Mesh;
     patches           (interface);
-    locations         faceCenters;
+    locations         FaceCenters;
 
     readData
     (
@@ -69,11 +69,11 @@ The `patches` specifies a list of the names of the OpenFOAM boundary patches tha
 participating in the coupled simulation. These need to be defined in the files
 included in the `0/` directory. The names of the interfaces (e.g., `Interface1`) are arbitrary and are not used.
 
-The `locations` field is optional and its default value is `faceCenters` (with `faceCentres` also accepted), signifying that the interface mesh is defined on the cell face centers. An alternative option is `faceNodes`, which defines the mesh on the face nodes and is needed, e.g., for reading displacements in an FSI scenario.
-The final type is `volumeCenters` (alternatively `volumeCentres`), which allows the user to couple over a volume using the cell centers of the domain. The user can also specify patches, which will be coupled additionally to the cells using the `faceCenters` mesh.
-The `volumeCenters` location is currently implemented for fluid-fluid coupling (`Pressure` and `Velocity`) and conjugate heat transfer (`Temperature`).
+The `locations` field is optional and its default value is `FaceCenters` (with `FaceCentres` also accepted), signifying that the interface mesh is defined on the cell face centers. An alternative option is `FaceNodes`, which defines the mesh on the face nodes and is needed, e.g., for reading displacements in an FSI scenario.
+The final type is `VolumeCenters` (alternatively `VolumeCentres`), which allows the user to couple over a volume using the cell centers of the domain. The user can also specify patches, which will be coupled additionally to the cells using the `FaceCenters` mesh.
+The `VolumeCenters` location is currently implemented for fluid-fluid coupling (`Pressure` and `Velocity`) and conjugate heat transfer (`Temperature`).
 
-The `cellSets` field can be used to specify one or multiple coupling regions (defined by OpenFOAM `cellSets`) for volume coupling. The field can only be used with the `volumeCenters` location and it is optional. If no `cellSets` are specified, the full domain will be coupled.
+The `cellSets` field can be used to specify one or multiple coupling regions (defined by OpenFOAM `cellSets`) for volume coupling. The field can only be used with the `VolumeCenters` location and it is optional. If no `cellSets` are specified, the full domain will be coupled.
 
 The values for `readData` and `writeData`
 for conjugate heat transfer
@@ -274,8 +274,8 @@ interfaces
   {
     mesh              Fluid-Mesh;
     patches           (interface);
-    // For volume coupling specify volumeCenters
-    locations         faceCenters;
+    // For volume coupling specify VolumeCenters
+    locations         FaceCenters;
 
     writeData
     (
@@ -298,7 +298,7 @@ interfaces
 };
 ```
 
-Explicitly setting `locations volumeCenters;` in preciceDict is required for volume coupling. If omitted, it defaults to surface coupling on `faceCenters`. Volume coupling data is always assumed as values for now, i.e., cannot set volume gradient.
+Explicitly setting `locations VolumeCenters;` in preciceDict is required for volume coupling. If omitted, it defaults to surface coupling on `FaceCenters`. Volume coupling data is always assumed as values for now, i.e., cannot set volume gradient.
 
 When reading on the OpenFOAM side, the Generic module automatically detects the boundary condition type of the coupled patch to apply the received data. The boundary condition must be respected, therefore the data received is applied either as a `fixedValue` or `fixedGradient` boundary condition, determined by the type set in the `0/` files.
 
@@ -308,7 +308,7 @@ The `operation surface-normal-gradient;` is currently only supported for scalar 
 
 Besides surface coupling on the domain boundaries, the OpenFOAM adapter also supports coupling overlapping domains, which can be the complete domain, or regions of it. In contrast to surface coupling, though, reading volume data (source terms) requires a few additional configuration steps compared to writing data.
 
-In order to write volume data, it is enough to specify `volumeCenters` for the `locations` field. This will couple the whole internal field of the domain. Patches can be specified additionally, for surface coupling, or the list of patch names can be left empty.
+In order to write volume data, it is enough to specify `VolumeCenters` for the `locations` field. This will couple the whole internal field of the domain. Patches can be specified additionally, for surface coupling, or the list of patch names can be left empty.
 
 In order to read volume data (enforce source terms), it is necessary to use the [finite volume options](https://www.openfoam.com/documentation/guides/latest/doc/guide-fvoptions.html) (`fvOptions`) feature of OpenFOAM. Without this additional configuration, the values read in OpenFOAM in each time step would later be overwritten by OpenFOAM.
 The `fvOptions` construct provides many different options for sources, but the [coded sources](https://www.openfoam.com/documentation/guides/latest/doc/guide-fvoptions-sources-coded.html) is a convenient way to describe source terms in configuration.
@@ -391,7 +391,7 @@ Interface1
 {
   ...
   cellSets          (box1);
-  locations         volumeCenters;
+  locations         VolumeCenters;
 }
 ```
 
@@ -438,7 +438,7 @@ interfaces
   Interface1
   {
     mesh              Fluid-Mesh-Centers;
-    locations         faceCenters;
+    locations         FaceCenters;
     connectivity      false;
     patches           (interface);
 
@@ -448,7 +448,7 @@ interfaces
   Interface2
   {
     mesh              Fluid-Mesh-Nodes;
-    locations         faceNodes;
+    locations         FaceNodes;
     connectivity      true;
     patches           (interface);
 
@@ -457,9 +457,9 @@ interfaces
 };
 ```
 
-This `connectivity` boolean is optional and defaults to `false`. Note that `connectivity true` can only be used with `locations faceNodes`.
+This `connectivity` boolean is optional and defaults to `false`. Note that `connectivity true` can only be used with `locations FaceNodes`.
 
-Even if the coupling data is associated to `faceCenters` in the solver, we can select `faceNodes` as locations type: the respective data will be interpolated from faces to nodes. Also, connectivity is only needed and supported for `writeData`. Therefore, we need to split the interface in a "read" and a "write" part, as shown above.
+Even if the coupling data is associated to `FaceCenters` in the solver, we can select `FaceNodes` as locations type: the respective data will be interpolated from faces to nodes. Also, connectivity is only needed and supported for `writeData`. Therefore, we need to split the interface in a "read" and a "write" part, as shown above.
 
 More details about the rationale are given in the following section.
 

@@ -32,7 +32,7 @@ std::size_t preciceAdapter::FF::ExplicitMomentum::write(double* buffer, bool mes
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -110,7 +110,7 @@ void preciceAdapter::FF::ExplicitMomentum::read(double* buffer, const unsigned i
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::volumeCenters)
+    if (this->locationType_ == LocationType::VolumeCenters)
     {
         if (cellSetNames_.empty())
         {
@@ -193,7 +193,7 @@ bool preciceAdapter::FF::ExplicitMomentum::isLocationTypeSupported(const bool me
     }
     else
     {
-        return (this->locationType_ == LocationType::faceCenters || this->locationType_ == LocationType::volumeCenters);
+        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
     }
 }
 

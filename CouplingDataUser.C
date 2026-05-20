@@ -60,12 +60,12 @@ void preciceAdapter::CouplingDataUser::checkDataLocation(const bool meshConnecti
     if (this->isLocationTypeSupported(meshConnectivity) == false)
     {
         std::string location("none");
-        if (locationType_ == LocationType::faceCenters)
-            location = "faceCenters";
-        else if (locationType_ == LocationType::faceNodes)
-            location = "faceNodes";
-        else if (locationType_ == LocationType::volumeCenters)
-            location = "volumeCenters";
+        if (locationType_ == LocationType::FaceCenters)
+            location = "FaceCenters";
+        else if (locationType_ == LocationType::FaceNodes)
+            location = "FaceNodes";
+        else if (locationType_ == LocationType::VolumeCenters)
+            location = "VolumeCenters";
 
         if (meshConnectivity)
         {
