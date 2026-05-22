@@ -426,8 +426,7 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
         mVertexIDs.resize(mNumDataLocations);
 
         // Initialize the index of the vertices array
-        int vertices_index = 1;
-
+        int node_id = 1;
         if (!mCellSetNames.empty())
         {
             // for all the overlapping cells (cellSets)
@@ -445,8 +444,9 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
                     // {
                     //     vertices[vertices_index++] = Mesh.C().internalField()[cells[i]].z();
                     // }
-                    mpModelPart->CreateNewNode( vertices_index, Mesh.C().internalField()[cells[i]].x(), Mesh.C().internalField()[cells[i]].y(), Mesh.C().internalField()[cells[i]].z());
-                    vertices_index++;
+                    mpModelPart->CreateNewNode(node_id, Mesh.C().internalField()[cells[i]].x(), Mesh.C().internalField()[cells[i]].y(), Mesh.C().internalField()[cells[i]].z());    
+                    mVertexIDs[node_id - 1] = node_id;
+                    node_id++;
                 }
             }
         }
@@ -456,13 +456,17 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
 
             for (int i = 0; i < CellCenters.size(); i++)
             {
-                vertices[vertices_index++] = CellCenters[i].x();
-                vertices[vertices_index++] = CellCenters[i].y();
-                if (mDim == 3)
-                {
-                    vertices[vertices_index++] = CellCenters[i].z();
-                }
+                // vertices[vertices_index++] = CellCenters[i].x();
+                // vertices[vertices_index++] = CellCenters[i].y();
+                // if (mDim == 3)
+                // {
+                //     vertices[vertices_index++] = CellCenters[i].z();
+                // }
+                mpModelPart->CreateNewNode(node_id, CellCenters[i].x(), CellCenters[i].y(), CellCenters[i].z());    
+                mVertexIDs[node_id - 1] = node_id;
+                node_id++;
             }
+            
         }
 
         // Get the locations of the Mesh vertices (here: face centers)
@@ -476,17 +480,27 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
             // Assign the (x,y,z) locations to the vertices
             for (int i = 0; i < FaceCenters.size(); i++)
             {
-                vertices[vertices_index++] = FaceCenters[i].x();
-                vertices[vertices_index++] = FaceCenters[i].y();
-                if (mDim == 3)
-                {
-                    vertices[vertices_index++] = FaceCenters[i].z();
-                }
+                // vertices[vertices_index++] = FaceCenters[i].x();
+                // vertices[vertices_index++] = FaceCenters[i].y();
+                // if (mDim == 3)
+                // {
+                //     vertices[vertices_index++] = FaceCenters[i].z();
+                // }
+                mpModelPart->CreateNewNode(node_id, FaceCenters[i][0], FaceCenters[i][1], FaceCenters[i][2]);    
+                mVertexIDs[node_id - 1] = node_id;
+                node_id++;
             }
+            
         }
 
         // Pass the Mesh vertices information to preCICE
         //recice_.setMeshVertices(mMeshName, vertices, mVertexIDs);
+        // For CoSimIO
+        mInfo.Clear();
+        mInfo.Set("identifier", mMeshName);
+        mInfo.Set("connection_name", mConnectionName);
+        auto export_info = CoSimIO::ExportMesh(mInfo, *mpModelPart);
+        std::cout << "ExportMesh succesful!";
     }
 }
 
