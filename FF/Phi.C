@@ -9,17 +9,17 @@ preciceAdapter::FF::Phi::Phi(
     const_cast<surfaceScalarField*>(
         &mesh.lookupObject<surfaceScalarField>(namePhi)))
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::Phi::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::Phi::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // For every cell of the patch
         forAll(phi_->boundaryFieldRef()[patchID], i)
@@ -32,14 +32,14 @@ std::size_t preciceAdapter::FF::Phi::write(double* buffer, bool meshConnectivity
     return bufferIndex;
 }
 
-void preciceAdapter::FF::Phi::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::Phi::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         forAll(phi_->boundaryFieldRef()[patchID], i)
         {
@@ -48,12 +48,12 @@ void preciceAdapter::FF::Phi::read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FF::Phi::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::Phi::IsLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::FaceCenters);
+    return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::Phi::getDataName() const
+std::string preciceAdapter::FF::Phi::GetDataName() const
 {
     return "Phi";
 }

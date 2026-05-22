@@ -510,25 +510,25 @@ void preciceAdapter::Interface::AddCouplingDataWriter(
     CouplingDataUser* couplingDataWriter)
 {
     // Set the data name (from preCICE)
-    couplingDataWriter->setDataName(fieldConfig.name);
+    couplingDataWriter->SetDataName(fieldConfig.name);
 
     // Set the flip normal option
-    couplingDataWriter->setFlipNormal(fieldConfig.flip_normal);
+    couplingDataWriter->SetFlipNormal(fieldConfig.flip_normal);
 
     // Set the patchIDs of the patches that form the interface
-    couplingDataWriter->setPatchIDs(mPatchIDs);
+    couplingDataWriter->SetPatchIDs(mPatchIDs);
 
     // Set the names of the cell sets to be coupled (for volume coupling)
-    couplingDataWriter->setCellSetNames(mCellSetNames);
+    couplingDataWriter->SetCellSetNames(mCellSetNames);
 
     // Set the location type in the CouplingDataUser class
-    couplingDataWriter->setLocationsType(mLocationType);
+    couplingDataWriter->SetLocationsType(mLocationType);
 
     // Set the location type in the CouplingDataUser class
-    couplingDataWriter->checkDataLocation(mMeshConnectivity);
+    couplingDataWriter->CheckDataLocation(mMeshConnectivity);
 
     // Initilaize class specific data
-    couplingDataWriter->initialize();
+    couplingDataWriter->Initialize();
 
     // Add the CouplingDataUser to the list of writers
     mCouplingDataWriters.push_back(couplingDataWriter);
@@ -540,25 +540,25 @@ void preciceAdapter::Interface::AddCouplingDataReader(
     preciceAdapter::CouplingDataUser* couplingDataReader)
 {
     // Set the patchIDs of the patches that form the interface
-    couplingDataReader->setDataName(fieldConfig.name);
+    couplingDataReader->SetDataName(fieldConfig.name);
 
     // Set the flip normal option
-    couplingDataReader->setFlipNormal(fieldConfig.flip_normal);
+    couplingDataReader->SetFlipNormal(fieldConfig.flip_normal);
 
     // Add the CouplingDataUser to the list of readers
-    couplingDataReader->setPatchIDs(mPatchIDs);
+    couplingDataReader->SetPatchIDs(mPatchIDs);
 
     // Set the location type in the CouplingDataUser class
-    couplingDataReader->setLocationsType(mLocationType);
+    couplingDataReader->SetLocationsType(mLocationType);
 
     // Set the names of the cell sets to be coupled (for volume coupling)
-    couplingDataReader->setCellSetNames(mCellSetNames);
+    couplingDataReader->SetCellSetNames(mCellSetNames);
 
     // Check, if the current location type is supported by the data type
-    couplingDataReader->checkDataLocation(mMeshConnectivity);
+    couplingDataReader->CheckDataLocation(mMeshConnectivity);
 
     // Initilaize class specific data
-    couplingDataReader->initialize();
+    couplingDataReader->Initialize();
 
     // Add the CouplingDataUser to the list of readers
     mCouplingDataReaders.push_back(couplingDataReader);
@@ -573,7 +573,7 @@ void preciceAdapter::Interface::CreateBuffer()
     // Check all the coupling data readers
     for (uint i = 0; i < mCouplingDataReaders.size(); i++)
     {
-        if (mCouplingDataReaders.at(i)->hasVectorData())
+        if (mCouplingDataReaders.at(i)->HasVectorData())
         {
             needsVectorData = true;
         }
@@ -582,7 +582,7 @@ void preciceAdapter::Interface::CreateBuffer()
     // Check all the coupling data writers
     for (uint i = 0; i < mCouplingDataWriters.size(); i++)
     {
-        if (mCouplingDataWriters.at(i)->hasVectorData())
+        if (mCouplingDataWriters.at(i)->HasVectorData())
         {
             needsVectorData = true;
         }
@@ -606,32 +606,32 @@ void preciceAdapter::Interface::CreateBuffer()
 
 void preciceAdapter::Interface::ReadCouplingData(double relativeReadTime)
 {
-    // Make every coupling data reader read
+    // Make every coupling data reader Read
     for (uint i = 0; i < mCouplingDataReaders.size(); i++)
     {
         // Pointer to the current reader
         preciceAdapter::CouplingDataUser*
             couplingDataReader = mCouplingDataReaders.at(i);
 
-        // Make preCICE read vector or scalar data
+        // Make preCICE Read vector or scalar data
         // and fill the adapter's buffer
-        std::size_t nReadData = mVertexIDs.size() * mPrecice.getDataDimensions(mMeshName, couplingDataReader->dataName());
+        std::size_t nReadData = mVertexIDs.size() * mPrecice.getDataDimensions(mMeshName, couplingDataReader->DataName());
         // We could add a sanity check here
-        // nReadData == mVertexIDs.size() * (1 + (mDim - 1) * static_cast<int>(couplingDataReader->hasVectorData()));
+        // nReadData == mVertexIDs.size() * (1 + (mDim - 1) * static_cast<int>(couplingDataReader->HasVectorData()));
 
         precice::span<double> dataSpanRead {mDataBuffer.data(), nReadData};
         mPrecice.readData(
             mMeshName,
-            couplingDataReader->dataName(),
+            couplingDataReader->DataName(),
             mVertexIDs,
             relativeReadTime,
             dataSpanRead);
 
         // Apply flip normal if required
-        couplingDataReader->applyFlipNormal(dataSpanRead);
+        couplingDataReader->ApplyFlipNormal(dataSpanRead);
 
         // Read the received data from the buffer
-        couplingDataReader->read(mDataBuffer.data(), mDim);
+        couplingDataReader->Read(mDataBuffer.data(), mDim);
     }
 }
 
@@ -643,7 +643,7 @@ void preciceAdapter::Interface::WriteCouplingData()
               << mCouplingDataWriters.size()
               << std::endl;
               
-    // Make every coupling data writer write
+    // Make every coupling data writer Write
     for (uint i = 0; i < mCouplingDataWriters.size(); i++)
     {
         // Pointer to the current reader
@@ -651,12 +651,12 @@ void preciceAdapter::Interface::WriteCouplingData()
             couplingDataWriter = mCouplingDataWriters.at(i);
 
         // Write the data into the adapter's buffer
-        auto nWrittenData = couplingDataWriter->write(mDataBuffer.data(), mMeshConnectivity, mDim);
+        auto nWrittenData = couplingDataWriter->Write(mDataBuffer.data(), mMeshConnectivity, mDim);
 
         precice::span<double> dataSpanWritten {mDataBuffer.data(), nWrittenData};
 
         // Apply flip normal if required
-        couplingDataWriter->applyFlipNormal(dataSpanWritten);
+        couplingDataWriter->ApplyFlipNormal(dataSpanWritten);
 
         // Convert span/buffer into std::vector<double> for CoSimIO
         std::vector<double> data_to_send(
@@ -672,17 +672,17 @@ void preciceAdapter::Interface::WriteCouplingData()
 
         CoSimIO::Info export_info;
         export_info.Set("connection_name", mConnectionName);
-        export_info.Set("identifier", couplingDataWriter->dataName());
+        export_info.Set("identifier", couplingDataWriter->DataName());
 
         export_info = CoSimIO::ExportData(
             export_info,
             data_to_send
         );
 
-        // // Make preCICE write vector or scalar data
+        // // Make preCICE Write vector or scalar data
         // mPrecice.writeData(
         //     mMeshName,
-        //     couplingDataWriter->dataName(),
+        //     couplingDataWriter->DataName(),
         //     mVertexIDs,
         //     dataSpanWritten);
     }

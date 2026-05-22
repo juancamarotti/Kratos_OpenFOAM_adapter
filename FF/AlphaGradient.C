@@ -10,17 +10,17 @@ preciceAdapter::FF::AlphaGradient::AlphaGradient(
     const_cast<volScalarField*>(
         &mesh.lookupObject<volScalarField>(nameAlpha)))
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::AlphaGradient::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::AlphaGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the Alpha gradient boundary patch
         const scalarField gradientPatch((Alpha_->boundaryFieldRef()[patchID])
@@ -37,14 +37,14 @@ std::size_t preciceAdapter::FF::AlphaGradient::write(double* buffer, bool meshCo
     return bufferIndex;
 }
 
-void preciceAdapter::FF::AlphaGradient::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::AlphaGradient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the Alpha gradient boundary patch
         scalarField& gradientPatch =
@@ -62,12 +62,12 @@ void preciceAdapter::FF::AlphaGradient::read(double* buffer, const unsigned int 
     }
 }
 
-bool preciceAdapter::FF::AlphaGradient::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::AlphaGradient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::FaceCenters);
+    return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::AlphaGradient::getDataName() const
+std::string preciceAdapter::FF::AlphaGradient::GetDataName() const
 {
     return "AlphaGradient";
 }

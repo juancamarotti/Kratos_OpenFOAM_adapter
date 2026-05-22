@@ -21,17 +21,17 @@ preciceAdapter::FSI::Stress::Stress(
             Foam::vector::zero));
 }
 
-std::size_t preciceAdapter::FSI::Stress::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FSI::Stress::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     return this->writeToBuffer(buffer, *Stress_, dim);
 }
 
-void preciceAdapter::FSI::Stress::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FSI::Stress::Read(double* buffer, const unsigned int dim)
 {
     this->readFromBuffer(buffer);
 }
 
-bool preciceAdapter::FSI::Stress::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FSI::Stress::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -39,11 +39,11 @@ bool preciceAdapter::FSI::Stress::isLocationTypeSupported(const bool meshConnect
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters);
+        return (this->mLocationType == LocationType::FaceCenters);
     }
 }
 
-std::string preciceAdapter::FSI::Stress::getDataName() const
+std::string preciceAdapter::FSI::Stress::GetDataName() const
 {
     return "Stress";
 }

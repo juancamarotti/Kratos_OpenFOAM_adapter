@@ -36,12 +36,12 @@ preciceAdapter::FSI::Force::Force(
     }
 }
 
-std::size_t preciceAdapter::FSI::Force::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FSI::Force::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     return this->writeToBuffer(buffer, *Force_, dim);
 }
 
-void preciceAdapter::FSI::Force::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FSI::Force::Read(double* buffer, const unsigned int dim)
 {
     // Copy the force field from the buffer to OpenFOAM
 
@@ -50,12 +50,12 @@ void preciceAdapter::FSI::Force::read(double* buffer, const unsigned int dim)
 
     int bufferIndex = 0;
     // Set boundary forces
-    for (unsigned int j = 0; j < patchIDs_.size(); j++)
+    for (unsigned int j = 0; j < mPatchIDs.size(); j++)
     {
         // Get the ID of the current patch
-        const unsigned int patchID = patchIDs_.at(j);
+        const unsigned int patchID = mPatchIDs.at(j);
 
-        if (this->locationType_ == LocationType::FaceCenters)
+        if (this->mLocationType == LocationType::FaceCenters)
         {
             // Make a force field
             vectorField& force = Force_->boundaryFieldRef()[patchID];
@@ -67,7 +67,7 @@ void preciceAdapter::FSI::Force::read(double* buffer, const unsigned int dim)
                     force[i][d] = buffer[bufferIndex++];
             }
         }
-        else if (this->locationType_ == LocationType::FaceNodes)
+        else if (this->mLocationType == LocationType::FaceNodes)
         {
             // Here we could easily interpolate the face values to point values
             // and assign them to some field, but I guess there is no need
@@ -77,7 +77,7 @@ void preciceAdapter::FSI::Force::read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FSI::Force::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FSI::Force::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -85,11 +85,11 @@ bool preciceAdapter::FSI::Force::isLocationTypeSupported(const bool meshConnecti
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters);
+        return (this->mLocationType == LocationType::FaceCenters);
     }
 }
 
-std::string preciceAdapter::FSI::Force::getDataName() const
+std::string preciceAdapter::FSI::Force::GetDataName() const
 {
     return "Force";
 }

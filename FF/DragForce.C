@@ -25,16 +25,16 @@ preciceAdapter::FF::DragForce::DragForce(
                 IOobject::AUTO_WRITE),
             mesh);
     }
-    dataType_ = vector;
+    mDataType = vector;
 }
 
-std::size_t preciceAdapter::FF::DragForce::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::DragForce::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (const auto& cell : F_d_->internalField())
             {
@@ -53,7 +53,7 @@ std::size_t preciceAdapter::FF::DragForce::write(double* buffer, bool meshConnec
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(F_d_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -77,9 +77,9 @@ std::size_t preciceAdapter::FF::DragForce::write(double* buffer, bool meshConnec
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         vectorField UPatch = F_d_->boundaryField()[patchID];
 
@@ -106,13 +106,13 @@ std::size_t preciceAdapter::FF::DragForce::write(double* buffer, bool meshConnec
     return bufferIndex;
 }
 
-void preciceAdapter::FF::DragForce::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::DragForce::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (auto& cell : F_d_->ref())
             {
@@ -131,7 +131,7 @@ void preciceAdapter::FF::DragForce::read(double* buffer, const unsigned int dim)
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(F_d_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -155,9 +155,9 @@ void preciceAdapter::FF::DragForce::read(double* buffer, const unsigned int dim)
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the velocity value boundary patch
         vectorField* valuePatchPtr = &F_d_->boundaryFieldRef()[patchID];
@@ -185,7 +185,7 @@ void preciceAdapter::FF::DragForce::read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FF::DragForce::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::DragForce::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -193,11 +193,11 @@ bool preciceAdapter::FF::DragForce::isLocationTypeSupported(const bool meshConne
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
+        return (this->mLocationType == LocationType::FaceCenters || this->mLocationType == LocationType::VolumeCenters);
     }
 }
 
-std::string preciceAdapter::FF::DragForce::getDataName() const
+std::string preciceAdapter::FF::DragForce::GetDataName() const
 {
     return "DragForce";
 }

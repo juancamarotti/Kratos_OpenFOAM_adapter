@@ -10,16 +10,16 @@ preciceAdapter::FF::Pressure::Pressure(
     const_cast<volScalarField*>(
         &mesh.lookupObject<volScalarField>(nameP)))
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::Pressure::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::Pressure::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (const auto& cell : p_->internalField())
             {
@@ -28,7 +28,7 @@ std::size_t preciceAdapter::FF::Pressure::write(double* buffer, bool meshConnect
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(p_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -43,9 +43,9 @@ std::size_t preciceAdapter::FF::Pressure::write(double* buffer, bool meshConnect
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // For every cell of the patch
         forAll(p_->boundaryFieldRef()[patchID], i)
@@ -58,13 +58,13 @@ std::size_t preciceAdapter::FF::Pressure::write(double* buffer, bool meshConnect
     return bufferIndex;
 }
 
-void preciceAdapter::FF::Pressure::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::Pressure::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (auto& cell : p_->ref())
             {
@@ -73,7 +73,7 @@ void preciceAdapter::FF::Pressure::read(double* buffer, const unsigned int dim)
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(p_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -88,9 +88,9 @@ void preciceAdapter::FF::Pressure::read(double* buffer, const unsigned int dim)
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the pressure value boundary patch
         scalarField* valuePatchPtr = &p_->boundaryFieldRef()[patchID];
@@ -112,7 +112,7 @@ void preciceAdapter::FF::Pressure::read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FF::Pressure::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::Pressure::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -120,11 +120,11 @@ bool preciceAdapter::FF::Pressure::isLocationTypeSupported(const bool meshConnec
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
+        return (this->mLocationType == LocationType::FaceCenters || this->mLocationType == LocationType::VolumeCenters);
     }
 }
 
-std::string preciceAdapter::FF::Pressure::getDataName() const
+std::string preciceAdapter::FF::Pressure::GetDataName() const
 {
     return "Pressure";
 }

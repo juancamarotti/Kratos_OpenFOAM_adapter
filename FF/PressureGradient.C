@@ -9,17 +9,17 @@ preciceAdapter::FF::PressureGradient::PressureGradient(
     const_cast<volScalarField*>(
         &mesh.lookupObject<volScalarField>(nameP)))
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::PressureGradient::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::PressureGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the pressure gradient boundary patch
         const scalarField gradientPatch((p_->boundaryFieldRef()[patchID])
@@ -36,14 +36,14 @@ std::size_t preciceAdapter::FF::PressureGradient::write(double* buffer, bool mes
     return bufferIndex;
 }
 
-void preciceAdapter::FF::PressureGradient::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::PressureGradient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the pressure gradient boundary patch
         scalarField& gradientPatch =
@@ -61,12 +61,12 @@ void preciceAdapter::FF::PressureGradient::read(double* buffer, const unsigned i
     }
 }
 
-bool preciceAdapter::FF::PressureGradient::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::PressureGradient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::FaceCenters);
+    return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::PressureGradient::getDataName() const
+std::string preciceAdapter::FF::PressureGradient::GetDataName() const
 {
     return "PressureGradient";
 }

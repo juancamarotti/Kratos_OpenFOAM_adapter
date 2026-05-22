@@ -4,34 +4,34 @@ preciceAdapter::CouplingDataUser::CouplingDataUser()
 {
 }
 
-bool preciceAdapter::CouplingDataUser::hasScalarData()
+bool preciceAdapter::CouplingDataUser::HasScalarData()
 {
-    return dataType_ == scalar;
+    return mDataType == scalar;
 }
 
-bool preciceAdapter::CouplingDataUser::hasVectorData()
+bool preciceAdapter::CouplingDataUser::HasVectorData()
 {
-    return dataType_ == vector;
+    return mDataType == vector;
 }
 
-void preciceAdapter::CouplingDataUser::setDataName(std::string dataName)
+void preciceAdapter::CouplingDataUser::SetDataName(std::string dataName)
 {
-    dataName_ = std::move(dataName);
+    mDataName = std::move(dataName);
 }
 
-const std::string& preciceAdapter::CouplingDataUser::dataName()
+const std::string& preciceAdapter::CouplingDataUser::DataName()
 {
-    return dataName_;
+    return mDataName;
 }
 
-void preciceAdapter::CouplingDataUser::setFlipNormal(bool flipNormal)
+void preciceAdapter::CouplingDataUser::SetFlipNormal(bool flipNormal)
 {
-    flipNormal_ = flipNormal;
+    mFlipNormal = flipNormal;
 }
 
-void preciceAdapter::CouplingDataUser::applyFlipNormal(precice::span<double> dataBuffer)
+void preciceAdapter::CouplingDataUser::ApplyFlipNormal(precice::span<double> dataBuffer)
 {
-    if (flipNormal_)
+    if (mFlipNormal)
     {
         for (double& val : dataBuffer)
         {
@@ -40,43 +40,43 @@ void preciceAdapter::CouplingDataUser::applyFlipNormal(precice::span<double> dat
     }
 }
 
-void preciceAdapter::CouplingDataUser::setPatchIDs(std::vector<int> patchIDs)
+void preciceAdapter::CouplingDataUser::SetPatchIDs(std::vector<int> patchIDs)
 {
-    patchIDs_ = patchIDs;
+    mPatchIDs = patchIDs;
 }
 
-void preciceAdapter::CouplingDataUser::setCellSetNames(std::vector<std::string> cellSetNames)
+void preciceAdapter::CouplingDataUser::SetCellSetNames(std::vector<std::string> cellSetNames)
 {
-    cellSetNames_ = cellSetNames;
+    mCellSetNames = cellSetNames;
 }
 
-void preciceAdapter::CouplingDataUser::setLocationsType(LocationType locationsType)
+void preciceAdapter::CouplingDataUser::SetLocationsType(LocationType locationsType)
 {
-    locationType_ = locationsType;
+    mLocationType = locationsType;
 }
 
-void preciceAdapter::CouplingDataUser::checkDataLocation(const bool meshConnectivity) const
+void preciceAdapter::CouplingDataUser::CheckDataLocation(const bool meshConnectivity) const
 {
-    if (this->isLocationTypeSupported(meshConnectivity) == false)
+    if (this->IsLocationTypeSupported(meshConnectivity) == false)
     {
         std::string location("none");
-        if (locationType_ == LocationType::FaceCenters)
+        if (mLocationType == LocationType::FaceCenters)
             location = "FaceCenters";
-        else if (locationType_ == LocationType::FaceNodes)
+        else if (mLocationType == LocationType::FaceNodes)
             location = "FaceNodes";
-        else if (locationType_ == LocationType::VolumeCenters)
+        else if (mLocationType == LocationType::VolumeCenters)
             location = "VolumeCenters";
 
         if (meshConnectivity)
         {
-            adapterInfo("The data \"" + getDataName() + "\""
+            adapterInfo("The data \"" + GetDataName() + "\""
                             + " does not currently support mesh connectivity (e.g., nearest-projection mapping) for location type "
                             + "\"" + location + "\".",
                         "error");
         }
         else
         {
-            adapterInfo("The data \"" + getDataName() + "\" does not support location type \""
+            adapterInfo("The data \"" + GetDataName() + "\" does not support location type \""
                             + location + "\". Please select a different location type.",
                         "error");
         }
@@ -84,7 +84,7 @@ void preciceAdapter::CouplingDataUser::checkDataLocation(const bool meshConnecti
 }
 
 // Dummy implementation which can be overwritten in derived classes if required
-void preciceAdapter::CouplingDataUser::initialize()
+void preciceAdapter::CouplingDataUser::Initialize()
 {
     return;
 }

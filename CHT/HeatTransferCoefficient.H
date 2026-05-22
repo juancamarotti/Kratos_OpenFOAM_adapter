@@ -35,15 +35,15 @@ public:
         const std::string nameT);
 
     //- Write the heat transfer coefficient values into the buffer
-    std::size_t write(double* buffer, bool meshConnectivity, const unsigned int dim) final;
+    std::size_t Write(double* buffer, bool meshConnectivity, const unsigned int dim) final;
 
     //- Read the heat transfer coefficient values from the buffer
-    void read(double* buffer, const unsigned int dim) final;
+    void Read(double* buffer, const unsigned int dim) final;
 
-    bool isLocationTypeSupported(const bool meshConnectivity) const final;
+    bool IsLocationTypeSupported(const bool meshConnectivity) const final;
 
     //- Get the name of the current data field
-    std::string getDataName() const final;
+    std::string GetDataName() const final;
 
     //- Destructor
     virtual ~HeatTransferCoefficient() {};

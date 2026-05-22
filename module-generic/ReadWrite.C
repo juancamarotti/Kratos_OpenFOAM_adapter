@@ -18,14 +18,14 @@ preciceAdapter::Generic::ScalarFieldCoupler::ScalarFieldCoupler(
   mesh_(mesh),
   fieldConfig_(fieldConfig)
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
-void preciceAdapter::Generic::ScalarFieldCoupler::initialize()
+void preciceAdapter::Generic::ScalarFieldCoupler::Initialize()
 {
     if (fieldConfig_.operation == "surface-normal-gradient")
     {
-        if (this->locationType_ != LocationType::FaceCenters)
+        if (this->mLocationType != LocationType::FaceCenters)
         {
             adapterInfo("Generic module: The surface-normal-gradient operation is only supported for FaceCenters location type.", "error");
         }
@@ -38,16 +38,16 @@ void preciceAdapter::Generic::ScalarFieldCoupler::initialize()
 }
 
 
-std::size_t preciceAdapter::Generic::ScalarFieldCoupler::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::Generic::ScalarFieldCoupler::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     if (fieldConfig_.operation == "surface-normal-gradient")
     {
         // For every boundary patch of the interface
-        for (uint j = 0; j < patchIDs_.size(); j++)
+        for (uint j = 0; j < mPatchIDs.size(); j++)
         {
-            int patchID = patchIDs_.at(j);
+            int patchID = mPatchIDs.at(j);
 
             // Get the surface normal gradient boundary patch
             scalarField gradientPatch(scalarField_->boundaryField()[patchID].snGrad());
@@ -61,9 +61,9 @@ std::size_t preciceAdapter::Generic::ScalarFieldCoupler::write(double* buffer, b
         return bufferIndex;
     }
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (const auto& cell : scalarField_->internalField())
             {
@@ -72,7 +72,7 @@ std::size_t preciceAdapter::Generic::ScalarFieldCoupler::write(double* buffer, b
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(scalarField_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -87,9 +87,9 @@ std::size_t preciceAdapter::Generic::ScalarFieldCoupler::write(double* buffer, b
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         const auto& boundaryPatch(scalarField_->boundaryField()[patchID]);
 
@@ -121,13 +121,13 @@ std::size_t preciceAdapter::Generic::ScalarFieldCoupler::write(double* buffer, b
     return bufferIndex;
 }
 
-void preciceAdapter::Generic::ScalarFieldCoupler::read(double* buffer, const unsigned int dim)
+void preciceAdapter::Generic::ScalarFieldCoupler::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (auto& cell : scalarField_->ref())
             {
@@ -136,7 +136,7 @@ void preciceAdapter::Generic::ScalarFieldCoupler::read(double* buffer, const uns
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(scalarField_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -151,9 +151,9 @@ void preciceAdapter::Generic::ScalarFieldCoupler::read(double* buffer, const uns
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         auto& bc = scalarField_->boundaryFieldRef()[patchID];
 
@@ -184,19 +184,19 @@ void preciceAdapter::Generic::ScalarFieldCoupler::read(double* buffer, const uns
     }
 }
 
-bool preciceAdapter::Generic::ScalarFieldCoupler::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::Generic::ScalarFieldCoupler::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
-        return (this->locationType_ == LocationType::FaceNodes);
+        return (this->mLocationType == LocationType::FaceNodes);
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
+        return (this->mLocationType == LocationType::FaceCenters || this->mLocationType == LocationType::VolumeCenters);
     }
 }
 
-std::string preciceAdapter::Generic::ScalarFieldCoupler::getDataName() const
+std::string preciceAdapter::Generic::ScalarFieldCoupler::GetDataName() const
 {
     return fieldConfig_.name;
 }
@@ -212,10 +212,10 @@ preciceAdapter::Generic::VectorFieldCoupler::VectorFieldCoupler(
   mesh_(mesh),
   fieldConfig_(fieldConfig)
 {
-    dataType_ = vector;
+    mDataType = vector;
 }
 
-void preciceAdapter::Generic::VectorFieldCoupler::initialize()
+void preciceAdapter::Generic::VectorFieldCoupler::Initialize()
 {
     // In the Generic module, for vector fields only the value operation is supported for now, i.e., cannot write gradients.
     if (fieldConfig_.operation == "gradient" || fieldConfig_.operation == "surface-normal-gradient")
@@ -224,13 +224,13 @@ void preciceAdapter::Generic::VectorFieldCoupler::initialize()
     }
 }
 
-std::size_t preciceAdapter::Generic::VectorFieldCoupler::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::Generic::VectorFieldCoupler::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (const auto& cell : vectorField_->internalField())
             {
@@ -249,7 +249,7 @@ std::size_t preciceAdapter::Generic::VectorFieldCoupler::write(double* buffer, b
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(vectorField_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -273,9 +273,9 @@ std::size_t preciceAdapter::Generic::VectorFieldCoupler::write(double* buffer, b
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the vector field boundary patch
         auto& boundaryPatch = vectorField_->boundaryField()[patchID];
@@ -296,13 +296,13 @@ std::size_t preciceAdapter::Generic::VectorFieldCoupler::write(double* buffer, b
     return bufferIndex;
 }
 
-void preciceAdapter::Generic::VectorFieldCoupler::read(double* buffer, const unsigned int dim)
+void preciceAdapter::Generic::VectorFieldCoupler::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (auto& cell : vectorField_->ref())
             {
@@ -321,7 +321,7 @@ void preciceAdapter::Generic::VectorFieldCoupler::read(double* buffer, const uns
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(vectorField_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -345,9 +345,9 @@ void preciceAdapter::Generic::VectorFieldCoupler::read(double* buffer, const uns
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         auto& bc = vectorField_->boundaryFieldRef()[patchID];
 
@@ -386,7 +386,7 @@ void preciceAdapter::Generic::VectorFieldCoupler::read(double* buffer, const uns
     }
 }
 
-bool preciceAdapter::Generic::VectorFieldCoupler::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::Generic::VectorFieldCoupler::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -394,11 +394,11 @@ bool preciceAdapter::Generic::VectorFieldCoupler::isLocationTypeSupported(const 
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
+        return (this->mLocationType == LocationType::FaceCenters || this->mLocationType == LocationType::VolumeCenters);
     }
 }
 
-std::string preciceAdapter::Generic::VectorFieldCoupler::getDataName() const
+std::string preciceAdapter::Generic::VectorFieldCoupler::GetDataName() const
 {
     return fieldConfig_.name;
 }

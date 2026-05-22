@@ -16,18 +16,18 @@ preciceAdapter::CHT::HeatTransferCoefficient::HeatTransferCoefficient(
         &mesh.lookupObject<volScalarField>(nameT))),
   mesh_(mesh)
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
 
-std::size_t preciceAdapter::CHT::HeatTransferCoefficient::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::CHT::HeatTransferCoefficient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Extract the effective conductivity on the patch
         extractKappaEff(patchID, meshConnectivity);
@@ -73,14 +73,14 @@ std::size_t preciceAdapter::CHT::HeatTransferCoefficient::write(double* buffer, 
 }
 
 
-void preciceAdapter::CHT::HeatTransferCoefficient::read(double* buffer, const unsigned int dim)
+void preciceAdapter::CHT::HeatTransferCoefficient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Extract the effective conductivity on the patch
         // TODO: At the moment, reading with connectivity is not supported
@@ -116,19 +116,19 @@ void preciceAdapter::CHT::HeatTransferCoefficient::read(double* buffer, const un
     }
 }
 
-bool preciceAdapter::CHT::HeatTransferCoefficient::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::CHT::HeatTransferCoefficient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
-        return (this->locationType_ == LocationType::FaceNodes);
+        return (this->mLocationType == LocationType::FaceNodes);
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters);
+        return (this->mLocationType == LocationType::FaceCenters);
     }
 }
 
-std::string preciceAdapter::CHT::HeatTransferCoefficient::getDataName() const
+std::string preciceAdapter::CHT::HeatTransferCoefficient::GetDataName() const
 {
     return "HeatTransferCoefficient";
 }

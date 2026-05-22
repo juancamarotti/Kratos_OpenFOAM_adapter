@@ -9,17 +9,17 @@ preciceAdapter::FF::Temperature::Temperature(
     const_cast<volScalarField*>(
         &mesh.lookupObject<volScalarField>(nameT)))
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::Temperature::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::Temperature::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
         scalarField gradientPatch((T_->boundaryFieldRef()[patchID])
                                       .snGrad());
 
@@ -34,14 +34,14 @@ std::size_t preciceAdapter::FF::Temperature::write(double* buffer, bool meshConn
     return bufferIndex;
 }
 
-void preciceAdapter::FF::Temperature::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::Temperature::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
         // For every cell of the patch
         forAll(T_->boundaryFieldRef()[patchID], i)
         {
@@ -50,12 +50,12 @@ void preciceAdapter::FF::Temperature::read(double* buffer, const unsigned int di
     }
 }
 
-bool preciceAdapter::FF::Temperature::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::Temperature::IsLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::FaceCenters);
+    return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::Temperature::getDataName() const
+std::string preciceAdapter::FF::Temperature::GetDataName() const
 {
     return "Temperature";
 }

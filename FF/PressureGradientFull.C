@@ -16,17 +16,17 @@ preciceAdapter::FF::PressureGradientFull::PressureGradientFull(
              IOobject::NO_WRITE),
          fvc::grad(*p_))
 {
-    dataType_ = vector;
+    mDataType = vector;
 }
 
-std::size_t preciceAdapter::FF::PressureGradientFull::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::PressureGradientFull::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
     gradP_ = fvc::grad(*p_);
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (const auto& cell : gradP_.internalField())
             {
@@ -45,7 +45,7 @@ std::size_t preciceAdapter::FF::PressureGradientFull::write(double* buffer, bool
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(p_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -69,9 +69,9 @@ std::size_t preciceAdapter::FF::PressureGradientFull::write(double* buffer, bool
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // For every cell of the patch
         forAll(gradP_.boundaryFieldRef()[patchID], i)
@@ -96,14 +96,14 @@ std::size_t preciceAdapter::FF::PressureGradientFull::write(double* buffer, bool
     return bufferIndex;
 }
 
-void preciceAdapter::FF::PressureGradientFull::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::PressureGradientFull::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the pressure gradient boundary patch
         scalarField& gradientPatch =
@@ -121,12 +121,12 @@ void preciceAdapter::FF::PressureGradientFull::read(double* buffer, const unsign
     }
 }
 
-bool preciceAdapter::FF::PressureGradientFull::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::PressureGradientFull::IsLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
+    return (this->mLocationType == LocationType::FaceCenters || this->mLocationType == LocationType::VolumeCenters);
 }
 
-std::string preciceAdapter::FF::PressureGradientFull::getDataName() const
+std::string preciceAdapter::FF::PressureGradientFull::GetDataName() const
 {
     return "PressureGradientFull";
 }

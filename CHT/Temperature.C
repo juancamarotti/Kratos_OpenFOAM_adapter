@@ -12,16 +12,16 @@ preciceAdapter::CHT::Temperature::Temperature(
         &mesh.lookupObject<volScalarField>(nameT))),
   mesh_(mesh)
 {
-    dataType_ = scalar;
+    mDataType = scalar;
 }
 
-std::size_t preciceAdapter::CHT::Temperature::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::CHT::Temperature::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (const auto& cell : T_->internalField())
             {
@@ -30,7 +30,7 @@ std::size_t preciceAdapter::CHT::Temperature::write(double* buffer, bool meshCon
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(T_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -45,9 +45,9 @@ std::size_t preciceAdapter::CHT::Temperature::write(double* buffer, bool meshCon
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         const scalarField& TPatch(
             T_->boundaryField()[patchID]);
@@ -82,13 +82,13 @@ std::size_t preciceAdapter::CHT::Temperature::write(double* buffer, bool meshCon
     return bufferIndex;
 }
 
-void preciceAdapter::CHT::Temperature::read(double* buffer, const unsigned int dim)
+void preciceAdapter::CHT::Temperature::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
-    if (this->locationType_ == LocationType::VolumeCenters)
+    if (this->mLocationType == LocationType::VolumeCenters)
     {
-        if (cellSetNames_.empty())
+        if (mCellSetNames.empty())
         {
             for (auto& cell : T_->ref())
             {
@@ -97,7 +97,7 @@ void preciceAdapter::CHT::Temperature::read(double* buffer, const unsigned int d
         }
         else
         {
-            for (const auto& cellSetName : cellSetNames_)
+            for (const auto& cellSetName : mCellSetNames)
             {
                 cellSet overlapRegion(T_->mesh(), cellSetName);
                 const labelList& cells = overlapRegion.toc();
@@ -112,9 +112,9 @@ void preciceAdapter::CHT::Temperature::read(double* buffer, const unsigned int d
     }
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // For every cell of the patch
         forAll(T_->boundaryField()[patchID], i)
@@ -126,19 +126,19 @@ void preciceAdapter::CHT::Temperature::read(double* buffer, const unsigned int d
     }
 }
 
-bool preciceAdapter::CHT::Temperature::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::CHT::Temperature::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
-        return (this->locationType_ == LocationType::FaceNodes);
+        return (this->mLocationType == LocationType::FaceNodes);
     }
     else
     {
-        return (this->locationType_ == LocationType::FaceCenters || this->locationType_ == LocationType::VolumeCenters);
+        return (this->mLocationType == LocationType::FaceCenters || this->mLocationType == LocationType::VolumeCenters);
     }
 }
 
-std::string preciceAdapter::CHT::Temperature::getDataName() const
+std::string preciceAdapter::CHT::Temperature::GetDataName() const
 {
     return "Temperature";
 }

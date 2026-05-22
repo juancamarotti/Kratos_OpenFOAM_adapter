@@ -10,17 +10,17 @@ preciceAdapter::FF::VelocityGradient::VelocityGradient(
     const_cast<volVectorField*>(
         &mesh.lookupObject<volVectorField>(nameU)))
 {
-    dataType_ = vector;
+    mDataType = vector;
 }
 
-std::size_t preciceAdapter::FF::VelocityGradient::write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t preciceAdapter::FF::VelocityGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the velocity gradient boundary patch
         vectorField gradientPatch((U_->boundaryFieldRef()[patchID])
@@ -49,14 +49,14 @@ std::size_t preciceAdapter::FF::VelocityGradient::write(double* buffer, bool mes
     return bufferIndex;
 }
 
-void preciceAdapter::FF::VelocityGradient::read(double* buffer, const unsigned int dim)
+void preciceAdapter::FF::VelocityGradient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
     // For every boundary patch of the interface
-    for (uint j = 0; j < patchIDs_.size(); j++)
+    for (uint j = 0; j < mPatchIDs.size(); j++)
     {
-        int patchID = patchIDs_.at(j);
+        int patchID = mPatchIDs.at(j);
 
         // Get the velocity gradient boundary patch
         vectorField* gradientPatchPtr;
@@ -95,12 +95,12 @@ void preciceAdapter::FF::VelocityGradient::read(double* buffer, const unsigned i
     }
 }
 
-bool preciceAdapter::FF::VelocityGradient::isLocationTypeSupported(const bool meshConnectivity) const
+bool preciceAdapter::FF::VelocityGradient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
-    return (this->locationType_ == LocationType::FaceCenters);
+    return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::VelocityGradient::getDataName() const
+std::string preciceAdapter::FF::VelocityGradient::GetDataName() const
 {
     return "VelocityGradient";
 }

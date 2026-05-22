@@ -29,73 +29,73 @@ protected:
     };
 
     //- Type of the coupling data (scalar or vector)
-    DataType dataType_ = scalar;
+    DataType mDataType = scalar;
 
     //- OpenFOAM patches that form the interface
-    std::vector<int> patchIDs_;
+    std::vector<int> mPatchIDs;
 
     //- Names of the OpenFOAM cell sets to be coupled (for volume coupling)
-    std::vector<std::string> cellSetNames_;
+    std::vector<std::string> mCellSetNames;
 
     //- data name
-    std::string dataName_;
+    std::string mDataName;
 
     //- location type of the interface
-    LocationType locationType_ = LocationType::none;
+    LocationType mLocationType = LocationType::none;
 
     //- flip normal option
-    bool flipNormal_ = false;
+    bool mFlipNormal = false;
 
 public:
     //- Constructor
     CouplingDataUser();
 
     //- Returns true if the data are scalar
-    bool hasScalarData();
+    bool HasScalarData();
 
     //- Returns true if the data are vector
-    bool hasVectorData();
+    bool HasVectorData();
 
     //- Set the data name
-    void setDataName(std::string dataName);
+    void SetDataName(std::string DataName);
 
     //- Get the data name
-    const std::string& dataName();
+    const std::string& DataName();
 
     //- Set flip normal option
-    void setFlipNormal(bool flipNormal);
+    void SetFlipNormal(bool flipNormal);
 
     //- Apply flip normal to the data buffer (multiply by -1)
-    void applyFlipNormal(precice::span<double> dataBuffer);
+    void ApplyFlipNormal(precice::span<double> dataBuffer);
 
     //- Set the patch IDs that form the interface
-    void setPatchIDs(std::vector<int> patchIDs);
+    void SetPatchIDs(std::vector<int> patchIDs);
 
     //- Set the cellSetNames that form the overlapping cells of the interface
-    void setCellSetNames(std::vector<std::string> cellSetNames);
+    void SetCellSetNames(std::vector<std::string> cellSetNames);
 
     //- Set the locations type of the interface
-    void setLocationsType(LocationType locationsType);
+    void SetLocationsType(LocationType locationsType);
 
     // Check if the dataset supports this interface nodes location
-    void checkDataLocation(const bool meshConnectivity) const;
+    void CheckDataLocation(const bool meshConnectivity) const;
 
-    //- option to initialize data in derived data classes
-    virtual void initialize();
+    //- option to Initialize data in derived data classes
+    virtual void Initialize();
 
     //- Write the coupling data to the buffer
     // Returns the number of entries that were filles in the buffer (nComp * vertices)
-    virtual std::size_t write(double* dataBuffer, bool meshConnectivity, const unsigned int dim) = 0;
+    virtual std::size_t Write(double* dataBuffer, bool meshConnectivity, const unsigned int dim) = 0;
 
     //- Read the coupling data from the buffer
-    virtual void read(double* dataBuffer, const unsigned int dim) = 0;
+    virtual void Read(double* dataBuffer, const unsigned int dim) = 0;
 
     //- Given the meshConnectivity, return if the underlying loactionType of the
     //- interface nodes is supported by the data set
-    virtual bool isLocationTypeSupported(const bool meshConnectivity) const = 0;
+    virtual bool IsLocationTypeSupported(const bool meshConnectivity) const = 0;
 
     //- Get the name of the current data field
-    virtual std::string getDataName() const = 0;
+    virtual std::string GetDataName() const = 0;
 
     //- Destructor
     virtual ~CouplingDataUser() {}

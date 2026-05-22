@@ -17,7 +17,7 @@ preciceAdapter::FSI::ForceBase::ForceBase(
         adapterInfo("Force based calculations only support compressible, incompressible, or solid solver types.", "error");
     }
 
-    dataType_ = vector;
+    mDataType = vector;
 }
 
 // Calculate viscous force
@@ -143,7 +143,7 @@ std::size_t preciceAdapter::FSI::ForceBase::writeToBuffer(double* buffer,
 
     int bufferIndex = 0;
     // For every boundary patch of the interface
-    for (const label patchID : patchIDs_)
+    for (const label patchID : mPatchIDs)
     {
         tmp<vectorField> tsurface = getFaceVectors(patchID);
         const auto& surface = tsurface();

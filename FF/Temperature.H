@@ -25,15 +25,15 @@ public:
         const std::string nameT);
 
     //- Write the temperature values into the buffer
-    std::size_t write(double* buffer, bool meshConnectivity, const unsigned int dim) override;
+    std::size_t Write(double* buffer, bool meshConnectivity, const unsigned int dim) override;
 
     //- Read the temperature values from the buffer
-    void read(double* buffer, const unsigned int dim) override;
+    void Read(double* buffer, const unsigned int dim) override;
 
-    bool isLocationTypeSupported(const bool meshConnectivity) const override;
+    bool IsLocationTypeSupported(const bool meshConnectivity) const override;
 
     //- Get the name of the current data field
-    std::string getDataName() const override;
+    std::string GetDataName() const override;
 };
 
 }

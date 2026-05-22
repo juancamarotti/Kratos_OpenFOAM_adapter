@@ -22,11 +22,11 @@ protected:
 public:
     ScalarFieldCoupler(const Foam::fvMesh& mesh, const preciceAdapter::FieldConfig& fieldConfig);
 
-    void initialize();
-    std::size_t write(double* buffer, bool meshConnectivity, const unsigned int dim);
-    void read(double* buffer, const unsigned int dim);
-    bool isLocationTypeSupported(const bool meshConnectivity) const;
-    std::string getDataName() const;
+    void Initialize();
+    std::size_t Write(double* buffer, bool meshConnectivity, const unsigned int dim);
+    void Read(double* buffer, const unsigned int dim);
+    bool IsLocationTypeSupported(const bool meshConnectivity) const;
+    std::string GetDataName() const;
 
     virtual ~ScalarFieldCoupler() {};
 };
@@ -41,11 +41,11 @@ protected:
 public:
     VectorFieldCoupler(const Foam::fvMesh& mesh, const preciceAdapter::FieldConfig& fieldConfig);
 
-    void initialize();
-    std::size_t write(double* buffer, bool meshConnectivity, const unsigned int dim);
-    void read(double* buffer, const unsigned int dim);
-    bool isLocationTypeSupported(const bool meshConnectivity) const;
-    std::string getDataName() const;
+    void Initialize();
+    std::size_t Write(double* buffer, bool meshConnectivity, const unsigned int dim);
+    void Read(double* buffer, const unsigned int dim);
+    bool IsLocationTypeSupported(const bool meshConnectivity) const;
+    std::string GetDataName() const;
 
     virtual ~VectorFieldCoupler() {};
 };
