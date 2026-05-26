@@ -66,7 +66,7 @@ public:
     void SetFlipNormal(bool flipNormal);
 
     //- Apply flip normal to the data buffer (multiply by -1)
-    void ApplyFlipNormal(precice::span<double> dataBuffer);
+    void ApplyFlipNormal(double* pData, std::size_t Size);
 
     //- Set the patch IDs that form the interface
     void SetPatchIDs(std::vector<int> patchIDs);
