@@ -606,6 +606,8 @@ void preciceAdapter::Interface::CreateBuffer()
 
 void preciceAdapter::Interface::ReadCouplingData(double relativeReadTime)
 {
+    (void)relativeReadTime;
+
     // Make every coupling data reader Read
     for (uint i = 0; i < mCouplingDataReaders.size(); i++)
     {
@@ -613,25 +615,48 @@ void preciceAdapter::Interface::ReadCouplingData(double relativeReadTime)
         preciceAdapter::CouplingDataUser*
             couplingDataReader = mCouplingDataReaders.at(i);
 
-        // Make preCICE Read vector or scalar data
-        // and fill the adapter's buffer
-        std::size_t nReadData = mVertexIDs.size() * mPrecice.getDataDimensions(mMeshName, couplingDataReader->DataName());
-        // We could add a sanity check here
-        // nReadData == mVertexIDs.size() * (1 + (mDim - 1) * static_cast<int>(couplingDataReader->HasVectorData()));
+        // Determine expected size
+        std::size_t nReadData =
+            mVertexIDs.size()
+            * (couplingDataReader->HasVectorData() ? mDim : 1);
 
-        precice::span<double> dataSpanRead {mDataBuffer.data(), nReadData};
-        mPrecice.readData(
-            mMeshName,
-            couplingDataReader->DataName(),
-            mVertexIDs,
-            relativeReadTime,
-            dataSpanRead);
+        // Prepare CoSimIO import
+        CoSimIO::Info import_info;
+        import_info.Set("connection_name", mConnectionName);
+        import_info.Set("identifier", couplingDataReader->DataName());
+
+        // Receive data
+        std::vector<double> received_data(nReadData);
+
+        import_info = CoSimIO::ImportData(
+            import_info,
+            received_data);
+
+        // Optional sanity check
+        if (received_data.size() != nReadData)
+        {
+            std::cerr << "ERROR: expected "
+                      << nReadData
+                      << " values but received "
+                      << received_data.size()
+                      << std::endl;
+        }
+
+        // Copy into adapter buffer
+        std::copy(
+            received_data.begin(),
+            received_data.end(),
+            mDataBuffer.begin());
 
         // Apply flip normal if required
-        couplingDataReader->ApplyFlipNormal(dataSpanRead);
+        couplingDataReader->ApplyFlipNormal(
+            mDataBuffer.data(),
+            received_data.size());
 
         // Read the received data from the buffer
-        couplingDataReader->Read(mDataBuffer.data(), mDim);
+        couplingDataReader->Read(
+            mDataBuffer.data(),
+            mDim);
     }
 }
 
@@ -653,10 +678,10 @@ void preciceAdapter::Interface::WriteCouplingData()
         // Write the data into the adapter's buffer
         auto nWrittenData = couplingDataWriter->Write(mDataBuffer.data(), mMeshConnectivity, mDim);
 
-        precice::span<double> dataSpanWritten {mDataBuffer.data(), nWrittenData};
-
         // Apply flip normal if required
-        couplingDataWriter->ApplyFlipNormal(dataSpanWritten);
+        couplingDataWriter->ApplyFlipNormal(
+            mDataBuffer.data(),
+            nWrittenData);
 
         // Convert span/buffer into std::vector<double> for CoSimIO
         std::vector<double> data_to_send(
@@ -678,13 +703,6 @@ void preciceAdapter::Interface::WriteCouplingData()
             export_info,
             data_to_send
         );
-
-        // // Make preCICE Write vector or scalar data
-        // mPrecice.writeData(
-        //     mMeshName,
-        //     couplingDataWriter->DataName(),
-        //     mVertexIDs,
-        //     dataSpanWritten);
     }
 }
 
