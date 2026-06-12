@@ -444,22 +444,23 @@ try
 
     // If checkpointing is required, specify the checkpointed fields
     // and write the first checkpoint
-    // if (RequiresWritingCheckpoint())
-    // {
-    //     mCheckpointing = true;
+    if (mStrongCoupling)
+    {
+        mCheckpointing = true;
 
-    //     // Setup the checkpointing (find and add fields to checkpoint)
-    //     SetupCheckpointing();
+        // Setup the checkpointing (find and add fields to checkpoint)
+        SetupCheckpointing();
 
-    //     // Write checkpoint (for the first iteration)
-    //     WriteCheckpoint();
-    // }
+        // Write checkpoint (for the first iteration)
+        WriteCheckpoint();
+    }
 
     // Adjust the timestep for the first iteration, if it is fixed
+    std::cout << "Entering CheckSolverTimeStepAndReadData, waiting..." << std::endl;
     // if (!mAdjustableTimestep)
     // {
-    //     AdjustSolverTimeStepAndReadData();
-    // }
+    CheckSolverTimeStepAndReadData();
+    //}
 
     // If the solver tries to end before the coupling is complete,
     // e.g. because the solver's endTime was smaller or (in implicit
@@ -487,100 +488,78 @@ catch (const CoSimIOError& e)
     std::exit(EXIT_FAILURE);
 }
 
+// Execute() for CoSimIO
 void preciceAdapter::Adapter::execute()
 try
 {
+    Info << "OPENFOAM: inside execute()" << Foam::endl;
 
-    // The solver has already solved the equations for this timestep.
-    // Now call the adapter's methods to perform the coupling.
-
-    // TODO add a function which checks if all fields are checkpointed.
-    // if (ncheckpointed is nregisterdobjects. )
-
-    // Write the coupling data in the buffer
+    // OpenFOAM has already solved. Export force to Kratos.
     WriteCouplingData();
-    std::cout << "The data export to co sim io was successful" << std::endl;
 
-    // Advance preCICE
-    Advance();
+    Info << "OPENFOAM: coupling data exported" << Foam::endl;
 
-    // Read checkpoint if required
-    if (RequiresReadingCheckpoint())
+    if (mStrongCoupling)
     {
-        PruneCheckpointedFields();
-        ReadCheckpoint();
+        CoSimIO::Info controlInfo =
+            ImportControlInfo();
+
+        ProcessControlInfo(controlInfo);
     }
 
-    // Write checkpoint if required
-    if (RequiresWritingCheckpoint())
+    if (mStrongCoupling && mRepeatTimeStep)
     {
-        WriteCheckpoint();
-    }
-    exit(0);
+        Info << "OPENFOAM: repeating timestep" << Foam::endl;
 
-    // As soon as OpenFOAM writes the results, it will not try to write again
-    // if the time takes the same value again. Therefore, during an implicit
-    // coupling, we write again when the coupling timestep is complete.
-    // Check the behavior e.g. by using watch on a result file:
-    //     watch -n 0.1 -d ls --full-time Fluid/0.01/T.gz
-    SETUP_TIMER();
-    if (mCheckpointing && IsCouplingTimeWindowComplete())
-    {
-        // Check if the time directory already exists
-        // (i.e. the solver wrote results that need to be updated)
-        if (mRunTime.timePath().type() == fileName::DIRECTORY)
+        if (mStrongCoupling)
         {
-            adapterInfo(
-                "The coupling timestep completed. "
-                "Writing the updated results.",
-                "info");
-            const_cast<Time&>(mRunTime).writeNow();
+            PruneCheckpointedFields();
+            ReadCheckpoint();
         }
-    }
-    ACCUMULATE_TIMER(time_in_write_results);
 
-    // Adjust the timestep, if it is fixed
-    if (!mAdjustableTimestep)
-    {
-        AdjustSolverTimeStepAndReadData();
+        CheckSolverTimeStepAndReadData();
+
+        mRepeatTimeStep = false;
+        return;
     }
 
-    // If the coupling is not going to continue, tear down everything
-    // and stop the simulation.
-    if (!IsCouplingOngoing())
+    if (mStrongCoupling && !mRepeatTimeStep)
     {
-        adapterInfo("The coupling completed.", "info");
+        Info << "OPENFOAM: timestep accepted" << Foam::endl;
 
-        // Finalize the preCICE solver interface and delete data
+        if (mStrongCoupling)
+        {
+            WriteCheckpoint();
+        }
+
+        CheckSolverTimeStepAndReadData();
+        return;
+    }
+    
+    CheckSolverTimeStepAndReadData();
+
+    if (!mCouplingOngoing)
+    {
+        Info << "OPENFOAM: finalize requested" << Foam::endl;
+
         Finalize();
 
-        // Tell OpenFOAM to stop the simulation.
-        // Set the solver's endTime to now. The next evaluation of
-        // runTime.run() will be false and the solver will exit.
         const_cast<Time&>(mRunTime).setEndTime(mRunTime.value());
-        adapterInfo(
-            "The simulation was ended by preCICE. "
-            "Calling the end() methods of any functionObject explicitly.",
-            "info");
-        adapterInfo("Great that you are using the OpenFOAM-preCICE adapter! "
-                    "Next to the preCICE library and any other components, please also cite this adapter. "
-                    "Find how on https://precice.org/adapter-openfoam-overview.html.",
-                    "info");
         const_cast<Time&>(mRunTime).functionObjects().end();
-    }
 
-    return;
+        return;
+    }
 }
 catch (const CoSimIOError& e)
 {
+    Info << "OPENFOAM: CoSimIO error in execute()" << Foam::endl;
     std::exit(EXIT_FAILURE);
 }
-
 
 void preciceAdapter::Adapter::adjustTimeStep()
 try
 {
-    AdjustSolverTimeStepAndReadData();
+    CheckSolverTimeStepAndReadData();
 
     return;
 }
@@ -647,44 +626,54 @@ void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
     return;
 }
 
+void preciceAdapter::Adapter::DisconnectSolverFromCoSimIO()
+{
+    Info << "Disconnecting from CoSimulation..." << nl;
+
+    CoSimIO::Info disconnect_settings;
+
+    disconnect_settings.Set(
+        "connection_name",
+        mConnectionName);
+
+    CoSimIO::Info disconnect_info =
+        CoSimIO::Disconnect(
+            disconnect_settings);
+
+    const int connection_status =
+        disconnect_info.Get<int>(
+            "connection_status");
+
+    if (connection_status
+        != CoSimIO::ConnectionStatus::Disconnected)
+    {
+        FatalErrorInFunction
+            << "Failed to disconnect from CoSimIO"
+            << abort(FatalError);
+    }
+
+    Info << "Successfully disconnected from CoSimulation"
+         << nl;
+}
+
 void preciceAdapter::Adapter::Initialize()
 {
     DEBUG(adapterInfo("Initializing the preCICE solver interface..."));
     SETUP_TIMER();
 
-    // if (mPrecice->requiresInitialData())
-    // {
-    //     DEBUG(adapterInfo("Initializing preCICE data..."));
-    //     WriteCouplingData();
-    // }
-    // CoSimIO::Info ctrlInfo;
-    // ctrlInfo.Set<std::string>("connection_name", mConnectionName);
-    // ctrlInfo.Set<std::string>("identifier", "run_control");
+    // Write initial coupling data to kratos
+    DEBUG(adapterInfo("Initializing preCICE data..."));
+    WriteCouplingData();
 
-    // Info << "OPENFOAM: waiting for run_control signal" << Foam::endl;
+    // Obtain whether the coupling is strong or not
+    ProcessControlInfo(ImportControlInfo());
 
-    // CoSimIO::Info receivedInfo = CoSimIO::ImportInfo(ctrlInfo);
+    // Obtain whether OpenFOAM is the first one to go or nor
+    ProcessControlInfo(ImportControlInfo());
 
-    // const std::string controlSignal =
-    //     receivedInfo.Get<std::string>("control_signal");
+    // Obtain the time step window
+    ProcessControlInfo(ImportControlInfo());
 
-    // Info << "OPENFOAM: received control_signal = "
-    //     << controlSignal << Foam::endl;
-
-    // if (controlSignal == "isStrongCoupling")
-    // {
-    //     CoSimIO::Info settings =
-    //         receivedInfo.Get<CoSimIO::Info>("settings", CoSimIO::Info{});
-
-    //     mStrongCoupling =
-    //         settings.Get<bool>("isStrongCoupling");
-
-    //     Info << "OPENFOAM: isStrongCoupling = "
-    //         << mStrongCoupling << Foam::endl;
-    // }
-
-
-    // mPrecice->initialize();
     mCoSimIOInitialized = true;
     ACCUMULATE_TIMER(time_in_initialize);
 
@@ -695,13 +684,13 @@ void preciceAdapter::Adapter::Initialize()
 
 void preciceAdapter::Adapter::Finalize()
 {
-    if (nullptr != mPrecice && mCoSimIOInitialized && !IsCouplingOngoing())
+    if (mCoSimIOInitialized && !IsCouplingOngoing())
     {
-        DEBUG(adapterInfo("Finalizing the preCICE solver interface..."));
+        DEBUG(adapterInfo("Finalizing the CoSimIO solver interface..."));
 
         // Finalize the preCICE solver interface
         SETUP_TIMER();
-        mPrecice->finalize();
+        DisconnectSolverFromCoSimIO();
         ACCUMULATE_TIMER(time_in_finalize);
 
         mCoSimIOInitialized = false;
@@ -711,7 +700,7 @@ void preciceAdapter::Adapter::Finalize()
     }
     else
     {
-        adapterInfo("Could not finalize preCICE.", "error");
+        adapterInfo("Could not finalize CoSimIO.", "error");
     }
 
     return;
@@ -728,110 +717,37 @@ void preciceAdapter::Adapter::Advance()
     return;
 }
 
-void preciceAdapter::Adapter::AdjustSolverTimeStepAndReadData()
+void preciceAdapter::Adapter::CheckSolverTimeStepAndReadData()
 {
-    DEBUG(adapterInfo("Adjusting the solver's timestep..."));
+    DEBUG(adapterInfo("Using fixed solver timestep..."));
 
-    // The timestep size that the solver has determined that it wants to use
-    double timestepSolverDetermined;
-
-    /* In this method, the adapter overwrites the timestep used by OpenFOAM.
-       If the timestep is not adjustable, OpenFOAM will not try to re-estimate
-       the timestep or read it again from the controlDict. Therefore, store
-       the value that the timestep has is the beginning and try again to use this
-       in every iteration.
-       // TODO Treat also the case where the user modifies the timestep
-       // in the controlDict during the simulation.
-    */
-
-    // Is the timestep adjustable or fixed?
-    if (!mAdjustableTimestep)
+    if (!mUseStoredTimestep)
     {
-        // Have we already stored the timestep?
-        if (!mUseStoredTimestep)
-        {
-            // Show a warning if runTimeModifiable is set
-            if (mRunTime.runTimeModifiable())
-            {
-                adapterInfo(
-                    "You have enabled 'runTimeModifiable' in the "
-                    "controlDict. The preciceAdapter does not yet "
-                    "fully support this functionality when "
-                    "'adjustableTimestep' is not enabled. "
-                    "If you modify the 'deltaT' in the controlDict "
-                    "during the simulation, it will not be updated.",
-                    "warning");
-            }
-
-            // Store the value
-            mTimeStepStored = mRunTime.deltaT().value();
-
-            // Ok, we stored it once, we will use this from now on
-            mUseStoredTimestep = true;
-        }
-
-        // Use the stored timestep as the determined solver's timestep
-        timestepSolverDetermined = mTimeStepStored;
-    }
-    else
-    {
-        // The timestep is adjustable, so OpenFOAM will modify it
-        // and therefore we can use the updated value
-        timestepSolverDetermined = mRunTime.deltaT().value();
+        mTimeStepStored = mRunTime.deltaT().value();
+        mUseStoredTimestep = true;
     }
 
-    /* If the solver tries to use a timestep smaller than the one determined
-       by preCICE, that means that the solver is trying to subcycle.
-       This may not be allowed by the user.
-       If the solver tries to use a bigger timestep, then it needs to use
-       the same timestep as the one determined by preCICE.
-    */
-    double tolerance = 1e-14;
-    if (mPrecice->getMaxTimeStepSize() - timestepSolverDetermined > tolerance)
+    mTimeStepSolver = mTimeStepStored;
+
+    const double current_delta_t = mRunTime.deltaT().value();
+    const double tolerance = 1e-14;
+
+    if (std::abs(current_delta_t - mTimeStepSolver) > tolerance)
     {
         adapterInfo(
-            "The solver's timestep is smaller than the "
-            "coupling timestep. Subcycling...",
-            "info");
-        mTimeStepSolver = timestepSolverDetermined;
-        if (mFSIEnabled)
-        {
-            adapterInfo(
-                "The adapter does not fully support subcycling for FSI and instabilities may occur.",
-                "warning");
-        }
-    }
-    else if (timestepSolverDetermined - mPrecice->getMaxTimeStepSize() > tolerance)
-    {
-        // In the last time-step, we adjust to dt = 0, but we don't need to trigger the warning here
-        if (IsCouplingOngoing())
-        {
-            adapterInfo(
-                "The solver's timestep cannot be larger than the coupling timestep."
-                " Adjusting from "
-                    + std::to_string(timestepSolverDetermined) + " to " + std::to_string(mPrecice->getMaxTimeStepSize()),
-                "warning");
-        }
-        mTimeStepSolver = mPrecice->getMaxTimeStepSize();
-    }
-    else
-    {
-        DEBUG(adapterInfo("The solver's timestep is the same as the "
-                          "coupling timestep."));
-        mTimeStepSolver = mPrecice->getMaxTimeStepSize();
+            "The OpenFOAM timestep differs from the stored fixed timestep. "
+            "Resetting deltaT from "
+            + std::to_string(current_delta_t)
+            + " to "
+            + std::to_string(mTimeStepSolver),
+            "warning");
+
+        const_cast<Time&>(mRunTime).setDeltaT(mTimeStepSolver, false);
     }
 
-    // Update the solver's timestep (but don't trigger the adjustDeltaT(),
-    // which also triggers the functionObject's adjustTimeStep())
-    // TODO: Keep this in mind if any relevant problem appears.
-    const_cast<Time&>(mRunTime).setDeltaT(mTimeStepSolver, false);
+    DEBUG(adapterInfo("Reading coupling data from CoSimIO..."));
 
-    DEBUG(adapterInfo("Reading coupling data associated to the calculated time-step size..."));
-
-    // Read the received coupling data from the buffer
-    // Fits to an implicit Euler
     ReadCouplingData(mRunTime.deltaT().value());
-    return;
 }
 
 bool preciceAdapter::Adapter::IsCouplingOngoing()
@@ -865,6 +781,62 @@ bool preciceAdapter::Adapter::RequiresWritingCheckpoint()
     return mPrecice->requiresWritingCheckpoint();
 }
 
+CoSimIO::Info preciceAdapter::Adapter::ImportControlInfo()
+{
+    CoSimIO::Info info;
+    info.Set("connection_name", mConnectionName);
+    info.Set("identifier", "run_control");
+
+    return CoSimIO::ImportInfo(info);
+}
+
+void preciceAdapter::Adapter::ProcessControlInfo(
+    const CoSimIO::Info& rInfo)
+{
+    const std::string signal =
+        rInfo.Get<std::string>("control_signal");
+
+    CoSimIO::Info settings =
+        rInfo.Get<CoSimIO::Info>("settings", CoSimIO::Info{});
+
+    Info << "OPENFOAM: received control_signal = "
+         << signal << Foam::endl;
+
+    if (signal == "isStrongCoupling")
+    {
+        mStrongCoupling =
+            settings.Get<bool>("isStrongCoupling");
+
+        Info << "OPENFOAM: isStrongCoupling = "
+             << mStrongCoupling << Foam::endl;
+    }
+    else if (signal == "firstOneToGo")
+    {
+        mFirstOneToGo =
+            settings.Get<bool>("firstOneToGo");
+    }
+    else if (signal == "setEndOfStepWindow")
+    {
+        mEndTimeOfStepWindow =
+            settings.Get<double>("end_time_of_step_window");
+    }
+    else if (signal == "solve")
+    {
+        mSolveRequested = true;
+    }
+    else if (signal == "finalize")
+    {
+        mCouplingOngoing = false;
+    }
+    else if (signal == "repeat_time_step")
+    {
+        mRepeatTimeStep =
+            settings.Get<bool>("repeat_time_step");
+
+        Info << "OPENFOAM: repeat_time_step = "
+            << mRepeatTimeStep << Foam::endl;
+    }
+}
 
 void preciceAdapter::Adapter::StoreCheckpointTime()
 {
@@ -1487,15 +1459,6 @@ catch (const CoSimIOError& e)
 
 void preciceAdapter::Adapter::Teardown()
 {
-    // If the solver interface was not deleted before, delete it now.
-    // Normally it should be deleted when IsCouplingOngoing() becomes false.
-    if (nullptr != mPrecice)
-    {
-        DEBUG(adapterInfo("Destroying the preCICE solver interface..."));
-        delete mPrecice;
-        mPrecice = nullptr;
-    }
-
     // Delete the preCICE solver interfaces
     if (mInterfaces.size() > 0)
     {

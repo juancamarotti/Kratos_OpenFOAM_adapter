@@ -75,7 +75,14 @@ private:
     //- Member variables required for CoSimIO
     std::string mConnectionName;
 
+    // Control variables
     bool mStrongCoupling = false;
+    bool mFirstOneToGo = false;
+    double mEndTimeOfStepWindow;
+    bool mSolveRequested;
+    bool mCouplingOngoing = true;
+    bool mRepeatTimeStep = false;
+    std::string mLastControlSignal;
 
     //- OpenFOAM runTime object
     const Foam::Time& mRunTime;
@@ -247,6 +254,8 @@ private:
     // Methods communicating with CoSimIO
     void ConnectSolverToCoSimIO();
 
+    void DisconnectSolverFromCoSimIO();
+
     //- Initialize preCICE and exchange the first data
     void Initialize();
 
@@ -264,7 +273,7 @@ private:
 
     //- Adjust the timestep of the solver according to preCICE
     // and read data associated to the calculated time step length
-    void AdjustSolverTimeStepAndReadData();
+    void CheckSolverTimeStepAndReadData();
 
     //- Determine if the coupling is still happening
     bool IsCouplingOngoing();
@@ -355,6 +364,12 @@ private:
     //- Destroy the preCICE interface and delete the allocated
     //  memory in a proper way. Called by the destructor.
     void Teardown();
+
+    // Import the control info
+    CoSimIO::Info ImportControlInfo();
+
+    // Process the control info
+    void ProcessControlInfo(const CoSimIO::Info& rInfo);
 
 public:
     // Methods called by the functionObject
