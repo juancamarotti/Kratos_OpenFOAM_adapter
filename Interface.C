@@ -212,16 +212,7 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
             }
         }
 
-        std::cout << "OPENFOAM: before Mesh export, sleeping..." << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-
-        std::cout << "OPENFOAM: now exporting Mesh" << std::endl;
-
-
-        // Pass the Mesh vertices information to preCICE
-        //mPrecice.setMeshVertices(mMeshName, vertices, mVertexIDs);
-        // For CoSimIO
+        // Export mesh to CoSimIO
         mInfo.Clear();
         mInfo.Set("identifier", mMeshName);
         mInfo.Set("connection_name", mConnectionName);
@@ -689,12 +680,6 @@ void preciceAdapter::Interface::WriteCouplingData()
             mDataBuffer.begin() + nWrittenData
         );
         
-        std::cout << data_to_send.size() << std::endl;
-        for (auto force : data_to_send)
-        {
-            std::cout << force << std::endl;
-        }
-
         CoSimIO::Info export_info;
         export_info.Set("connection_name", mConnectionName);
         export_info.Set("identifier", couplingDataWriter->DataName());
