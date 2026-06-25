@@ -527,9 +527,19 @@ try
     {
         Info << "OPENFOAM: timestep accepted" << Foam::endl;
 
-        if (mStrongCoupling)
+        WriteCheckpoint();
+
+        CoSimIO::Info controlInfo = ImportControlInfo();
+        ProcessControlInfo(controlInfo);
+
+        if (!mCouplingOngoing)
         {
-            WriteCheckpoint();
+            Info << "OPENFOAM: finalize requested" << Foam::endl;
+
+            const_cast<Time&>(mRunTime).setEndTime(mRunTime.value());
+            const_cast<Time&>(mRunTime).functionObjects().end();
+
+            return;
         }
 
         CheckSolverTimeStepAndReadData();
@@ -537,18 +547,6 @@ try
     }
     
     CheckSolverTimeStepAndReadData();
-
-    if (!mCouplingOngoing)
-    {
-        Info << "OPENFOAM: finalize requested" << Foam::endl;
-
-        Finalize();
-
-        const_cast<Time&>(mRunTime).setEndTime(mRunTime.value());
-        const_cast<Time&>(mRunTime).functionObjects().end();
-
-        return;
-    }
 }
 catch (const CoSimIOError& e)
 {
@@ -684,7 +682,7 @@ void preciceAdapter::Adapter::Initialize()
 
 void preciceAdapter::Adapter::Finalize()
 {
-    if (mCoSimIOInitialized && !IsCouplingOngoing())
+    if (mCoSimIOInitialized)
     {
         DEBUG(adapterInfo("Finalizing the CoSimIO solver interface..."));
 
@@ -810,19 +808,9 @@ void preciceAdapter::Adapter::ProcessControlInfo(
         Info << "OPENFOAM: isStrongCoupling = "
              << mStrongCoupling << Foam::endl;
     }
-    else if (signal == "firstOneToGo")
+    else if (signal == "coupling_ongoing")
     {
-        mFirstOneToGo =
-            settings.Get<bool>("firstOneToGo");
-    }
-    else if (signal == "setEndOfStepWindow")
-    {
-        mEndTimeOfStepWindow =
-            settings.Get<double>("end_time_of_step_window");
-    }
-    else if (signal == "solve")
-    {
-        mSolveRequested = true;
+        mCouplingOngoing = settings.Get<bool>("coupling_ongoing");
     }
     else if (signal == "finalize")
     {
@@ -1444,11 +1432,7 @@ void preciceAdapter::Adapter::WriteMeshCheckpoint()
 void preciceAdapter::Adapter::end()
 try
 {
-    // Throw a warning if the simulation exited before the coupling was complete
-    if (nullptr != mPrecice && IsCouplingOngoing())
-    {
-        adapterInfo("The solver exited before the coupling was complete.", "warning");
-    }
+    Finalize();
 
     return;
 }
