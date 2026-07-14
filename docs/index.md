@@ -11,8 +11,8 @@ hide:
 
 ## **Table of Contents**
 
-- [What is this?](#what-is-this?)
-- [What can it do?](#what-can-it-do?)
+- [What is this?](#what-is-this)
+- [What can it do?](#what-can-it-do)
 - [Try](#try)
 - [Learn](#learn)
 - [Cite](#cite)
@@ -54,7 +54,7 @@ All features of preCICE are supported, including implicit coupling and nearest-p
 
 
 ## **Try**
-Here you will find how to [get the adapter](get.md), how to [configure](configure.md) a case, how to [extend the adapter](extend.md) to cover additional features, as well as a few notes on [supported OpenFOAM versions](openfoam-support.md).
+Here you will find how to [get the adapter](get.md), how to [configure](config.md) a case, how to [extend the adapter](extend.md) to cover additional features, as well as a few notes on [supported OpenFOAM versions](openfoam-support.md).
 
 
 ## **Learn**

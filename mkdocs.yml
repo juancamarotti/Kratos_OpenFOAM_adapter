@@ -65,3 +65,6 @@ nav:
   - Extending: extend.md
 
   - OpenFOAM support: openfoam-support.md
+
+exclude_docs: |
+  images/docs-adapter-openfoam-implicit-loop-src.md
