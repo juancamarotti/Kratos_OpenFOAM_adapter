@@ -3,7 +3,42 @@ title: Configure the OpenFOAM adapter
 permalink: adapter-openfoam-config.html
 keywords: adapter, openfoam, configuration, preciceDict, controlDict
 summary: "Write a system/preciceDict, set compatible boundary conditions, and activate the adapter in your system/controlDict."
+hide: 
+  -toc
 ---
+
+!!! abstract "Summary"
+
+    Write a system/preciceDict, set compatible boundary conditions, and activate the adapter in your system/controlDict.
+
+
+## Table of Contents
+- [The adapter's configuration file](#the-adapters-configuration-file)
+- [Configuration of the OpenFOAM case](#configuration-of-the-openfoam-case)
+    - [Boundary conditions](#boundary-conditions)
+        - [CHT](#cht)
+        - [FSI](#fsi)
+        - [FF](#ff)
+        - [Generic module](#generic-module)
+    - [Volume coupling](#volume-coupling)
+        - [Volume coupling over a domain region](#volume-coupling-over-a-domain-region)
+    - [Load the adapter](#load-the-adapter)
+- [Advanced configuration](#advanced-configuration)
+    - [Nearest-projection mapping](#nearest-projection-mapping)
+        - [Adapter Implementation](#adapter-implementation)
+    - [Notes on subcycling](#notes-on-subcycling)
+    - [Additional properties for some solvers](#additional-properties-for-some-solvers)
+        - [Conjugate heat transfer](#conjugate-heat-transfer)
+        - [Fluid-structure interaction](#fluid-structure-interaction)
+        - [Fluid-fluid coupling](#fluid-fluid-coupling)
+    - [Additional parameters in the adapter's configuration file](#additional-parameters-in-the-adapters-configuration-file)
+        - [User-defined solver type](#user-defined-solver-type)
+        - [Parameters and fields with different names](#parameters-and-fields-with-different-names)
+        - [Restarting FSI simulations](#restarting-fsi-simulations)
+        - [Debugging](#debugging)
+- [Coupling OpenFOAM with 2D solvers](#coupling-openfoam-with-2d-solvers)
+- [Porting your older cases to the current configuration format](#porting-your-older-cases-to-the-current-configuration-format)
+- [Upcoming changes to the configuration format](#upcoming-changes-to-the-configuration-format)
 
 In order to run a coupled simulation, you need to:
 
@@ -15,7 +50,7 @@ In order to run a coupled simulation, you need to:
 
 You may skip the section _"Advanced configuration"_ in the beginning, as it only concerns special cases.
 
-## The adapter's configuration file
+## **The adapter's configuration file**
 
 The adapter is configured via the file `system/preciceDict`. This file is an OpenFOAM dictionary with the following form:
 
@@ -133,16 +168,15 @@ For fluid-structure interaction, coupled quantities can be:
   - fluid participants: `Displacement`, `DisplacementDelta` (difference to the displacement at the last coupling time window)
   - solid participants: `Force`, `Stress`
 
-{% warning %}
-You will run into problems when you use `Displacement(Delta)` as write data set and execute RBF mappings in parallel. This would affect users who use OpenFOAM and the adapter as the Solid participant in order to compute solid mechanics with OpenFOAM (currently not officially supported at all). Have a look [at this issue on GitHub](https://github.com/precice/openfoam-adapter/issues/153) for details.
-{% endwarning %}
+!!! warning
 
-{% tip %}
-The `writeData` and `readData` names are case-insensitive since v1.4.0. This means that both `TEMPERATURE` and `Temperature` are valid, for example.
-Additionally, since earlier versions, only the beginning of the name needs to match: `Temperatures0` is valid and matched to the temperature reader/writer, for example.
-{% endtip %}
+    You will run into problems when you use `Displacement(Delta)` as write data set and execute RBF mappings in parallel. This would affect users who use OpenFOAM and the adapter as the Solid participant in order to compute solid mechanics with OpenFOAM (currently not officially supported at all). Have a look [at this issue on GitHub](https://github.com/precice/openfoam-adapter/issues/153) for details.
 
-## Configuration of the OpenFOAM case
+!!! tip
+    The `writeData` and `readData` names are case-insensitive since v1.4.0. This means that both `TEMPERATURE` and `Temperature` are valid, for example.
+    Additionally, since earlier versions, only the beginning of the name needs to match: `Temperatures0` is valid and matched to the temperature reader/writer, for example.
+
+## **Configuration of the OpenFOAM case**
 
 A few changes are required in the configuration of an OpenFOAM case, in order to specify the interfaces and load the adapter. For some solvers, additional parameters may be needed (see "advanced configuration").
 
@@ -151,7 +185,7 @@ A few changes are required in the configuration of an OpenFOAM case, in order to
 The type of the `readData` needs to be compatible with the respective boundary
 conditions set for each field in the `0/` directory of the case.
 
-Read the [OpenFOAM User Guide](https://www.openfoam.com/documentation/user-guide/boundaries.php) for more on boundary conditions.
+Read the [OpenFOAM User Guide](https://www.openfoam.com/documentation/user-guide/boundaries.php) for more on boundary conditions. <!--This user guide link is obsolete, should be replaced>
 
 #### CHT
 
@@ -667,11 +701,11 @@ The option here defines the way the interface mesh is initialized when restartin
 
 The user can toggle debug messages at [build time](https://precice.org/adapter-openfoam-get.html).
 
-## Coupling OpenFOAM with 2D solvers
+## **Coupling OpenFOAM with 2D solvers**
 
 The adapter asks preCICE for the dimensions of the coupling data defined in the `precice-config.xml` (2D or 3D). It then automatically operates in either 3D (normal) or 2D (reduced) mode, with z-axis being the out-of-plane dimension. [Read more](https://github.com/precice/openfoam-adapter/pull/96). In 2D mode, the adapter also supports axisymmetric cases.
 
-## Porting your older cases to the current configuration format
+## **Porting your older cases to the current configuration format**
 
 In earlier versions of the adapter, we were using a yaml-based configuration format,
 with the adapter configuration file usually named as `precice-adapter-config.yml`.
@@ -679,7 +713,7 @@ We moved to a OpenFOAM dictionary format in [#105](https://github.com/precice/op
 to reduce the dependencies. You may also find the [tutorials #69](https://github.com/precice/tutorials/pull/69)
 to be a useful reference (file changes).
 
-## Upcoming changes to the configuration format
+## **Upcoming changes to the configuration format**
 
 We are currently working on porting the adapter configuration file to the new [adapter configuration schema](https://github.com/precice/preeco-orga/tree/main/adapter-config-schema). Since v1.4.0, `readData` and `writeData` support parsing both the new format. Additional options (`solver_name`, `operation` and `flip-normal`) can be specified in the dictionaries. For example, the data `name` as known by preCICE can be different than the `solver_name` known by OpenFOAM. However, the new options are not yet functionally supported by the current modules FF, CHT and FSI. Support for the new options is planned in the Generic module. The legacy word list format is still supported, and both formats can even be mixed:
 
