@@ -12,7 +12,7 @@ hide:
     Get the code from GitHub and run ./Allwmake. If this fails, look into wmake.log and ldd.log.
 
 ## **Table of Contents**
-- [What does the adapter version mean?](#what-does-the-adapter-version-mean)
+- [What does the adapter version mean?](#what-does-the-adapter-version-mean?)
 - [Troubleshooting](#troubleshooting)
     - [Unknown function type `preciceAdapterFunctionObject`](#unknown-function-type-preciceadapterfunctionobject)
     - [wmkdep: could not open file X](#wmkdep-could-not-open-file-x)
