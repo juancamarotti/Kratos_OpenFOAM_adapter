@@ -11,7 +11,7 @@
 
 ## Start here
 
-See the [adapter documentation](docs/index.md) and related [tutorials](https://precice.org/tutorials.html).
+See the [adapter documentation](https://precice.org/adapter-openfoam-overview.html) and related [tutorials](https://precice.org/tutorials.html).
 
 Please [report any issues](https://github.com/precice/openfoam-adapter/issues) here and give us feedback through [one of our community channels](https://precice.org/community-channels.html). Please ask question in the [preCICE forum](https://precice.discourse.group/), not via issues.
 
