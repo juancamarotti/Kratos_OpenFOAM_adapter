@@ -1,36 +1,81 @@
-# OpenFOAM-preCICE adapter
+# The OpenFOAM adapter
 
-[![Ask questions in the forum](https://img.shields.io/badge/community-forum-orange?link=https%3A%2F%2Fprecice.discourse.group%2F)](https://precice.discourse.group/)
-[![Release](https://img.shields.io/github/release/precice/openfoam-adapter.svg)](https://github.com/precice/openfoam-adapter/releases/latest)
-[![SoftwareHeritage](https://archive.softwareheritage.org/badge/origin/https://github.com/precice/openfoam-adapter/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/precice/openfoam-adapter)
-[![Cite](https://img.shields.io/badge/cite-literature_guide-d45815)](https://precice.org/fundamentals-literature-guide.html)
-[![Changelog](https://img.shields.io/badge/Keep%20a%20Changelog--555.svg?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNmMTVkMzAiIHZpZXdCb3g9IjAgMCAxODcgMTg1Ij48cGF0aCBkPSJNNjIgN2MtMTUgMy0yOCAxMC0zNyAyMmExMjIgMTIyIDAgMDAtMTggOTEgNzQgNzQgMCAwMDE2IDM4YzYgOSAxNCAxNSAyNCAxOGE4OSA4OSAwIDAwMjQgNCA0NSA0NSAwIDAwNiAwbDMtMSAxMy0xYTE1OCAxNTggMCAwMDU1LTE3IDYzIDYzIDAgMDAzNS01MiAzNCAzNCAwIDAwLTEtNWMtMy0xOC05LTMzLTE5LTQ3LTEyLTE3LTI0LTI4LTM4LTM3QTg1IDg1IDAgMDA2MiA3em0zMCA4YzIwIDQgMzggMTQgNTMgMzEgMTcgMTggMjYgMzcgMjkgNTh2MTJjLTMgMTctMTMgMzAtMjggMzhhMTU1IDE1NSAwIDAxLTUzIDE2bC0xMyAyaC0xYTUxIDUxIDAgMDEtMTItMWwtMTctMmMtMTMtNC0yMy0xMi0yOS0yNy01LTEyLTgtMjQtOC0zOWExMzMgMTMzIDAgMDE4LTUwYzUtMTMgMTEtMjYgMjYtMzMgMTQtNyAyOS05IDQ1LTV6TTQwIDQ1YTk0IDk0IDAgMDAtMTcgNTQgNzUgNzUgMCAwMDYgMzJjOCAxOSAyMiAzMSA0MiAzMiAyMSAyIDQxLTIgNjAtMTRhNjAgNjAgMCAwMDIxLTE5IDUzIDUzIDAgMDA5LTI5YzAtMTYtOC0zMy0yMy01MWE0NyA0NyAwIDAwLTUtNWMtMjMtMjAtNDUtMjYtNjctMTgtMTIgNC0yMCA5LTI2IDE4em0xMDggNzZhNTAgNTAgMCAwMS0yMSAyMmMtMTcgOS0zMiAxMy00OCAxMy0xMSAwLTIxLTMtMzAtOS01LTMtOS05LTEzLTE2YTgxIDgxIDAgMDEtNi0zMiA5NCA5NCAwIDAxOC0zNSA5MCA5MCAwIDAxNi0xMmwxLTJjNS05IDEzLTEzIDIzLTE2IDE2LTUgMzItMyA1MCA5IDEzIDggMjMgMjAgMzAgMzYgNyAxNSA3IDI5IDAgNDJ6bS00My03M2MtMTctOC0zMy02LTQ2IDUtMTAgOC0xNiAyMC0xOSAzN2E1NCA1NCAwIDAwNSAzNGM3IDE1IDIwIDIzIDM3IDIyIDIyLTEgMzgtOSA0OC0yNGE0MSA0MSAwIDAwOC0yNCA0MyA0MyAwIDAwLTEtMTJjLTYtMTgtMTYtMzEtMzItMzh6bS0yMyA5MWgtMWMtNyAwLTE0LTItMjEtN2EyNyAyNyAwIDAxLTEwLTEzIDU3IDU3IDAgMDEtNC0yMCA2MyA2MyAwIDAxNi0yNWM1LTEyIDEyLTE5IDI0LTIxIDktMyAxOC0yIDI3IDIgMTQgNiAyMyAxOCAyNyAzM3MtMiAzMS0xNiA0MGMtMTEgOC0yMSAxMS0zMiAxMXptMS0zNHYxNGgtOFY2OGg4djI4bDEwLTEwaDExbC0xNCAxNSAxNyAxOEg5NnoiLz48L3N2Zz4K)](https://github.com/precice/openfoam-adapter/blob/develop/CHANGELOG.md)
-[![License](https://img.shields.io/github/license/precice/openfoam-adapter.svg)](https://github.com/precice/openfoam-adapter/blob/master/LICENSE)
-[![Build with OpenFOAM v2512](https://github.com/precice/openfoam-adapter/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/precice/openfoam-adapter/actions/workflows/build.yml)
-[![OpenFOAM Package Index](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fexasim-project%2Fopi%2Frefs%2Fheads%2Fmain%2Fpkg%2Fprecice-adapter%2Fmetadata.json&query=%24.%5Bname%2Ctype%2Cversion%5D&label=opi)](https://github.com/exasim-project/opi)
+## Overview
 
-## Start here
+## How to get the adapter?
+The adapter depends on OpenFOAM v2512, CoSimIO, and preCICE. The following provides a complete guideline to get the adapter and its dependencies.
 
-See the [adapter documentation](docs/index.md) and related [tutorials](https://precice.org/tutorials.html).
+**1. Clone the adapter's repository**
 
-Please [report any issues](https://github.com/precice/openfoam-adapter/issues) here and give us feedback through [one of our community channels](https://precice.org/community-channels.html). Please ask question in the [preCICE forum](https://precice.discourse.group/), not via issues.
+```bash
+git clone https://github.com/juancamarotti/OpenFOAM_CoSimIO-Adapter.git
+```
 
-This project is actively maintained on [precice/openfoam-adapter](https://github.com/precice/openfoam-adapter). Current maintainers: [@MakisH](https://github.com/MakisH/) and [@DavidSCN](https://github.com/DavidSCN).
+**2. Clone CoSimIO and build it with MPI support**
 
-## Contributing
+```bash
+git clone https://github.com/KratosMultiphysics/CoSimIO.git
 
-We welcome contributions! Have a look at open [good first issues](https://github.com/precice/openfoam-adapter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) and [where we need help](https://github.com/precice/openfoam-adapter/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+cd CoSimIO
 
-Check the file `CONTRIBUTING.md` for a few tips and guidelines.
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \ 
+    -DCO_SIM_IO_BUILD_MPI=ON \ 
+    -DCO_SIM_IO_BUILD_TESTING=OFF
 
-## Citing
+cmake --build build --parallel "$(nproc)"
+```
 
-Whenever using or referring to this adapter in academic publications, please cite it [1]. See the option "Cite this repository" in the "About" section, as well as the [preCICE literature guide](https://precice.org/fundamentals-literature-guide.html) and the [adapter overview page](https://precice.org/adapter-openfoam-overview.html) for more information.
+**3. Install OpenFOAM solver version v2512**
+```bash
+# Add the repository
+curl -s https://dl.openfoam.com/add-debian-repo.sh | sudo bash
 
-## References
+# Update the repository information
+sudo apt-get update
 
-[1] Chourdakis, G., Schneider, D., & Uekermann, B. (2023). OpenFOAM-preCICE: Coupling OpenFOAM with External Solvers for Multi-Physics Simulations. OpenFOAM® Journal, 3, 1–25. [DOI: 10.51560/ofj.v3.88](https://doi.org/10.51560/ofj.v3.88)
+# Install preferred package. Eg,
+sudo apt-get install openfoam2512-default
+```
 
-## Disclaimer
+**4. Get preCICE, build and install**
 
-This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM®  and OpenCFD®  trade marks.
+```bash
+git clone https://github.com/precice/precice.git
+
+cd precice
+
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$HOME/.local" \
+    -DPRECICE_FEATURE_PETSC_MAPPING=OFF
+
+cmake --build build --parallel "$(nproc)"
+cmake --install build
+```
+
+**5. Load OpenFOAM environment**
+
+```bash
+source /usr/lib/openfoam/openfoam2512/etc/bashrc
+```
+
+**6. Set environment variables**
+
+```bash
+export COSIMIO_ROOT=/path/to/CoSimIO
+export PKG_CONFIG_PATH="$HOME/.local/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+export LD_LIBRARY_PATH="$COSIMIO_ROOT/build:$HOME/.local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+```
+Please change ```<path/to/CoSimIO/SourceFiles>``` accordingly. Besides, ```$PKG_CONFIG_PATH``` must include the directory containing ```libprecice.pc```, while ```LD_LIBRARY_PATH``` must include the directories containing the shared libraries ```libco_sim_io.so``` and ```libco_sim_io_mpi.so``` so that the runtime linker can locate them.
+
+**7. At adapter's directory, run ```Allwmake``` build file**
+
+```bash
+chmod +x ./Allwmake
+
+From the adapter root directory, execute:
+
+./Allwmake
+```
+
