@@ -38,6 +38,8 @@ sudo apt-get update
 sudo apt-get install openfoam2512-default
 ```
 
+**⚠️ Warning:** The adapter currently supports **only OpenFOAM v2512**. Please install this version before proceeding.
+
 **4. Get preCICE, build and install**
 
 ```bash
