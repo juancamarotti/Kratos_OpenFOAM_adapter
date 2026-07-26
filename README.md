@@ -61,7 +61,7 @@ curl -s https://dl.openfoam.com/add-debian-repo.sh | sudo bash
 # Update the repository information
 sudo apt-get update
 
-# Install preferred package. Eg,
+# Install OpenFOAM v2512
 sudo apt-get install openfoam2512-default
 ```
 
@@ -90,8 +90,8 @@ source /usr/lib/openfoam/openfoam2512/etc/bashrc
 
 ```bash
 export COSIMIO_ROOT=/path/to/CoSimIO
-export PKG_CONFIG_PATH="$HOME/.local/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-export LD_LIBRARY_PATH="$COSIMIO_ROOT/build:$HOME/.local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export PKG_CONFIG_PATH=path/to/precice_build
+export LD_LIBRARY_PATH=path/to/CoSimIO_build
 ```
 Please change ```<path/to/CoSimIO/SourceFiles>``` accordingly. Besides, ```$PKG_CONFIG_PATH``` must include the directory containing ```libprecice.pc```, while ```LD_LIBRARY_PATH``` must include the directories containing the shared libraries ```libco_sim_io.so``` and ```libco_sim_io_mpi.so``` so that the runtime linker can locate them.
 
