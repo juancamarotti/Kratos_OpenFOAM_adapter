@@ -96,10 +96,6 @@ void preciceAdapter::Adapter::ConfigFileRead()
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE));
 
-    // Read and display the preCICE configuration file name
-    mCoSimIOConfigFilename = CoSimIODict.get<fileName>("preciceConfig");
-    DEBUG(adapterInfo("  precice-config-file : " + mCoSimIOConfigFilename));
-
     // Read and display the participant name
     mParticipantName = CoSimIODict.get<word>("participant");
     DEBUG(adapterInfo("  participant name    : " + mParticipantName));
@@ -308,11 +304,9 @@ try
     DEBUG(adapterInfo("Creating the preCICE solver interface..."));
     DEBUG(adapterInfo("  Number of processes: " + std::to_string(Pstream::nProcs())));
     DEBUG(adapterInfo("  MPI rank: " + std::to_string(Pstream::myProcNo())));
-    //mPrecice = new precice::Participant(mParticipantName, mCoSimIOConfigFilename, Pstream::myProcNo(), Pstream::nProcs());
+
     ConnectSolverToCoSimIO();
-    std::cout << "Connection successful" << std::endl;
-    // exit(0);
-    DEBUG(adapterInfo("  preCICE solver interface was created."));
+    std::cout << "Connection to CoSimIO successful" << std::endl;
 
     ACCUMULATE_TIMER(time_in_co_sim_io_construct);
 
@@ -325,7 +319,7 @@ try
         std::string nameCellDisplacement = mFSIEnabled ? mFSI->getCellDisplacementFieldName() : "default";
         bool restartFromDeformed = mFSIEnabled ? mFSI->isRestartingFromDeformed() : false;
 
-        Interface* interface = new Interface(*mPrecice, mMesh, mInterfacesConfig.at(i).MeshName, mInterfacesConfig.at(i).LocationsType, mInterfacesConfig.at(i).PatchNames, mInterfacesConfig.at(i).CellSetNames, mInterfacesConfig.at(i).MeshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement, mConnectionName);
+        Interface* interface = new Interface(mMesh, mInterfacesConfig.at(i).MeshName, mInterfacesConfig.at(i).LocationsType, mInterfacesConfig.at(i).PatchNames, mInterfacesConfig.at(i).CellSetNames, mInterfacesConfig.at(i).MeshConnectivity, restartFromDeformed, namePointDisplacement, nameCellDisplacement, mConnectionName);
         mInterfaces.push_back(interface);
         DEBUG(adapterInfo("Interface created on mesh " + mInterfacesConfig.at(i).MeshName));
 
@@ -437,9 +431,9 @@ try
         interface->CreateBuffer();
     }
     ACCUMULATE_TIMER(time_in_mesh_setup);
-    std::cout << "THE READERS AND WRITERS WERE CREATED SUCCESSFULLY" << std::endl;
+    std::cout << "The data readers and writers were created successfully" << std::endl;
 
-    // Initialize preCICE and exchange the first coupling data
+    // Initialize and exchange the first coupling data
     Initialize();
 
     // If checkpointing is required, specify the checkpointed fields
@@ -608,6 +602,7 @@ void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
     settings.Set("version", "1.25");
     CoSimIO::Info connect_info;
 
+    // TO DO: MPI Connection with CoSimIO
     // if(TotalNumOfProcesses == 1)
     // {
     Info << "Running in Serial. Connecting to CoSimulation using File IO" << nl;
@@ -656,11 +651,11 @@ void preciceAdapter::Adapter::DisconnectSolverFromCoSimIO()
 
 void preciceAdapter::Adapter::Initialize()
 {
-    DEBUG(adapterInfo("Initializing the preCICE solver interface..."));
+    DEBUG(adapterInfo("Initializing the CoSimIO solver interface..."));
     SETUP_TIMER();
 
     // Write initial coupling data to kratos
-    DEBUG(adapterInfo("Initializing preCICE data..."));
+    DEBUG(adapterInfo("Initializing coupling data..."));
     WriteCouplingData();
 
     // Obtain whether the coupling is strong or not
@@ -675,7 +670,7 @@ void preciceAdapter::Adapter::Initialize()
     mCoSimIOInitialized = true;
     ACCUMULATE_TIMER(time_in_initialize);
 
-    adapterInfo("preCICE was configured and initialized", "info");
+    adapterInfo("CoSimIO was configured and initialized", "info");
 
     return;
 }
@@ -686,7 +681,7 @@ void preciceAdapter::Adapter::Finalize()
     {
         DEBUG(adapterInfo("Finalizing the CoSimIO solver interface..."));
 
-        // Finalize the preCICE solver interface
+        // Finalize the solver interface
         SETUP_TIMER();
         DisconnectSolverFromCoSimIO();
         ACCUMULATE_TIMER(time_in_finalize);
@@ -709,7 +704,7 @@ void preciceAdapter::Adapter::Advance()
     DEBUG(adapterInfo("Advancing preCICE..."));
 
     SETUP_TIMER();
-    mPrecice->advance(mTimeStepSolver);
+
     ACCUMULATE_TIMER(time_in_advance);
 
     return;
@@ -752,31 +747,7 @@ bool preciceAdapter::Adapter::IsCouplingOngoing()
 {
     bool IsCouplingOngoing = false;
 
-    // If the coupling ends before the solver ends,
-    // the solver would try to access this method again,
-    // giving a segmentation fault if mPrecice
-    // was not available.
-    if (nullptr != mPrecice)
-    {
-        IsCouplingOngoing = mPrecice->isCouplingOngoing();
-    }
-
     return IsCouplingOngoing;
-}
-
-bool preciceAdapter::Adapter::IsCouplingTimeWindowComplete()
-{
-    return mPrecice->isTimeWindowComplete();
-}
-
-bool preciceAdapter::Adapter::RequiresReadingCheckpoint()
-{
-    return mPrecice->requiresReadingCheckpoint();
-}
-
-bool preciceAdapter::Adapter::RequiresWritingCheckpoint()
-{
-    return mPrecice->requiresWritingCheckpoint();
 }
 
 CoSimIO::Info preciceAdapter::Adapter::ImportControlInfo()
@@ -1443,7 +1414,7 @@ catch (const CoSimIOError& e)
 
 void preciceAdapter::Adapter::Teardown()
 {
-    // Delete the preCICE solver interfaces
+    // Delete the solver interfaces
     if (mInterfaces.size() > 0)
     {
         DEBUG(adapterInfo("Deleting the interfaces..."));
@@ -1584,10 +1555,9 @@ try
     Teardown();
 
     TIMING_MODE(
-        // Continuing the output started in the destructor of preciceAdapterFunctionObject
+        // Continuing the output started in the destructor of CoSimIOAdapterFunctionObject
         Info << "Time exclusively in the adapter: " << (time_in_config_read_ + time_in_mesh_setup + time_in_checkpointing_setup + time_in_write + time_in_read + time_in_checkpointing_write + time_in_checkpointing_read).str() << nl;
         Info << "  (S) reading CoSimIODict:       " << time_in_config_read_.str() << nl;
-        Info << "  (S) constructing preCICE:      " << time_in_co_sim_io_construct.str() << nl;
         Info << "  (S) setting up the interfaces: " << time_in_mesh_setup.str() << nl;
         Info << "  (S) setting up checkpointing:  " << time_in_checkpointing_setup.str() << nl;
         Info << "  (I) writing data:              " << time_in_write.str() << nl;
@@ -1595,12 +1565,11 @@ try
         Info << "  (I) writing checkpoints:       " << time_in_checkpointing_write.str() << nl;
         Info << "  (I) reading checkpoints:       " << time_in_checkpointing_read.str() << nl;
         Info << "  (I) writing OpenFOAM results:  " << time_in_write_results.str() << " (at the end of converged time windows)" << nl << nl;
-        Info << "Time exclusively in preCICE:     " << (time_in_initialize + time_in_advance + time_in_finalize).str() << nl;
+        Info << "  Time exclusively in CoSimIO:     " << (time_in_initialize + time_in_advance + time_in_finalize).str() << nl;
         Info << "  (S) initialize():              " << time_in_initialize.str() << nl;
         Info << "  (I) advance():                 " << time_in_advance.str() << nl;
         Info << "  (I) finalize():                " << time_in_finalize.str() << nl;
         Info << "  These times include time waiting for other participants." << nl;
-        Info << "  See also precice-profiling on the website https://precice.org/tooling-performance-analysis.html." << nl;
         Info << "-------------------------------------------------------------------------------------" << nl;)
 
     return;

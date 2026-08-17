@@ -13,7 +13,6 @@
 using namespace Foam;
 
 preciceAdapter::Interface::Interface(
-    precice::Participant& Precice,
     const fvMesh& Mesh,
     std::string MeshName,
     std::string LocationsType,
@@ -24,7 +23,8 @@ preciceAdapter::Interface::Interface(
     const std::string& NamePointDisplacement,
     const std::string& NameCellDisplacement,
     std::string ConnectionName)
-: mPrecice(Precice),
+: 
+// mPrecice(Precice),
   mMeshName(MeshName),
   mPatchNames(PatchNames),
   mCellSetNames(CellSetNames),
@@ -75,7 +75,7 @@ preciceAdapter::Interface::Interface(
         {
             adapterInfo("Patch \""
                             + PatchNames.at(j) + "\" does not exist and therefore cannot be used as a coupling interface for Mesh \""
-                            + MeshName + "\". Check the system/preciceDict.",
+                            + MeshName + "\". Check the system/CoSimIODict.",
                         "error");
         }
 

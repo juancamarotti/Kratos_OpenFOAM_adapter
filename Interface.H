@@ -5,7 +5,6 @@
 #include <vector>
 #include "fvCFD.H"
 #include "CouplingDataUser.H"
-#include <precice/precice.hpp>
 
 #include "pointPatchField.H"
 
@@ -28,9 +27,6 @@ struct FieldConfig
 class Interface
 {
 protected:
-    //- preCICE solver interface
-    precice::Participant& mPrecice;
-
     //- Array of CoSimIO::Model parts(to store mesh info) for all coupling interfaces
     std::unique_ptr<CoSimIO::ModelPart> mpModelPart;
 
@@ -40,14 +36,14 @@ protected:
     //- Member variables required for CoSimIO
     std::string mConnectionName;
 
-    //- Mesh name used in the preCICE configuration
+    //- Mesh name used in the CoSimIO configuration
     std::string mMeshName;
 
     //- Point locations type (FaceCenters vs FaceNodes)
     LocationType mLocationType {LocationType::none};
 
-    //- Mesh ID assigned by preCICE to the interface
-    int mMeshID;
+    // //- Mesh ID assigned by CoSimIO to the interface
+    // int mMeshID;
 
     //- Names of the OpenFOAM patches that form the interface
     std::vector<std::string> mPatchNames;
@@ -61,7 +57,7 @@ protected:
     //- Number of data points (cell centers) on the interface
     int mNumDataLocations = 0;
 
-    //- Vertex IDs assigned by preCICE
+    //- Vertex IDs
     std::vector<int> mVertexIDs;
 
     //- Buffer for the coupling data
@@ -83,7 +79,7 @@ protected:
     unsigned int mDim;
 
     //- Extracts the locations of the face centers or face nodes
-    //  and exposes them to preCICE with setMeshVertices
+    //  and exports them to CoSimIO 
     void ConfigureMesh(const Foam::fvMesh& mesh,
                        const std::string& namePointDisplacement,
                        const std::string& nameCellDisplacement);
@@ -91,7 +87,6 @@ protected:
 public:
     //- Constructor
     Interface(
-        precice::Participant& precice,
         const Foam::fvMesh& mesh,
         std::string meshName,
         std::string locationsType,
