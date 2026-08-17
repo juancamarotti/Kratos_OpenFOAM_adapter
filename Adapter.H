@@ -1,5 +1,5 @@
-#ifndef PRECICEADAPTER_H
-#define PRECICEADAPTER_H
+#ifndef COSIMIOADAPTER_H
+#define COSIMIOADAPTER_H
 #include "Interface.H"
 
 // Conjugate Heat Transfer module
