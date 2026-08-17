@@ -12,7 +12,7 @@
 #include "co_sim_io.hpp"
 #include "co_sim_io_mpi.hpp"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 
 //- field options
@@ -79,7 +79,7 @@ protected:
     unsigned int mDim;
 
     //- Extracts the locations of the face centers or face nodes
-    //  and exports them to CoSimIO 
+    //  and exports them to CoSimIO
     void ConfigureMesh(const Foam::fvMesh& mesh,
                        const std::string& namePointDisplacement,
                        const std::string& nameCellDisplacement);

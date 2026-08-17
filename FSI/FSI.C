@@ -4,7 +4,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FSI::FluidStructureInteraction::FluidStructureInteraction(
+CoSimIOAdapter::FSI::FluidStructureInteraction::FluidStructureInteraction(
     const Foam::fvMesh& mesh,
     const Foam::Time& runTime)
 : mesh_(mesh),
@@ -12,7 +12,7 @@ preciceAdapter::FSI::FluidStructureInteraction::FluidStructureInteraction(
 {
 }
 
-bool preciceAdapter::FSI::FluidStructureInteraction::configure(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::FSI::FluidStructureInteraction::configure(const IOdictionary& adapterConfig)
 {
     DEBUG(adapterInfo("Configuring the FSI module..."));
 
@@ -47,7 +47,7 @@ bool preciceAdapter::FSI::FluidStructureInteraction::configure(const IOdictionar
     return true;
 }
 
-bool preciceAdapter::FSI::FluidStructureInteraction::readConfig(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::FSI::FluidStructureInteraction::readConfig(const IOdictionary& adapterConfig)
 {
     const dictionary& FSIdict = adapterConfig.subOrEmptyDict("FSI");
 
@@ -90,7 +90,7 @@ bool preciceAdapter::FSI::FluidStructureInteraction::readConfig(const IOdictiona
 }
 
 // NOTE: This is exactly the same as in the CHT module.
-std::string preciceAdapter::FSI::FluidStructureInteraction::determineSolverType()
+std::string CoSimIOAdapter::FSI::FluidStructureInteraction::determineSolverType()
 {
     // NOTE: When coupling a different variable, you may want to
     // add more cases here. Or you may provide the solverType in the config.
@@ -130,7 +130,7 @@ std::string preciceAdapter::FSI::FluidStructureInteraction::determineSolverType(
 }
 
 
-bool preciceAdapter::FSI::FluidStructureInteraction::addWriters(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::FSI::FluidStructureInteraction::addWriters(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     std::string dataName = fieldConfig.name;
 
@@ -180,7 +180,7 @@ bool preciceAdapter::FSI::FluidStructureInteraction::addWriters(const preciceAda
     return found;
 }
 
-bool preciceAdapter::FSI::FluidStructureInteraction::addReaders(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::FSI::FluidStructureInteraction::addReaders(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     std::string dataName = fieldConfig.name;
 
@@ -230,17 +230,17 @@ bool preciceAdapter::FSI::FluidStructureInteraction::addReaders(const preciceAda
     return found;
 }
 
-std::string preciceAdapter::FSI::FluidStructureInteraction::getCellDisplacementFieldName()
+std::string CoSimIOAdapter::FSI::FluidStructureInteraction::getCellDisplacementFieldName()
 {
     return nameCellDisplacement_;
 }
 
-std::string preciceAdapter::FSI::FluidStructureInteraction::getPointDisplacementFieldName()
+std::string CoSimIOAdapter::FSI::FluidStructureInteraction::getPointDisplacementFieldName()
 {
     return namePointDisplacement_;
 }
 
-bool preciceAdapter::FSI::FluidStructureInteraction::isRestartingFromDeformed()
+bool CoSimIOAdapter::FSI::FluidStructureInteraction::isRestartingFromDeformed()
 {
     return restartFromDeformed_;
 }

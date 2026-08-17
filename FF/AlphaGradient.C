@@ -3,7 +3,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::AlphaGradient::AlphaGradient(
+CoSimIOAdapter::FF::AlphaGradient::AlphaGradient(
     const Foam::fvMesh& mesh,
     const std::string nameAlpha)
 : Alpha_(
@@ -13,7 +13,7 @@ preciceAdapter::FF::AlphaGradient::AlphaGradient(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::AlphaGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::AlphaGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -37,7 +37,7 @@ std::size_t preciceAdapter::FF::AlphaGradient::Write(double* buffer, bool meshCo
     return bufferIndex;
 }
 
-void preciceAdapter::FF::AlphaGradient::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::AlphaGradient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -62,12 +62,12 @@ void preciceAdapter::FF::AlphaGradient::Read(double* buffer, const unsigned int 
     }
 }
 
-bool preciceAdapter::FF::AlphaGradient::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::AlphaGradient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::AlphaGradient::GetDataName() const
+std::string CoSimIOAdapter::FF::AlphaGradient::GetDataName() const
 {
     return "AlphaGradient";
 }

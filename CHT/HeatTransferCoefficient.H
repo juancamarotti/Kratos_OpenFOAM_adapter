@@ -4,7 +4,7 @@
 #include "CouplingDataUser.H"
 #include "KappaEffective.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace CHT
 {

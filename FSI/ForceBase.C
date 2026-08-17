@@ -3,7 +3,7 @@
 using namespace Foam;
 
 
-preciceAdapter::FSI::ForceBase::ForceBase(
+CoSimIOAdapter::FSI::ForceBase::ForceBase(
     const Foam::fvMesh& mesh,
     const std::string solverType)
 : mesh_(mesh),
@@ -21,7 +21,7 @@ preciceAdapter::FSI::ForceBase::ForceBase(
 }
 
 // Calculate viscous force
-Foam::tmp<Foam::volSymmTensorField> preciceAdapter::FSI::ForceBase::devRhoReff() const
+Foam::tmp<Foam::volSymmTensorField> CoSimIOAdapter::FSI::ForceBase::devRhoReff() const
 {
     // For turbulent flows
     typedef compressible::turbulenceModel cmpTurbModel;
@@ -52,7 +52,7 @@ Foam::tmp<Foam::volSymmTensorField> preciceAdapter::FSI::ForceBase::devRhoReff()
 }
 
 // lookup correct rho
-Foam::tmp<Foam::volScalarField> preciceAdapter::FSI::ForceBase::rho() const
+Foam::tmp<Foam::volScalarField> CoSimIOAdapter::FSI::ForceBase::rho() const
 {
     // If volScalarField exists, read it from registry (for compressible cases)
     // interFoam is incompressible but has volScalarField rho
@@ -86,7 +86,7 @@ Foam::tmp<Foam::volScalarField> preciceAdapter::FSI::ForceBase::rho() const
 }
 
 // lookup correct mu
-Foam::tmp<Foam::volScalarField> preciceAdapter::FSI::ForceBase::mu() const
+Foam::tmp<Foam::volScalarField> CoSimIOAdapter::FSI::ForceBase::mu() const
 {
     if (solverType_.compare("incompressible") == 0)
     {
@@ -123,7 +123,7 @@ Foam::tmp<Foam::volScalarField> preciceAdapter::FSI::ForceBase::mu() const
     }
 }
 
-std::size_t preciceAdapter::FSI::ForceBase::writeToBuffer(double* buffer,
+std::size_t CoSimIOAdapter::FSI::ForceBase::writeToBuffer(double* buffer,
                                                           volVectorField& forceField,
                                                           const unsigned int dim) const
 {
@@ -181,7 +181,7 @@ std::size_t preciceAdapter::FSI::ForceBase::writeToBuffer(double* buffer,
     return bufferIndex;
 }
 
-void preciceAdapter::FSI::ForceBase::readFromBuffer(double* buffer) const
+void CoSimIOAdapter::FSI::ForceBase::readFromBuffer(double* buffer) const
 {
     /* TODO: Implement (issue https://github.com/precice/openfoam-adapter/issues/240)
      * We need two nested for-loops for each patch,

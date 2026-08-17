@@ -3,7 +3,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::ImplicitMomentum::ImplicitMomentum(
+CoSimIOAdapter::FF::ImplicitMomentum::ImplicitMomentum(
     const Foam::fvMesh& mesh,
     const std::string nameImplicitMomentum)
 {
@@ -28,7 +28,7 @@ preciceAdapter::FF::ImplicitMomentum::ImplicitMomentum(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::ImplicitMomentum::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::ImplicitMomentum::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -74,7 +74,7 @@ std::size_t preciceAdapter::FF::ImplicitMomentum::Write(double* buffer, bool mes
     return bufferIndex;
 }
 
-void preciceAdapter::FF::ImplicitMomentum::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::ImplicitMomentum::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -121,7 +121,7 @@ void preciceAdapter::FF::ImplicitMomentum::Read(double* buffer, const unsigned i
     }
 }
 
-bool preciceAdapter::FF::ImplicitMomentum::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::ImplicitMomentum::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -133,7 +133,7 @@ bool preciceAdapter::FF::ImplicitMomentum::IsLocationTypeSupported(const bool me
     }
 }
 
-std::string preciceAdapter::FF::ImplicitMomentum::GetDataName() const
+std::string CoSimIOAdapter::FF::ImplicitMomentum::GetDataName() const
 {
     return "ImplicitMomentum";
 }

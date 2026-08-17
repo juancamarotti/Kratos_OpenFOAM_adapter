@@ -12,7 +12,7 @@
 
 using namespace Foam;
 
-preciceAdapter::Interface::Interface(
+CoSimIOAdapter::Interface::Interface(
     const fvMesh& Mesh,
     std::string MeshName,
     std::string LocationsType,
@@ -23,8 +23,7 @@ preciceAdapter::Interface::Interface(
     const std::string& NamePointDisplacement,
     const std::string& NameCellDisplacement,
     std::string ConnectionName)
-: 
-// mPrecice(Precice),
+: // mPrecice(Precice),
   mMeshName(MeshName),
   mPatchNames(PatchNames),
   mCellSetNames(CellSetNames),
@@ -87,13 +86,13 @@ preciceAdapter::Interface::Interface(
     ConfigureMesh(Mesh, NamePointDisplacement, NameCellDisplacement);
 }
 
-void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::string& NamePointDisplacement, const std::string& NameCellDisplacement)
+void CoSimIOAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::string& NamePointDisplacement, const std::string& NameCellDisplacement)
 {
     // The way we configure the Mesh differs between meshes based on face centers
     // and meshes based on face nodes.
     // TODO: Reduce code duplication. In the meantime, take care to update
     // all the branches.
-    
+
     // Make CoSimIO::ModelPart and push in the array of model_part_interfaces
     mpModelPart = CoSimIO::make_unique<CoSimIO::ModelPart>(mMeshName);
 
@@ -142,7 +141,8 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
 
             // Assign the (x,y,z) locations to the vertices
             // id = 0
-            for (int i = 0; i < FaceCenters.size(); i++){
+            for (int i = 0; i < FaceCenters.size(); i++)
+            {
                 for (unsigned int d = 0; d < mDim; ++d)
                 {
                     vertices[vertices_index++] = FaceCenters[i][d];
@@ -154,12 +154,11 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
                     node_id,
                     FaceCenters[i][0],
                     FaceCenters[i][1],
-                    FaceCenters[i][2]
-                );
+                    FaceCenters[i][2]);
 
                 node_id++;
             }
-            
+
 
             // Check if we are in the right layer in case of preCICE dimension 2
             // If there is at least one node with a different z-coordinate, then the (2D) geometry is not on the xy-plane, as required.
@@ -284,9 +283,9 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
                 }
 
                 mVertexIDs[node_id - 1] = node_id;
-                
+
                 // Pass the Mesh vertices informtion to CoSimIO
-                mpModelPart->CreateNewNode( node_id, FaceNodes[i][0], FaceNodes[i][1], FaceNodes[i][2]);
+                mpModelPart->CreateNewNode(node_id, FaceNodes[i][0], FaceNodes[i][1], FaceNodes[i][2]);
 
                 node_id++;
             }
@@ -435,7 +434,7 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
                     // {
                     //     vertices[vertices_index++] = Mesh.C().internalField()[cells[i]].z();
                     // }
-                    mpModelPart->CreateNewNode(node_id, Mesh.C().internalField()[cells[i]].x(), Mesh.C().internalField()[cells[i]].y(), Mesh.C().internalField()[cells[i]].z());    
+                    mpModelPart->CreateNewNode(node_id, Mesh.C().internalField()[cells[i]].x(), Mesh.C().internalField()[cells[i]].y(), Mesh.C().internalField()[cells[i]].z());
                     mVertexIDs[node_id - 1] = node_id;
                     node_id++;
                 }
@@ -453,11 +452,10 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
                 // {
                 //     vertices[vertices_index++] = CellCenters[i].z();
                 // }
-                mpModelPart->CreateNewNode(node_id, CellCenters[i].x(), CellCenters[i].y(), CellCenters[i].z());    
+                mpModelPart->CreateNewNode(node_id, CellCenters[i].x(), CellCenters[i].y(), CellCenters[i].z());
                 mVertexIDs[node_id - 1] = node_id;
                 node_id++;
             }
-            
         }
 
         // Get the locations of the Mesh vertices (here: face centers)
@@ -477,11 +475,10 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
                 // {
                 //     vertices[vertices_index++] = FaceCenters[i].z();
                 // }
-                mpModelPart->CreateNewNode(node_id, FaceCenters[i][0], FaceCenters[i][1], FaceCenters[i][2]);    
+                mpModelPart->CreateNewNode(node_id, FaceCenters[i][0], FaceCenters[i][1], FaceCenters[i][2]);
                 mVertexIDs[node_id - 1] = node_id;
                 node_id++;
             }
-            
         }
 
         // Pass the Mesh vertices information to preCICE
@@ -496,7 +493,7 @@ void preciceAdapter::Interface::ConfigureMesh(const fvMesh& Mesh, const std::str
 }
 
 
-void preciceAdapter::Interface::AddCouplingDataWriter(
+void CoSimIOAdapter::Interface::AddCouplingDataWriter(
     const FieldConfig& fieldConfig,
     CouplingDataUser* couplingDataWriter)
 {
@@ -526,9 +523,9 @@ void preciceAdapter::Interface::AddCouplingDataWriter(
 }
 
 
-void preciceAdapter::Interface::AddCouplingDataReader(
+void CoSimIOAdapter::Interface::AddCouplingDataReader(
     const FieldConfig& fieldConfig,
-    preciceAdapter::CouplingDataUser* couplingDataReader)
+    CoSimIOAdapter::CouplingDataUser* couplingDataReader)
 {
     // Set the patchIDs of the patches that form the interface
     couplingDataReader->SetDataName(fieldConfig.name);
@@ -555,7 +552,7 @@ void preciceAdapter::Interface::AddCouplingDataReader(
     mCouplingDataReaders.push_back(couplingDataReader);
 }
 
-void preciceAdapter::Interface::CreateBuffer()
+void CoSimIOAdapter::Interface::CreateBuffer()
 {
     // Will the interface buffer need to store 3D vector data?
     bool needsVectorData = false;
@@ -595,7 +592,7 @@ void preciceAdapter::Interface::CreateBuffer()
     mDataBuffer.resize(dataBufferSize);
 }
 
-void preciceAdapter::Interface::ReadCouplingData(double relativeReadTime)
+void CoSimIOAdapter::Interface::ReadCouplingData(double relativeReadTime)
 {
     (void)relativeReadTime;
 
@@ -603,7 +600,7 @@ void preciceAdapter::Interface::ReadCouplingData(double relativeReadTime)
     for (uint i = 0; i < mCouplingDataReaders.size(); i++)
     {
         // Pointer to the current reader
-        preciceAdapter::CouplingDataUser*
+        CoSimIOAdapter::CouplingDataUser*
             couplingDataReader = mCouplingDataReaders.at(i);
 
         // Determine expected size
@@ -651,19 +648,19 @@ void preciceAdapter::Interface::ReadCouplingData(double relativeReadTime)
     }
 }
 
-void preciceAdapter::Interface::WriteCouplingData()
+void CoSimIOAdapter::Interface::WriteCouplingData()
 {
     std::cout << "INSIDE WriteCouplingData()" << std::endl;
 
     std::cout << "Number of writers = "
               << mCouplingDataWriters.size()
               << std::endl;
-              
+
     // Make every coupling data writer Write
     for (uint i = 0; i < mCouplingDataWriters.size(); i++)
     {
         // Pointer to the current reader
-        preciceAdapter::CouplingDataUser*
+        CoSimIOAdapter::CouplingDataUser*
             couplingDataWriter = mCouplingDataWriters.at(i);
 
         // Write the data into the adapter's buffer
@@ -677,21 +674,19 @@ void preciceAdapter::Interface::WriteCouplingData()
         // Convert span/buffer into std::vector<double> for CoSimIO
         std::vector<double> data_to_send(
             mDataBuffer.begin(),
-            mDataBuffer.begin() + nWrittenData
-        );
-        
+            mDataBuffer.begin() + nWrittenData);
+
         CoSimIO::Info export_info;
         export_info.Set("connection_name", mConnectionName);
         export_info.Set("identifier", couplingDataWriter->DataName());
 
         export_info = CoSimIO::ExportData(
             export_info,
-            data_to_send
-        );
+            data_to_send);
     }
 }
 
-preciceAdapter::Interface::~Interface()
+CoSimIOAdapter::Interface::~Interface()
 {
     // Delete all the coupling data readers
     for (uint i = 0; i < mCouplingDataReaders.size(); i++)

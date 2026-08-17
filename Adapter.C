@@ -7,7 +7,7 @@
 
 using namespace Foam;
 
-preciceAdapter::Adapter::Adapter(const Time& runTime, const fvMesh& mesh)
+CoSimIOAdapter::Adapter::Adapter(const Time& runTime, const fvMesh& mesh)
 : mRunTime(runTime),
   mMesh(mesh)
 {
@@ -16,7 +16,7 @@ preciceAdapter::Adapter::Adapter(const Time& runTime, const fvMesh& mesh)
     return;
 }
 
-void preciceAdapter::Adapter::ReadFieldConfigs(const std::string& listName, Foam::ITstream& stream, std::vector<FieldConfig>& configs)
+void CoSimIOAdapter::Adapter::ReadFieldConfigs(const std::string& listName, Foam::ITstream& stream, std::vector<FieldConfig>& configs)
 {
     // Perform check on whether read/WriteData is a list
     if (stream.peek() == token::BEGIN_LIST)
@@ -79,7 +79,7 @@ void preciceAdapter::Adapter::ReadFieldConfigs(const std::string& listName, Foam
     }
 }
 
-void preciceAdapter::Adapter::ConfigFileRead()
+void CoSimIOAdapter::Adapter::ConfigFileRead()
 {
 
     SETUP_TIMER();
@@ -280,7 +280,7 @@ void preciceAdapter::Adapter::ConfigFileRead()
     return;
 }
 
-void preciceAdapter::Adapter::configure()
+void CoSimIOAdapter::Adapter::configure()
 try
 {
     // Read the adapter's configuration file
@@ -483,7 +483,7 @@ catch (const CoSimIOError& e)
 }
 
 // Execute() for CoSimIO
-void preciceAdapter::Adapter::execute()
+void CoSimIOAdapter::Adapter::execute()
 try
 {
     Info << "OPENFOAM: inside execute()" << Foam::endl;
@@ -539,7 +539,7 @@ try
         CheckSolverTimeStepAndReadData();
         return;
     }
-    
+
     CheckSolverTimeStepAndReadData();
 }
 catch (const CoSimIOError& e)
@@ -548,7 +548,7 @@ catch (const CoSimIOError& e)
     std::exit(EXIT_FAILURE);
 }
 
-void preciceAdapter::Adapter::adjustTimeStep()
+void CoSimIOAdapter::Adapter::adjustTimeStep()
 try
 {
     CheckSolverTimeStepAndReadData();
@@ -560,7 +560,7 @@ catch (const CoSimIOError& e)
     std::exit(EXIT_FAILURE);
 }
 
-void preciceAdapter::Adapter::ReadCouplingData(double relativeReadTime)
+void CoSimIOAdapter::Adapter::ReadCouplingData(double relativeReadTime)
 {
     SETUP_TIMER();
     DEBUG(adapterInfo("Reading coupling data..."));
@@ -575,7 +575,7 @@ void preciceAdapter::Adapter::ReadCouplingData(double relativeReadTime)
     return;
 }
 
-void preciceAdapter::Adapter::WriteCouplingData()
+void CoSimIOAdapter::Adapter::WriteCouplingData()
 {
     SETUP_TIMER();
     DEBUG(adapterInfo("Writing coupling data..."));
@@ -591,7 +591,7 @@ void preciceAdapter::Adapter::WriteCouplingData()
     return;
 }
 
-void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
+void CoSimIOAdapter::Adapter::ConnectSolverToCoSimIO()
 {
     // Connection between openFOAM and Kratos-CoSimulation using CoSimIO (ONLY ONE TIME for multiple interfaces)
     CoSimIO::Info settings;
@@ -609,8 +609,8 @@ void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
     connect_info = CoSimIO::Connect(settings);
     //
     //else{
-        // Info << "Running in Parallel. Connecting to CoSimulation using MPI" << nl;
-        // connect_info = CoSimIO::ConnectMPI(settings, MPI_COMM_WORLD);
+    // Info << "Running in Parallel. Connecting to CoSimulation using MPI" << nl;
+    // connect_info = CoSimIO::ConnectMPI(settings, MPI_COMM_WORLD);
     //}
 
     //COSIMIO_CHECK_EQUAL(connect_info.Get<int>("connection_status"), CoSimIO::ConnectionStatus::Connected);
@@ -619,7 +619,7 @@ void preciceAdapter::Adapter::ConnectSolverToCoSimIO()
     return;
 }
 
-void preciceAdapter::Adapter::DisconnectSolverFromCoSimIO()
+void CoSimIOAdapter::Adapter::DisconnectSolverFromCoSimIO()
 {
     Info << "Disconnecting from CoSimulation..." << nl;
 
@@ -649,7 +649,7 @@ void preciceAdapter::Adapter::DisconnectSolverFromCoSimIO()
          << nl;
 }
 
-void preciceAdapter::Adapter::Initialize()
+void CoSimIOAdapter::Adapter::Initialize()
 {
     DEBUG(adapterInfo("Initializing the CoSimIO solver interface..."));
     SETUP_TIMER();
@@ -675,7 +675,7 @@ void preciceAdapter::Adapter::Initialize()
     return;
 }
 
-void preciceAdapter::Adapter::Finalize()
+void CoSimIOAdapter::Adapter::Finalize()
 {
     if (mCoSimIOInitialized)
     {
@@ -699,7 +699,7 @@ void preciceAdapter::Adapter::Finalize()
     return;
 }
 
-void preciceAdapter::Adapter::Advance()
+void CoSimIOAdapter::Adapter::Advance()
 {
     DEBUG(adapterInfo("Advancing preCICE..."));
 
@@ -710,7 +710,7 @@ void preciceAdapter::Adapter::Advance()
     return;
 }
 
-void preciceAdapter::Adapter::CheckSolverTimeStepAndReadData()
+void CoSimIOAdapter::Adapter::CheckSolverTimeStepAndReadData()
 {
     DEBUG(adapterInfo("Using fixed solver timestep..."));
 
@@ -730,9 +730,9 @@ void preciceAdapter::Adapter::CheckSolverTimeStepAndReadData()
         adapterInfo(
             "The OpenFOAM timestep differs from the stored fixed timestep. "
             "Resetting deltaT from "
-            + std::to_string(current_delta_t)
-            + " to "
-            + std::to_string(mTimeStepSolver),
+                + std::to_string(current_delta_t)
+                + " to "
+                + std::to_string(mTimeStepSolver),
             "warning");
 
         const_cast<Time&>(mRunTime).setDeltaT(mTimeStepSolver, false);
@@ -743,14 +743,14 @@ void preciceAdapter::Adapter::CheckSolverTimeStepAndReadData()
     ReadCouplingData(mRunTime.deltaT().value());
 }
 
-bool preciceAdapter::Adapter::IsCouplingOngoing()
+bool CoSimIOAdapter::Adapter::IsCouplingOngoing()
 {
     bool IsCouplingOngoing = false;
 
     return IsCouplingOngoing;
 }
 
-CoSimIO::Info preciceAdapter::Adapter::ImportControlInfo()
+CoSimIO::Info CoSimIOAdapter::Adapter::ImportControlInfo()
 {
     CoSimIO::Info info;
     info.Set("connection_name", mConnectionName);
@@ -759,14 +759,14 @@ CoSimIO::Info preciceAdapter::Adapter::ImportControlInfo()
     return CoSimIO::ImportInfo(info);
 }
 
-void preciceAdapter::Adapter::ProcessControlInfo(
+void CoSimIOAdapter::Adapter::ProcessControlInfo(
     const CoSimIO::Info& rInfo)
 {
     const std::string signal =
         rInfo.Get<std::string>("control_signal");
 
     CoSimIO::Info settings =
-        rInfo.Get<CoSimIO::Info>("settings", CoSimIO::Info{});
+        rInfo.Get<CoSimIO::Info>("settings", CoSimIO::Info {});
 
     Info << "OPENFOAM: received control_signal = "
          << signal << Foam::endl;
@@ -793,11 +793,11 @@ void preciceAdapter::Adapter::ProcessControlInfo(
             settings.Get<bool>("repeat_time_step");
 
         Info << "OPENFOAM: repeat_time_step = "
-            << mRepeatTimeStep << Foam::endl;
+             << mRepeatTimeStep << Foam::endl;
     }
 }
 
-void preciceAdapter::Adapter::StoreCheckpointTime()
+void CoSimIOAdapter::Adapter::StoreCheckpointTime()
 {
     mCouplingIterationTimeIndex = mRunTime.timeIndex();
     mCouplingIterationTimeValue = mRunTime.value();
@@ -806,7 +806,7 @@ void preciceAdapter::Adapter::StoreCheckpointTime()
     return;
 }
 
-void preciceAdapter::Adapter::ReloadCheckpointTime()
+void CoSimIOAdapter::Adapter::ReloadCheckpointTime()
 {
     const_cast<Time&>(mRunTime).setTime(mCouplingIterationTimeValue, mCouplingIterationTimeIndex);
     // TODO also reset the current iteration?!
@@ -815,7 +815,7 @@ void preciceAdapter::Adapter::ReloadCheckpointTime()
     return;
 }
 
-void preciceAdapter::Adapter::StoreMeshPoints()
+void CoSimIOAdapter::Adapter::StoreMeshPoints()
 {
     if (!mMeshPoints)
     {
@@ -837,7 +837,7 @@ void preciceAdapter::Adapter::StoreMeshPoints()
     }
 }
 
-void preciceAdapter::Adapter::ReloadMeshPoints()
+void CoSimIOAdapter::Adapter::ReloadMeshPoints()
 {
     if (!mMesh.moving())
     {
@@ -857,7 +857,7 @@ void preciceAdapter::Adapter::ReloadMeshPoints()
     DEBUG(adapterInfo("Moved mesh points to their previous locations."));
 }
 
-void preciceAdapter::Adapter::SetupMeshCheckpointing()
+void CoSimIOAdapter::Adapter::SetupMeshCheckpointing()
 {
     // The other mesh <type>Fields:
     //      C
@@ -874,7 +874,7 @@ void preciceAdapter::Adapter::SetupMeshCheckpointing()
 }
 
 
-void preciceAdapter::Adapter::SetupCheckpointing()
+void CoSimIOAdapter::Adapter::SetupCheckpointing()
 {
     SETUP_TIMER();
 
@@ -910,7 +910,7 @@ void preciceAdapter::Adapter::SetupCheckpointing()
     ACCUMULATE_TIMER(time_in_checkpointing_setup);
 }
 
-void preciceAdapter::Adapter::PruneCheckpointedFields()
+void CoSimIOAdapter::Adapter::PruneCheckpointedFields()
 {
     // Check if checkpointed fields exist in OpenFOAM registry
     // If not, remove them from the checkpointed fields vector
@@ -971,13 +971,13 @@ void preciceAdapter::Adapter::PruneCheckpointedFields()
 
 // All mesh checkpointed fields
 
-void preciceAdapter::Adapter::AddMeshCheckpointField(surfaceScalarField& field)
+void CoSimIOAdapter::Adapter::AddMeshCheckpointField(surfaceScalarField& field)
 {
     mMeshSurfaceScalarFields.push_back(&field);
     mMeshSurfaceScalarFieldCopies.push_back(new surfaceScalarField(field));
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(volScalarField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(volScalarField* field)
 {
     if (field)
     {
@@ -986,7 +986,7 @@ void preciceAdapter::Adapter::AddCheckpointField(volScalarField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(volVectorField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(volVectorField* field)
 {
     if (field)
     {
@@ -995,7 +995,7 @@ void preciceAdapter::Adapter::AddCheckpointField(volVectorField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(surfaceScalarField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(surfaceScalarField* field)
 {
     if (field)
     {
@@ -1004,7 +1004,7 @@ void preciceAdapter::Adapter::AddCheckpointField(surfaceScalarField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(surfaceVectorField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(surfaceVectorField* field)
 {
     if (field)
     {
@@ -1013,7 +1013,7 @@ void preciceAdapter::Adapter::AddCheckpointField(surfaceVectorField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(pointScalarField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(pointScalarField* field)
 {
     if (field)
     {
@@ -1022,7 +1022,7 @@ void preciceAdapter::Adapter::AddCheckpointField(pointScalarField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(pointVectorField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(pointVectorField* field)
 {
     if (field)
     {
@@ -1034,7 +1034,7 @@ void preciceAdapter::Adapter::AddCheckpointField(pointVectorField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(volTensorField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(volTensorField* field)
 {
     if (field)
     {
@@ -1043,7 +1043,7 @@ void preciceAdapter::Adapter::AddCheckpointField(volTensorField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(surfaceTensorField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(surfaceTensorField* field)
 {
     if (field)
     {
@@ -1052,7 +1052,7 @@ void preciceAdapter::Adapter::AddCheckpointField(surfaceTensorField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(pointTensorField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(pointTensorField* field)
 {
     if (field)
     {
@@ -1061,7 +1061,7 @@ void preciceAdapter::Adapter::AddCheckpointField(pointTensorField* field)
     }
 }
 
-void preciceAdapter::Adapter::AddCheckpointField(volSymmTensorField* field)
+void CoSimIOAdapter::Adapter::AddCheckpointField(volSymmTensorField* field)
 {
     if (field)
     {
@@ -1073,7 +1073,7 @@ void preciceAdapter::Adapter::AddCheckpointField(volSymmTensorField* field)
 
 // NOTE: Add here methods to add other object types to checkpoint, if needed.
 
-void preciceAdapter::Adapter::ReadCheckpoint()
+void CoSimIOAdapter::Adapter::ReadCheckpoint()
 {
     SETUP_TIMER();
 
@@ -1270,7 +1270,7 @@ void preciceAdapter::Adapter::ReadCheckpoint()
 }
 
 
-void preciceAdapter::Adapter::WriteCheckpoint()
+void CoSimIOAdapter::Adapter::WriteCheckpoint()
 {
     SETUP_TIMER();
 
@@ -1353,7 +1353,7 @@ void preciceAdapter::Adapter::WriteCheckpoint()
     return;
 }
 
-void preciceAdapter::Adapter::ReadMeshCheckpoint()
+void CoSimIOAdapter::Adapter::ReadMeshCheckpoint()
 {
     DEBUG(adapterInfo("Reading a mesh checkpoint..."));
 
@@ -1378,7 +1378,7 @@ void preciceAdapter::Adapter::ReadMeshCheckpoint()
     return;
 }
 
-void preciceAdapter::Adapter::WriteMeshCheckpoint()
+void CoSimIOAdapter::Adapter::WriteMeshCheckpoint()
 {
     DEBUG(adapterInfo("Writing a mesh checkpoint..."));
 
@@ -1400,7 +1400,7 @@ void preciceAdapter::Adapter::WriteMeshCheckpoint()
     return;
 }
 
-void preciceAdapter::Adapter::end()
+void CoSimIOAdapter::Adapter::end()
 try
 {
     Finalize();
@@ -1412,7 +1412,7 @@ catch (const CoSimIOError& e)
     std::exit(EXIT_FAILURE);
 }
 
-void preciceAdapter::Adapter::Teardown()
+void CoSimIOAdapter::Adapter::Teardown()
 {
     // Delete the solver interfaces
     if (mInterfaces.size() > 0)
@@ -1549,7 +1549,7 @@ void preciceAdapter::Adapter::Teardown()
     return;
 }
 
-preciceAdapter::Adapter::~Adapter()
+CoSimIOAdapter::Adapter::~Adapter()
 try
 {
     Teardown();

@@ -2,7 +2,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::Alpha::Alpha(
+CoSimIOAdapter::FF::Alpha::Alpha(
     const Foam::fvMesh& mesh,
     const std::string nameAlpha)
 : Alpha_(
@@ -12,7 +12,7 @@ preciceAdapter::FF::Alpha::Alpha(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::Alpha::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::Alpha::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -57,7 +57,7 @@ std::size_t preciceAdapter::FF::Alpha::Write(double* buffer, bool meshConnectivi
     return bufferIndex;
 }
 
-void preciceAdapter::FF::Alpha::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::Alpha::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -98,7 +98,7 @@ void preciceAdapter::FF::Alpha::Read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FF::Alpha::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::Alpha::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -110,7 +110,7 @@ bool preciceAdapter::FF::Alpha::IsLocationTypeSupported(const bool meshConnectiv
     }
 }
 
-std::string preciceAdapter::FF::Alpha::GetDataName() const
+std::string CoSimIOAdapter::FF::Alpha::GetDataName() const
 {
     return "Alpha";
 }

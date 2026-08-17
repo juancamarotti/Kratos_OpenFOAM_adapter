@@ -4,7 +4,7 @@
 
 using namespace Foam;
 
-preciceAdapter::CHT::Temperature::Temperature(
+CoSimIOAdapter::CHT::Temperature::Temperature(
     const Foam::fvMesh& mesh,
     const std::string nameT)
 : T_(
@@ -15,7 +15,7 @@ preciceAdapter::CHT::Temperature::Temperature(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::CHT::Temperature::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::CHT::Temperature::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -82,7 +82,7 @@ std::size_t preciceAdapter::CHT::Temperature::Write(double* buffer, bool meshCon
     return bufferIndex;
 }
 
-void preciceAdapter::CHT::Temperature::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::CHT::Temperature::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -126,7 +126,7 @@ void preciceAdapter::CHT::Temperature::Read(double* buffer, const unsigned int d
     }
 }
 
-bool preciceAdapter::CHT::Temperature::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::CHT::Temperature::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -138,7 +138,7 @@ bool preciceAdapter::CHT::Temperature::IsLocationTypeSupported(const bool meshCo
     }
 }
 
-std::string preciceAdapter::CHT::Temperature::GetDataName() const
+std::string CoSimIOAdapter::CHT::Temperature::GetDataName() const
 {
     return "Temperature";
 }

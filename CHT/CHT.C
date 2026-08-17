@@ -4,13 +4,13 @@
 
 using namespace Foam;
 
-preciceAdapter::CHT::ConjugateHeatTransfer::ConjugateHeatTransfer(
+CoSimIOAdapter::CHT::ConjugateHeatTransfer::ConjugateHeatTransfer(
     const Foam::fvMesh& mesh)
 : mesh_(mesh)
 {
 }
 
-bool preciceAdapter::CHT::ConjugateHeatTransfer::configure(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::CHT::ConjugateHeatTransfer::configure(const IOdictionary& adapterConfig)
 {
     DEBUG(adapterInfo("Configuring the CHT module..."));
 
@@ -44,7 +44,7 @@ bool preciceAdapter::CHT::ConjugateHeatTransfer::configure(const IOdictionary& a
     return true;
 }
 
-bool preciceAdapter::CHT::ConjugateHeatTransfer::readConfig(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::CHT::ConjugateHeatTransfer::readConfig(const IOdictionary& adapterConfig)
 {
     const dictionary& CHTdict = adapterConfig.subOrEmptyDict("CHT");
 
@@ -79,7 +79,7 @@ bool preciceAdapter::CHT::ConjugateHeatTransfer::readConfig(const IOdictionary& 
     return true;
 }
 
-std::string preciceAdapter::CHT::ConjugateHeatTransfer::determineSolverType()
+std::string CoSimIOAdapter::CHT::ConjugateHeatTransfer::determineSolverType()
 {
     // NOTE: When coupling a different variable, you may want to
     // add more cases here. Or you may provide the solverType in the config.
@@ -118,7 +118,7 @@ std::string preciceAdapter::CHT::ConjugateHeatTransfer::determineSolverType()
     return solverType;
 }
 
-bool preciceAdapter::CHT::ConjugateHeatTransfer::addWriters(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::CHT::ConjugateHeatTransfer::addWriters(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     std::string dataName = fieldConfig.name;
 
@@ -210,7 +210,7 @@ bool preciceAdapter::CHT::ConjugateHeatTransfer::addWriters(const preciceAdapter
     return found;
 }
 
-bool preciceAdapter::CHT::ConjugateHeatTransfer::addReaders(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::CHT::ConjugateHeatTransfer::addReaders(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     std::string dataName = fieldConfig.name;
 

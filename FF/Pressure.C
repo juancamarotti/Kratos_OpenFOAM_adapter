@@ -3,7 +3,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::Pressure::Pressure(
+CoSimIOAdapter::FF::Pressure::Pressure(
     const Foam::fvMesh& mesh,
     const std::string nameP)
 : p_(
@@ -13,7 +13,7 @@ preciceAdapter::FF::Pressure::Pressure(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::Pressure::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::Pressure::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -58,7 +58,7 @@ std::size_t preciceAdapter::FF::Pressure::Write(double* buffer, bool meshConnect
     return bufferIndex;
 }
 
-void preciceAdapter::FF::Pressure::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::Pressure::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -112,7 +112,7 @@ void preciceAdapter::FF::Pressure::Read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FF::Pressure::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::Pressure::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -124,7 +124,7 @@ bool preciceAdapter::FF::Pressure::IsLocationTypeSupported(const bool meshConnec
     }
 }
 
-std::string preciceAdapter::FF::Pressure::GetDataName() const
+std::string CoSimIOAdapter::FF::Pressure::GetDataName() const
 {
     return "Pressure";
 }

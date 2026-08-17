@@ -2,7 +2,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FSI::Force::Force(
+CoSimIOAdapter::FSI::Force::Force(
     const Foam::fvMesh& mesh,
     const std::string solverType,
     const std::string nameForce)
@@ -36,12 +36,12 @@ preciceAdapter::FSI::Force::Force(
     }
 }
 
-std::size_t preciceAdapter::FSI::Force::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FSI::Force::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     return this->writeToBuffer(buffer, *Force_, dim);
 }
 
-void preciceAdapter::FSI::Force::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FSI::Force::Read(double* buffer, const unsigned int dim)
 {
     // Copy the force field from the buffer to OpenFOAM
 
@@ -77,7 +77,7 @@ void preciceAdapter::FSI::Force::Read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FSI::Force::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FSI::Force::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -89,12 +89,12 @@ bool preciceAdapter::FSI::Force::IsLocationTypeSupported(const bool meshConnecti
     }
 }
 
-std::string preciceAdapter::FSI::Force::GetDataName() const
+std::string CoSimIOAdapter::FSI::Force::GetDataName() const
 {
     return "Force";
 }
 
-Foam::tmp<Foam::vectorField> preciceAdapter::FSI::Force::getFaceVectors(const unsigned int patchID) const
+Foam::tmp<Foam::vectorField> CoSimIOAdapter::FSI::Force::getFaceVectors(const unsigned int patchID) const
 {
     // Normal vectors multiplied by face area
     return mesh_.boundary()[patchID].Sf();

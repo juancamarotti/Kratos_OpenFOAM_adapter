@@ -1,35 +1,35 @@
 #include "CouplingDataUser.H"
 
-preciceAdapter::CouplingDataUser::CouplingDataUser()
+CoSimIOAdapter::CouplingDataUser::CouplingDataUser()
 {
 }
 
-bool preciceAdapter::CouplingDataUser::HasScalarData()
+bool CoSimIOAdapter::CouplingDataUser::HasScalarData()
 {
     return mDataType == scalar;
 }
 
-bool preciceAdapter::CouplingDataUser::HasVectorData()
+bool CoSimIOAdapter::CouplingDataUser::HasVectorData()
 {
     return mDataType == vector;
 }
 
-void preciceAdapter::CouplingDataUser::SetDataName(std::string dataName)
+void CoSimIOAdapter::CouplingDataUser::SetDataName(std::string dataName)
 {
     mDataName = std::move(dataName);
 }
 
-const std::string& preciceAdapter::CouplingDataUser::DataName()
+const std::string& CoSimIOAdapter::CouplingDataUser::DataName()
 {
     return mDataName;
 }
 
-void preciceAdapter::CouplingDataUser::SetFlipNormal(bool flipNormal)
+void CoSimIOAdapter::CouplingDataUser::SetFlipNormal(bool flipNormal)
 {
     mFlipNormal = flipNormal;
 }
 
-void preciceAdapter::CouplingDataUser::ApplyFlipNormal(
+void CoSimIOAdapter::CouplingDataUser::ApplyFlipNormal(
     double* pData,
     std::size_t Size)
 {
@@ -42,22 +42,22 @@ void preciceAdapter::CouplingDataUser::ApplyFlipNormal(
     }
 }
 
-void preciceAdapter::CouplingDataUser::SetPatchIDs(std::vector<int> patchIDs)
+void CoSimIOAdapter::CouplingDataUser::SetPatchIDs(std::vector<int> patchIDs)
 {
     mPatchIDs = patchIDs;
 }
 
-void preciceAdapter::CouplingDataUser::SetCellSetNames(std::vector<std::string> cellSetNames)
+void CoSimIOAdapter::CouplingDataUser::SetCellSetNames(std::vector<std::string> cellSetNames)
 {
     mCellSetNames = cellSetNames;
 }
 
-void preciceAdapter::CouplingDataUser::SetLocationsType(LocationType locationsType)
+void CoSimIOAdapter::CouplingDataUser::SetLocationsType(LocationType locationsType)
 {
     mLocationType = locationsType;
 }
 
-void preciceAdapter::CouplingDataUser::CheckDataLocation(const bool meshConnectivity) const
+void CoSimIOAdapter::CouplingDataUser::CheckDataLocation(const bool meshConnectivity) const
 {
     if (this->IsLocationTypeSupported(meshConnectivity) == false)
     {
@@ -86,7 +86,7 @@ void preciceAdapter::CouplingDataUser::CheckDataLocation(const bool meshConnecti
 }
 
 // Dummy implementation which can be overwritten in derived classes if required
-void preciceAdapter::CouplingDataUser::Initialize()
+void CoSimIOAdapter::CouplingDataUser::Initialize()
 {
     return;
 }

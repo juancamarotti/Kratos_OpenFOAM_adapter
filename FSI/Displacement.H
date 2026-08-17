@@ -7,7 +7,7 @@
 #include "fixedValuePointPatchFields.H"
 #include "primitivePatchInterpolation.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace FSI
 {

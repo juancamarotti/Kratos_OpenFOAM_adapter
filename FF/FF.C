@@ -4,13 +4,13 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::FluidFluid::FluidFluid(
+CoSimIOAdapter::FF::FluidFluid::FluidFluid(
     const Foam::fvMesh& mesh)
 : mesh_(mesh)
 {
 }
 
-bool preciceAdapter::FF::FluidFluid::configure(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::FF::FluidFluid::configure(const IOdictionary& adapterConfig)
 {
     DEBUG(adapterInfo("Configuring the FF module..."));
 
@@ -43,7 +43,7 @@ bool preciceAdapter::FF::FluidFluid::configure(const IOdictionary& adapterConfig
     return true;
 }
 
-bool preciceAdapter::FF::FluidFluid::readConfig(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::FF::FluidFluid::readConfig(const IOdictionary& adapterConfig)
 {
     const dictionary& FFdict = adapterConfig.subOrEmptyDict("FF");
 
@@ -90,7 +90,7 @@ bool preciceAdapter::FF::FluidFluid::readConfig(const IOdictionary& adapterConfi
     return true;
 }
 
-std::string preciceAdapter::FF::FluidFluid::determineSolverType()
+std::string CoSimIOAdapter::FF::FluidFluid::determineSolverType()
 {
     // NOTE: When coupling a different variable, you may want to
     // add more cases here. Or you may provide the solverType in the config.
@@ -125,7 +125,7 @@ std::string preciceAdapter::FF::FluidFluid::determineSolverType()
     return solverType;
 }
 
-bool preciceAdapter::FF::FluidFluid::addWriters(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::FF::FluidFluid::addWriters(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     std::string dataName = fieldConfig.name;
 
@@ -215,7 +215,7 @@ bool preciceAdapter::FF::FluidFluid::addWriters(const preciceAdapter::FieldConfi
     return found;
 }
 
-bool preciceAdapter::FF::FluidFluid::addReaders(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::FF::FluidFluid::addReaders(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     std::string dataName = fieldConfig.name;
 

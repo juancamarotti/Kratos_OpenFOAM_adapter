@@ -5,9 +5,9 @@
 
 using namespace Foam;
 
-//----- preciceAdapter::CHT::HeatFlux -----------------------------------------
+//----- CoSimIOAdapter::CHT::HeatFlux -----------------------------------------
 
-preciceAdapter::CHT::HeatFlux::HeatFlux(
+CoSimIOAdapter::CHT::HeatFlux::HeatFlux(
     const Foam::fvMesh& mesh,
     const std::string nameT)
 : T_(
@@ -18,7 +18,7 @@ preciceAdapter::CHT::HeatFlux::HeatFlux(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::CHT::HeatFlux::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::CHT::HeatFlux::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -71,7 +71,7 @@ std::size_t preciceAdapter::CHT::HeatFlux::Write(double* buffer, bool meshConnec
     return bufferIndex;
 }
 
-void preciceAdapter::CHT::HeatFlux::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::CHT::HeatFlux::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -103,7 +103,7 @@ void preciceAdapter::CHT::HeatFlux::Read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::CHT::HeatFlux::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::CHT::HeatFlux::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -115,14 +115,14 @@ bool preciceAdapter::CHT::HeatFlux::IsLocationTypeSupported(const bool meshConne
     }
 }
 
-std::string preciceAdapter::CHT::HeatFlux::GetDataName() const
+std::string CoSimIOAdapter::CHT::HeatFlux::GetDataName() const
 {
     return "HeatFlux";
 }
 
-//----- preciceAdapter::CHT::HeatFlux_Compressible ----------------------------
+//----- CoSimIOAdapter::CHT::HeatFlux_Compressible ----------------------------
 
-preciceAdapter::CHT::HeatFlux_Compressible::HeatFlux_Compressible(
+CoSimIOAdapter::CHT::HeatFlux_Compressible::HeatFlux_Compressible(
     const Foam::fvMesh& mesh,
     const std::string nameT)
 : HeatFlux(mesh, nameT),
@@ -130,24 +130,24 @@ preciceAdapter::CHT::HeatFlux_Compressible::HeatFlux_Compressible(
 {
 }
 
-preciceAdapter::CHT::HeatFlux_Compressible::~HeatFlux_Compressible()
+CoSimIOAdapter::CHT::HeatFlux_Compressible::~HeatFlux_Compressible()
 {
     delete Kappa_;
 }
 
-void preciceAdapter::CHT::HeatFlux_Compressible::extractKappaEff(uint patchID, bool meshConnectivity)
+void CoSimIOAdapter::CHT::HeatFlux_Compressible::extractKappaEff(uint patchID, bool meshConnectivity)
 {
     Kappa_->extract(patchID, meshConnectivity);
 }
 
-scalar preciceAdapter::CHT::HeatFlux_Compressible::getKappaEffAt(int i)
+scalar CoSimIOAdapter::CHT::HeatFlux_Compressible::getKappaEffAt(int i)
 {
     return Kappa_->getAt(i);
 }
 
-//----- preciceAdapter::CHT::HeatFlux_Incompressible --------------------------
+//----- CoSimIOAdapter::CHT::HeatFlux_Incompressible --------------------------
 
-preciceAdapter::CHT::HeatFlux_Incompressible::HeatFlux_Incompressible(
+CoSimIOAdapter::CHT::HeatFlux_Incompressible::HeatFlux_Incompressible(
     const Foam::fvMesh& mesh,
     const std::string nameT,
     const std::string nameRho,
@@ -159,24 +159,24 @@ preciceAdapter::CHT::HeatFlux_Incompressible::HeatFlux_Incompressible(
 {
 }
 
-preciceAdapter::CHT::HeatFlux_Incompressible::~HeatFlux_Incompressible()
+CoSimIOAdapter::CHT::HeatFlux_Incompressible::~HeatFlux_Incompressible()
 {
     delete Kappa_;
 }
 
-void preciceAdapter::CHT::HeatFlux_Incompressible::extractKappaEff(uint patchID, bool meshConnectivity)
+void CoSimIOAdapter::CHT::HeatFlux_Incompressible::extractKappaEff(uint patchID, bool meshConnectivity)
 {
     Kappa_->extract(patchID, meshConnectivity);
 }
 
-scalar preciceAdapter::CHT::HeatFlux_Incompressible::getKappaEffAt(int i)
+scalar CoSimIOAdapter::CHT::HeatFlux_Incompressible::getKappaEffAt(int i)
 {
     return Kappa_->getAt(i);
 }
 
-//----- preciceAdapter::CHT::HeatFlux_Basic -----------------------------------
+//----- CoSimIOAdapter::CHT::HeatFlux_Basic -----------------------------------
 
-preciceAdapter::CHT::HeatFlux_Basic::HeatFlux_Basic(
+CoSimIOAdapter::CHT::HeatFlux_Basic::HeatFlux_Basic(
     const Foam::fvMesh& mesh,
     const std::string nameT,
     const std::string nameKappa)
@@ -185,17 +185,17 @@ preciceAdapter::CHT::HeatFlux_Basic::HeatFlux_Basic(
 {
 }
 
-preciceAdapter::CHT::HeatFlux_Basic::~HeatFlux_Basic()
+CoSimIOAdapter::CHT::HeatFlux_Basic::~HeatFlux_Basic()
 {
     delete Kappa_;
 }
 
-void preciceAdapter::CHT::HeatFlux_Basic::extractKappaEff(uint patchID, bool meshConnectivity)
+void CoSimIOAdapter::CHT::HeatFlux_Basic::extractKappaEff(uint patchID, bool meshConnectivity)
 {
     Kappa_->extract(patchID, meshConnectivity);
 }
 
-scalar preciceAdapter::CHT::HeatFlux_Basic::getKappaEffAt(int i)
+scalar CoSimIOAdapter::CHT::HeatFlux_Basic::getKappaEffAt(int i)
 {
     return Kappa_->getAt(i);
 }

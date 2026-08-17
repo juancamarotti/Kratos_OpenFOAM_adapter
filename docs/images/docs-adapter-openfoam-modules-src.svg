@@ -503,7 +503,7 @@
             <xhtml:div
                style="box-sizing: border-box; font-size: 0; text-align: center; ">
               <xhtml:div
-                 style="display: inline-block; font-size: 22px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">preciceAdapterFunctionObject</xhtml:div>
+                 style="display: inline-block; font-size: 22px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">CoSimIOAdapterFunctionObject</xhtml:div>
             </xhtml:div>
           </xhtml:div>
         </foreignObject>
@@ -517,7 +517,7 @@
            id="text112"
            style="font-size:22px;font-family:Helvetica;text-anchor:middle;fill:#000000"><tspan
              style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22px;font-family:'CMU Bright';-inkscape-font-specification:'CMU Bright, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-             id="tspan1801">preciceAdapterFunctionObject</tspan></text>
+             id="tspan1801">CoSimIOAdapterFunctionObject</tspan></text>
       </switch>
     </g>
     <rect

@@ -96,7 +96,7 @@ We take into account the following relevant differences between OpenFOAM version
 
 ### OpenFOAM v1612-v1806
 
-- **clockValue:** The `clockValue.H` header is not available (used in `preciceAdapterFunctionObject.H`).
+- **clockValue:** The `clockValue.H` header is not available (used in `CoSimIOAdapterFunctionObject.H`).
   - Disable the timers feature, controlled by the `ADAPTER_ENABLE_TIMINGS` preprocessor variable (set in `Allwmake`).
 - **dictionary access:** In dictionaries (essentially: in the `preciceDict`), some methods are not available. These are mainly used in the configuration step in `Adapter.C`, but also in `ForceBase.C`.
   - Replace `preciceDict.get<fileName>("...")` with `static_cast<fileName>(preciceDict.lookup("...")`.
@@ -150,7 +150,7 @@ Related work in the adapter: [PR #91](https://github.com/precice/openfoam-adapte
 OpenFOAM 8 was [released](https://openfoam.org/release/8/) in July 2020 ([GitHub mirror](https://github.com/OpenFOAM/OpenFOAM-8), [Doxygen](https://cpp.openfoam.org/v8)). Compared to OpenFOAM 7:
 
 - **Function objects:** Function objects changed behavior, and the `execute()` method is now also executed at start. See the [adapter issue #179](https://github.com/precice/openfoam-adapter/issues/179) and [PR #180](https://github.com/precice/openfoam-adapter/pull/180).
-  - In the beginning of `preciceAdapterFunctionObject::read()`, add `this->executeAtStart_ = false;`.
+  - In the beginning of `CoSimIOAdapterFunctionObject::read()`, add `this->executeAtStart_ = false;`.
 - **Thermophysical models:** Some properties were moved from the previous `TurbulenceModels` and `transportModels` to the new `ThermophysicalTransportModels` and `MomentumTransportModels`.
   - In `Make/options`, replace the following include paths:
     - Remove the include paths to `transportModels/incompressible`, `transportModels/compressible`, `transportModels/twoPhaseMixture`, `transportModels/interfaceProperties`, `transportModels/immiscibleIncompressibleTwoPhaseMixture`, `TurbulenceModels/turbulenceModels`, `TurbulenceModels/compressible`, `TurbulenceModels/incompressible`.
@@ -194,7 +194,7 @@ Related work in the adapter: [PR #130](https://github.com/precice/openfoam-adapt
 OpenFOAM 9 was [released](https://openfoam.org/release/9/) in July 2021 ([GitHub mirror](https://github.com/OpenFOAM/OpenFOAM-9), [Doxygen](https://cpp.openfoam.org/v9)). Compared to OpenFOAM 8:
 
 - **Function objects:** The `setTimeStep()` method was removed.
-  - Remove the method from the `preciceAdapterFunctionObject.H` and `preciceAdapterFunctionObject.C`. Adjust the comments for the equivalent method in `Adapter.H`.
+  - Remove the method from the `CoSimIOAdapterFunctionObject.H` and `CoSimIOAdapterFunctionObject.C`. Adjust the comments for the equivalent method in `Adapter.H`.
   - **Impact:** See limitations in adjustable time step size ([#261](https://github.com/precice/openfoam-adapter/issues/261)).
 - **Thermophysical models:** Different libraries need to be linked and different headers need to be included:
   - In `Make/options`, remove the linking of `fluidThermoMomentumTransportModels` and `incompressibleMomentumTransportModels`.
@@ -218,7 +218,7 @@ Related work in the adapter: [PR #221](https://github.com/precice/openfoam-adapt
 OpenFOAM 10 was [released](https://openfoam.org/release/10/) in July 2022 ([GitHub mirror](https://github.com/OpenFOAM/OpenFOAM-10), [Doxygen](https://cpp.openfoam.org/v10)). Compared to OpenFOAM 9:
 
 - **Function objects:** The method `fields()` has been made pure virtual, meaning it needs to be implemented.
-  - In `preciceAdapterFunctionObject.H`, implement it as (more of a workaround to avoid implementation):
+  - In `CoSimIOAdapterFunctionObject.H`, implement it as (more of a workaround to avoid implementation):
 
     ```c++
     virtual wordList fields() const
@@ -232,7 +232,7 @@ OpenFOAM 10 was [released](https://openfoam.org/release/10/) in July 2022 ([GitH
   - In `FSI/ForceBase.H`, replace `kinematicMomentumTransportModel.H` with `incompressibleMomentumTransportModel.H`.
   - In `FSI/ForceBase.C`, replace `basicThermo::dictName` with `physicalProperties::typeName`.
 - **Fields `V0` and `V00`:** The fields `V0` and `V00` have been removed or renamed (not sure to what).
-  - In `Adapter.C`, method `preciceAdapter::Adapter::setupMeshVolCheckpointing()`, guard each of these two fields with a `if (mesh_.foundObject<volScalarField::Internal>("V0"))` (and `if (... ("V00"))`, respectively). Alternatively, remove the implementation of this method altogether.
+  - In `Adapter.C`, method `CoSimIOAdapter::Adapter::setupMeshVolCheckpointing()`, guard each of these two fields with a `if (mesh_.foundObject<volScalarField::Internal>("V0"))` (and `if (... ("V00"))`, respectively). Alternatively, remove the implementation of this method altogether.
   - **Impact:** This might lead to stability issues in FSI simulations with implicit coupling. Check your results.
 - **Case files:** Several [changes to the tutorials](https://github.com/precice/tutorials/tree/OpenFOAM10) are needed, read the [discussion](https://github.com/precice/tutorials/pull/283).
 
@@ -312,8 +312,8 @@ functions
 
     preCICE_Adapter
     {
-        type preciceAdapterFunctionObject;
-        libs ("libpreciceAdapterFunctionObject.so");
+        type CoSimIOAdapterFunctionObject;
+        libs ("libCoSimIOAdapterFunctionObject.so");
     }
 
 }

@@ -28,7 +28,7 @@
 
 using CoSimIOError = std::runtime_error;
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 
 class Adapter

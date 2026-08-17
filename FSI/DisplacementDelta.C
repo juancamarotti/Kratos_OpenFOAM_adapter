@@ -2,7 +2,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FSI::DisplacementDelta::DisplacementDelta(
+CoSimIOAdapter::FSI::DisplacementDelta::DisplacementDelta(
     const Foam::fvMesh& mesh,
     const std::string namePointDisplacement,
     const std::string nameCellDisplacement)
@@ -19,7 +19,7 @@ preciceAdapter::FSI::DisplacementDelta::DisplacementDelta(
 
 // We cannot do this step in the constructor by design of the adapter since the information of the CouplingDataUser is
 // defined later. Hence, we call this method after the CouplingDaaUser has been configured
-void preciceAdapter::FSI::DisplacementDelta::Initialize()
+void CoSimIOAdapter::FSI::DisplacementDelta::Initialize()
 {
     // Initialize appropriate objects for each interface patch, namely the volField and the interpolation object
     // this is only necessary for face based FSI
@@ -34,7 +34,7 @@ void preciceAdapter::FSI::DisplacementDelta::Initialize()
 }
 
 
-std::size_t preciceAdapter::FSI::DisplacementDelta::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FSI::DisplacementDelta::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     /* TODO: Implement
      * We need two nested for-loops for each patch,
@@ -46,7 +46,7 @@ std::size_t preciceAdapter::FSI::DisplacementDelta::Write(double* buffer, bool m
 }
 
 // return the displacement to use later in the velocity?
-void preciceAdapter::FSI::DisplacementDelta::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FSI::DisplacementDelta::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
     for (unsigned int j = 0; j < mPatchIDs.size(); j++)
@@ -94,7 +94,7 @@ void preciceAdapter::FSI::DisplacementDelta::Read(double* buffer, const unsigned
     }
 }
 
-bool preciceAdapter::FSI::DisplacementDelta::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FSI::DisplacementDelta::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     // Solid solver *could* allow connectivity for writing displacement
     if (meshConnectivity)
@@ -107,7 +107,7 @@ bool preciceAdapter::FSI::DisplacementDelta::IsLocationTypeSupported(const bool 
     }
 }
 
-std::string preciceAdapter::FSI::DisplacementDelta::GetDataName() const
+std::string CoSimIOAdapter::FSI::DisplacementDelta::GetDataName() const
 {
     return "DisplacementDelta";
 }

@@ -403,19 +403,19 @@ To load this adapter, you must include the following in
 the `system/controlDict` configuration file of the case:
 
 ```c++
-libs ("libpreciceAdapterFunctionObject.so");
+libs ("libCoSimIOAdapterFunctionObject.so");
 functions
 {
     preCICE_Adapter
     {
-        type preciceAdapterFunctionObject;
+        type CoSimIOAdapterFunctionObject;
         errors strict; // optional
     }
 }
 ```
 
-This directs the solver to use the `preciceAdapterFunctionObject` function object,
-which is part of the `libpreciceAdapterFunctionObject.so` shared library.
+This directs the solver to use the `CoSimIOAdapterFunctionObject` function object,
+which is part of the `libCoSimIOAdapterFunctionObject.so` shared library.
 The name `preCICE_Adapter` can be arbitrary. It is important that the library is loaded outside the `functions` dictionary when you want to use the custom boundary conditions that we provide with the FF module.
 
 The `errors strict` option is optional and [available since OpenFOAM v2012](https://www.openfoam.com/news/main-news/openfoam-v20-12/post-processing#post-processing-function-object-error-handling). Since the adapter is necessary to do a coupled simulation, this option instructs OpenFOAM to stop in case it faces issues with loading the adapter. For OpenFOAM versions that don't support this, remove the option.

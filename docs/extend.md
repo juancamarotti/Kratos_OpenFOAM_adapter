@@ -16,7 +16,7 @@ While in the beginning the adapter only included a module for conjugate heat tra
 ## Starting points
 
 In case you just want to couple a different variable, you need to create a new
-coupling data user class in the `preciceAdapter::CHT` namespace or in a new one.
+coupling data user class in the `CoSimIOAdapter::CHT` namespace or in a new one.
 Then you need to add an option for it in the configuration part
 to add objects of it into the `couplingDataWriters` and `couplingDataReaders`
 whenever requested.
