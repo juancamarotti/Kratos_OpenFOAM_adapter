@@ -33,7 +33,7 @@ In addition, the adapter supports the following fields in a volume coupling setu
 
 
 ## How to get the adapter?
-The adapter depends on OpenFOAM v2512, CoSimIO, and preCICE. The following provides a complete guideline to get the adapter and its dependencies.
+The adapter depends on OpenFOAM v2512 and CoSimIO. The following provides a complete guideline to get the adapter and its dependencies.
 
 **1. Clone the adapter's repository**
 
@@ -41,7 +41,7 @@ The adapter depends on OpenFOAM v2512, CoSimIO, and preCICE. The following provi
 git clone https://github.com/juancamarotti/OpenFOAM_CoSimIO-Adapter.git
 ```
 
-**2. Clone CoSimIO and build it with MPI support**
+**2. Clone, build, and install CoSimIO with MPI support**
 
 ```bash
 git clone https://github.com/KratosMultiphysics/CoSimIO.git
@@ -51,6 +51,8 @@ cd CoSimIO
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCO_SIM_IO_BUILD_MPI=ON -DCO_SIM_IO_BUILD_TESTING=OFF
 
 cmake --build build --parallel "$(nproc)"
+
+cmake --install build
 ```
 
 **3. Install OpenFOAM solver version v2512**
@@ -67,35 +69,22 @@ sudo apt-get install openfoam2512-default
 
 **⚠️ Warning:** The adapter currently supports **only OpenFOAM v2512**. Please install this version before proceeding.
 
-**4. Get preCICE, build and install**
 
-```bash
-git clone https://github.com/precice/precice.git
-
-cd precice
-
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/.local" -DPRECICE_FEATURE_PETSC_MAPPING=OFF
-
-cmake --build build --parallel "$(nproc)"
-cmake --install build
-```
-
-**5. Load OpenFOAM environment**
+**4. Load OpenFOAM environment**
 
 ```bash
 source /usr/lib/openfoam/openfoam2512/etc/bashrc
 ```
 
-**6. Set environment variables**
+**5. Set environment variables**
 
 ```bash
 export COSIMIO_ROOT=/path/to/CoSimIO
-export PKG_CONFIG_PATH=path/to/precice_build
 export LD_LIBRARY_PATH=path/to/CoSimIO_build
 ```
 Please change ```<path/to/CoSimIO/SourceFiles>``` accordingly. Besides, ```$PKG_CONFIG_PATH``` must include the directory containing ```libprecice.pc```, while ```LD_LIBRARY_PATH``` must include the directories containing the shared libraries ```libco_sim_io.so``` and ```libco_sim_io_mpi.so``` so that the runtime linker can locate them.
 
-**7. At adapter's directory, run ```Allwmake``` build file**
+**6. At adapter's directory, run ```Allwmake``` build file**
 
 From the adapter root directory, execute:
 ```bash
