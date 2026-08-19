@@ -1,5 +1,8 @@
 # The OpenFOAM adapter
 
+**Requirements**: OpenFOAM v2512, CoSimIO built with MPI support, CMake, and a compatible C++ compiler.
+
+
 ## Overview
 
 ### Description
@@ -82,7 +85,7 @@ source /usr/lib/openfoam/openfoam2512/etc/bashrc
 export COSIMIO_ROOT=/path/to/CoSimIO
 export LD_LIBRARY_PATH=path/to/CoSimIO_build
 ```
-Please change ```<path/to/CoSimIO/SourceFiles>``` accordingly. Besides, ```LD_LIBRARY_PATH``` must include the directories containing the shared libraries ```libco_sim_io.so``` and ```libco_sim_io_mpi.so``` so that the runtime linker can locate them.
+Please change ```<path/to/CoSimIO>``` accordingly. Besides, ```LD_LIBRARY_PATH``` must include the directories containing the shared libraries ```libco_sim_io.so``` and ```libco_sim_io_mpi.so``` so that the runtime linker can locate them.
 
 **6. At adapter's directory, run ```Allwmake``` build file**
 
@@ -139,12 +142,12 @@ interfaces
 }
 ```
 The ```moduleName``` selects the coupling module used by the adapter. Available modules include FSI for fluid-structure interaction, CHT for conjugate heat transfer, and FF for fluid-fluid coupling.
-<!--participants>
+<!--participants-->
 The ```interfaces``` block determines the interfaces available in the co-simulation. For each interface, following properties have to be determined:
 - ```InterfaceName``` can be set arbitrarily
 - ```meshName``` <!-- participant and meshName are originally required to correspond with preciceConfig.xml. How about here? ProjectParametersCoSim.json?-->
 - ```patches``` specifies the list of names of boundary patches that participate in the co-simulation. Each specified patch must exist in the OpenFOAM mesh boundary, and the corresponding field files in the ```0/``` directory must provide appropriate boundary conditions for that patch.
-- The ```locations``` field determines the position where the interface mesh is defined on the cell. Default value of ```locations``` is ```faceCenters```, while other values can be set for ```interfaceMeshLocation```, including ```faceNodes``` and ```volumeCenters```.
+- The ```locations``` field determines the position where the interface mesh is defined on the cell. Default value of ```locations``` is ```FaceCenters```, while other values can be set for ```interfaceMeshLocation```, including ```FaceNodes``` and ```VolumeCenters```.
 - ```ReadData``` and ```WriteData``` sections define which field will be exchanged between the two solvers. Available fields include ```Temperature```,  ```Heat-Flux```, ```Sink-Temperature```, and ```Heat-Transfer-Coefficient```. Postfixed names following a hyphen can be added to distinguish multiple data sets of the same type (e.g. ```Temperature-Domain1```). For FSI module, ```WriteData``` values also include ```Force``` and ```Stress``` for fluid participants and ```Displacement``` for solid participants, while ```ReadData``` takes also ```Displacement``` and ```DisplacementDelta``` for fluid participants and ```Force``` and ```Stress``` for solid participants.
 - Specific settings when using certain values for ```ReadData``` and/or ```WriteData``` for each boundary module has to be satisfied:
 
@@ -155,7 +158,7 @@ The ```interfaces``` block determines the interfaces available in the co-simulat
         - type ```fixedValue``` for the interface (e.g., ```flap```) in the ```0/pointDisplacement```, and
         - ```solver displacementLaplacian``` in the ```constant/dynamicMeshDict```
 
-    - ```FF``` module supports eading and writing ```Pressure```, ```Velocity```, ```PressureGradient```, ```VelocityGradient```, ```FlowTemperature```, ```FlowTemperatureGradient```, ```Alpha```, ```AlphaGradient``` and the face flux ```Phi```. Similarly to the ```CHT``` module, you need a ```fixedValue``` boundary condition of the respective primary field in order to read and apply values, and a ```fixedGradient``` boundary condition of the respective gradient field in order to read and apply gradients.
+    - ```FF``` module supports reading and writing ```Pressure```, ```Velocity```, ```PressureGradient```, ```VelocityGradient```, ```FlowTemperature```, ```FlowTemperatureGradient```, ```Alpha```, ```AlphaGradient``` and the face flux ```Phi```. Similarly to the ```CHT``` module, you need a ```fixedValue``` boundary condition of the respective primary field in order to read and apply values, and a ```fixedGradient``` boundary condition of the respective gradient field in order to read and apply gradients.
 
 - The last section defines additional properties for specific solvers. More information can be obtained via [preCICE-OpenFoam-Adapter documentation](https://precice.org/adapter-openfoam-config.html#additional-properties-for-some-solvers).
 
@@ -209,7 +212,7 @@ The parameters to be defined in the parameter definition are listed in the follo
 | `startFrom <start_option>;`     | Specifies how the simulation start time is selected, e.g. from `startTime` or the latest available time directory.            |
 | `startTime <time>;`             | Defines the initial simulation time when `startFrom startTime;` is used.                                                      |
 | `stopAt <stop_option>;`         | Specifies the condition used to stop the simulation, e.g. when `endTime` is reached.                                          |
-| `endTime <time>;`               | Defines the final simulation time.                                                moduleName selects the coupling module used by the adapter. Available modules include FSI for fluid-structure interaction, CHT for conjugate heat transfer, and FF for fluid-fluid coupling.                                            |
+| `endTime <time>;`               | Defines the final simulation time.                                       |
 | `deltaT <time_step>;`           | Defines the simulation time-step size.                                                                                        |
 | `writeControl <write_control>;` | Specifies how output writing is triggered, e.g. by time steps or simulation time.                                             |
 | `writeInterval <interval>;`     | Defines the interval between output writes according to the selected `writeControl`.                                          |
@@ -541,3 +544,13 @@ functions
     }
 }
 ```
+
+
+
+## References
+
+OpenCFD Ltd. (2024, January 2). *Function objects*. OpenFOAM Documentation. https://doc.openfoam.com/2312/tools/post-processing/function-objects/
+
+preCICE. (2026, June 30). *Configure the OpenFOAM adapter*. https://precice.org/adapter-openfoam-config.html#additional-properties-for-some-solvers
+
+Sastre i Rienitz, E. (2026, August 17). *Coupling Kratos Multiphysics with OpenFOAM for strongly coupled FSI problems* [Presentation slides]. Technische Universität München. https://github.com/juancamarotti/OpenFOAM_CoSimIO-Adapter/blob/develop/Coupling_Kratos_Multiphysics_with_OpenFOAM.pdf
