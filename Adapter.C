@@ -96,10 +96,6 @@ void CoSimIOAdapter::Adapter::ConfigFileRead()
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE));
 
-    // Read and display the participant name
-    mParticipantName = CoSimIODict.get<word>("participant");
-    DEBUG(adapterInfo("  participant name    : " + mParticipantName));
-
     // Read and display the list of modules
     DEBUG(adapterInfo("  modules requested   : "));
     auto modules_ = CoSimIODict.get<wordList>("modules");

@@ -87,9 +87,6 @@ private:
     //- OpenFOAM fvMesh object
     const Foam::fvMesh& mMesh;
 
-    //- preCICE participant name
-    Foam::word mParticipantName;
-
     //- Switch for checkpointing
     bool mCheckpointing = false;
 
