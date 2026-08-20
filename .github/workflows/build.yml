@@ -29,5 +29,26 @@ jobs:
       uses: gerlero/setup-openfoam@v1
       with:
         openfoam-version: 2512
-    - name: Build OpenFOAM-preCICE adapter
+
+    - name: Clone CoSimIO
+      run: |
+        git clone --depth 1 \
+          https://github.com/KratosMultiphysics/CoSimIO.git \
+          CoSimIO
+
+    - name: Build CoSimIO
+      run: |
+        cmake \
+          -S CoSimIO \
+          -B CoSimIO/build \
+          -DCO_SIM_IO_BUILD_MPI=ON \
+          -DCO_SIM_IO_BUILD_TESTING=OFF
+
+        cmake --build CoSimIO/build --parallel
+
+    - name: Set CoSimIO environment
+      run: |
+        echo "COSIMIO_ROOT=$GITHUB_WORKSPACE/CoSimIO" >> "$GITHUB_ENV"
+        echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/CoSimIO/build:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+    - name: Build OpenFOAM-CoSimIO adapter
       run: ./Allwmake
