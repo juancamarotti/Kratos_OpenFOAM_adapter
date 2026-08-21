@@ -112,8 +112,6 @@ FoamFile
     object      CoSimIODict;
 }
 
-participant Fluid;
-
 modules (<moduleName>);
 
 interfaces
@@ -142,7 +140,6 @@ interfaces
 }
 ```
 The ```moduleName``` selects the coupling module used by the adapter. Available modules include FSI for fluid-structure interaction, CHT for conjugate heat transfer, and FF for fluid-fluid coupling.
-<!--participants-->
 The ```interfaces``` block determines the interfaces available in the co-simulation. For each interface, following properties have to be determined:
 - ```InterfaceName``` can be set arbitrarily
 - ```meshName``` <!-- participant and meshName are originally required to correspond with preciceConfig.xml. How about here? ProjectParametersCoSim.json?-->
@@ -166,7 +163,6 @@ An overview of entries required for ```CoSimIODict``` configuration can be found
 
 | Entry         | Description                                                                                                         |
 | ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `participant` | Mandatory participant-name entry. Currently stored by the adapter but not used to establish the CoSimIO connection. |
 | `modules`     | Specifies the enabled coupling modules (`FSI`, `CHT`, `FF`, etc.).                                                  |
 | `interfaces`  | Defines one or more coupling interfaces.                                                                            |
 | `mesh`        | Name/identifier of the coupling mesh exported through CoSimIO.                                                      |
@@ -178,7 +174,7 @@ An overview of entries required for ```CoSimIODict``` configuration can be found
 
 ### controlDict
 
-A ```controlDict``` parameter dictionary has the following general format:
+Beside common parameters setup for ```controlDict``` as per regular ```openFOAM``` solver execution, function object ```CoSimIO_Adapter``` must also be added as follows:
 
 ```
 FoamFile
@@ -204,28 +200,8 @@ functions
 }
 ```
 
-The parameters to be defined in the parameter definition are listed in the following table:
+The ```errors strict``` option is optional. It instructs OpenFOAM to stop in case it faces issues with loading the adapter.
 
-| Parameter                       | Meaning                                                                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `application <solver>;`         | Specifies the OpenFOAM solver/application to run.                                                                             |
-| `startFrom <start_option>;`     | Specifies how the simulation start time is selected, e.g. from `startTime` or the latest available time directory.            |
-| `startTime <time>;`             | Defines the initial simulation time when `startFrom startTime;` is used.                                                      |
-| `stopAt <stop_option>;`         | Specifies the condition used to stop the simulation, e.g. when `endTime` is reached.                                          |
-| `endTime <time>;`               | Defines the final simulation time.                                       |
-| `deltaT <time_step>;`           | Defines the simulation time-step size.                                                                                        |
-| `writeControl <write_control>;` | Specifies how output writing is triggered, e.g. by time steps or simulation time.                                             |
-| `writeInterval <interval>;`     | Defines the interval between output writes according to the selected `writeControl`.                                          |
-| `purgeWrite <number>;`          | Specifies how many previous output time directories are retained. A value of `0` keeps all written directories.               |
-| `writeFormat <format>;`         | Specifies the output file format, typically `ascii` or `binary`.                                                              |
-| `writePrecision <digits>;`      | Defines the numerical precision used when writing field data.                                                                 |
-| `writeCompression <option>;`    | Enables or disables compression of output files.                                                                              |
-| `timeFormat <format>;`          | Specifies the numeric format used for simulation-time values and time-directory names.                                        |
-| `timePrecision <digits>;`       | Defines the numerical precision used for simulation-time values and directory names.                                          |
-| `libs ("<library_name>");`      | Dynamically loads one or more shared libraries required by additional runtime functionality, such as custom function objects. |
-
-
-```functions``` section defines the function objects that will be executed during runtime. ```CoSimIO_Adapter``` function object call is a must, since it establishes the connection between ```CoSimIO``` and ```OpenFOAM```. Other OpenFOAM function objects can also be called per need. Generic OpenFOAM function-object controls can be found at [OpenFOAM function object controls documentation](https://doc.openfoam.com/2312/tools/post-processing/function-objects/). 
 
 ### Examples
 
@@ -241,8 +217,6 @@ FoamFile
     class       dictionary;
     object      CoSimIODict;
 }
-
-participant Fluid;
 
 modules (FSI);
 
@@ -271,280 +245,6 @@ FSI
   rho rho [1 -3 0 0 0 0 0] 956.0;
 }
 ```
-
-```controlDict``` configuration
-
-```
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "system";
-    object      controlDict;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-application         pimpleFoam;
-
-startFrom           startTime;
-//startFrom           latestTime;
-
-startTime           0;
-
-stopAt              endTime;
-
-endTime             25.0;
-
-deltaT              0.05;
-
-writeControl        timeStep;
-
-writeInterval       10;
-
-purgeWrite          0;
-
-writeFormat         ascii;
-
-writePrecision      12;
-
-writeCompression    off;
-
-timeFormat          general;
-
-timePrecision       8;
-
-libs ("libCoSimIOAdapterFunctionObject.so");
-functions
-{
-    CoSimIO_Adapter
-    {
-        type CoSimIOAdapterFunctionObject;
-        errors strict; // Available since OpenFOAM v2012
-    }
-
-    // Function object "CourantNo" to see courant number
-    Co1
-    {
-        type                CourantNo;
-        libs                ("libfieldFunctionObjects.so");
-        executeControl      timeStep;
-        executeInterval     50;
-        writeControl        writeTime;
-    }
-
-    // Function object "forces" to calcuate the total force on interface
-    forces
-    {
-        type                forces;
-        libs                ( "libforces.so" );
-        patches             (Mok);
-        rho                 rhoInf;
-        log                 true;
-        rhoInf              956.0;
-        CofR                (0 0 0);
-        writeControl    timeStep;
-        writeInterval   1;
-    }
-
-    residuals
-    {
-        type            residuals;
-        libs            ("libutilityFunctionObjects.so");
-        writeControl    timeStep;
-        writeInterval   100;
-        fields          (p U);
-    }
-
-
-    probes
-    {
-        type            probes;
-        libs            ("libsampling.so");
-
-        writeControl    writeTime;     // or timeStep if you want every step
-        writeInterval   100;
-
-        fields          (U p);         // add whatever you want to sample
-
-        probeLocations
-        (
-            (0.4965 0.25 0.0)
-        );
-    }
-
-    writePointDisplacement
-    {
-        type            writeObjects;
-        libs            ("libutilityFunctionObjects.so");
-
-        writeControl    timeStep;
-        writeInterval   100;
-
-        objects         (pointDisplacement);
-    }
-
-
-}
-```
-
-
-#### FSI Turek
-
-```CoSimIODict``` configuration
-
-```
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      CoSimIODict;
-}
-
-participant Fluid;
-
-modules (FSI);
-
-interfaces
-{
-  interface_flap
-  {
-    mesh              interface_flap;
-    patches           (flap);
-    locations         FaceCenters;
-    
-    ReadData
-    (
-        Displacement-Flap
-    );
-    
-    WriteData
-    (
-        Force-Flap
-    );
-  };
-};
-
-FSI
-{
-  rho rho [1 -3 0 0 0 0 0] 1000.0;
-}
-```
-
-```ControlDict``` configuration
-```
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "system";
-    object      controlDict;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-application         pimpleFoam;
-
-startFrom           startTime;
-//startFrom           latestTime;
-
-startTime           0;
-
-stopAt              endTime;
-
-endTime             25.0;
-
-deltaT              0.005;
-
-writeControl        timeStep;
-
-writeInterval       100;
-
-purgeWrite          0;
-
-writeFormat         ascii;
-
-writePrecision      12;
-
-writeCompression    off;
-
-timeFormat          general;
-
-timePrecision       8;
-
-libs ("libCoSimIOAdapterFunctionObject.so");
-functions
-{
-    CoSimIO_Adapter
-    {
-        type CoSimIOAdapterFunctionObject;
-        errors strict; // Available since OpenFOAM v2012
-    }
-
-    // Function object "CourantNo" to see courant number
-    Co1
-    {
-        type                CourantNo;
-        libs                ("libfieldFunctionObjects.so");
-        executeControl      timeStep;
-        executeInterval     100;
-        writeControl        writeTime;
-    }
-
-    // Function object "forces" to calcuate the total force on interface
-    forces
-    {
-        type                forces;
-        libs                ( "libforces.so" );
-        patches             (flap);
-        rho                 rhoInf;
-        log                 true;
-        rhoInf              1000;
-        CofR                (0 0 0);
-        writeControl    timeStep;
-        writeInterval   1;
-    }
-
-    residuals
-    {
-        type            residuals;
-        libs            ("libutilityFunctionObjects.so");
-        writeControl    timeStep;
-        writeInterval   100;
-        fields          (p U);
-    }
-
-
-    probes
-    {
-        type            probes;
-        libs            ("libsampling.so");
-
-        writeControl    writeTime;     // or timeStep if you want every step
-        writeInterval   100;
-
-        fields          (U p);         // add whatever you want to sample
-
-        probeLocations
-        (
-            (0.4965 0.25 0.0)
-        );
-    }
-
-    writePointDisplacement
-    {
-        type            writeObjects;
-        libs            ("libutilityFunctionObjects.so");
-
-        writeControl    timeStep;
-        writeInterval   100;
-
-        objects         (pointDisplacement);
-    }
-}
-```
-
 
 
 ## References
