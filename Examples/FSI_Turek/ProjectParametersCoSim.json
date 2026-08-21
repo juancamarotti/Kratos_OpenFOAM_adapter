@@ -1,0 +1,145 @@
+{
+    "problem_data" :
+    {
+        "start_time" : 0.0,
+        "end_time" : 25.0,
+        "echo_level" : 3,
+        "print_colors" : true,
+        "parallel_type" : "OpenMP"
+    },
+    "solver_settings" :
+    {
+        "type" : "coupled_solvers.gauss_seidel_strong",
+        "echo_level" : 3,
+        "num_coupling_iterations": 50,
+        "predictors" : [
+            {
+                "type" : "average_value_based",
+                "solver"         : "Openfoam_Kratos_Wrapper",
+                "data_name"        : "Force-Flap",
+                "echo_level" : 1
+            }
+        ],
+        "data_transfer_operators" : {
+            "mapper" : {
+                "type" : "kratos_mapping",
+                "mapper_settings" : {
+                    "mapper_type" : "nearest_neighbor",
+                    "echo_level" : 4,
+                    "search_settings" : {
+                        "search_radius" : 0.1
+                    }
+                }
+            }
+        },
+        "convergence_accelerators": [
+            {
+               "type"      : "iqnils",
+                "solver": "structure",
+                "data_name": "load_interface_flap"
+            }
+        ],
+        "convergence_criteria": [
+            {
+                "type": "relative_norm_previous_residual",
+                "solver": "structure",
+                "data_name": "load_interface_flap",
+                "abs_tolerance": 1e-9,
+                "rel_tolerance": 1e-4
+            }
+        ],
+        "coupling_sequence":
+        [
+        {
+            "name": "structure",
+            "input_data_list": [],
+            "output_data_list": []
+        },
+        {
+            "name": "Openfoam_Kratos_Wrapper",
+            "input_data_list": [
+                {
+                    "data"           : "Displacement-Flap",
+                    "from_solver"      : "structure",
+                    "from_solver_data" : "disp_interface_flap",
+                    "data_transfer_operator" : "mapper"
+                }      
+                  ],
+            "output_data_list": [
+                 {
+                    "data"              : "Force-Flap",
+                    "to_solver"       : "structure",
+                    "to_solver_data"  : "load_interface_flap",
+                    "data_transfer_operator" : "mapper",
+                    // "after_data_transfer_operations" : ["scaling_loads_interface_flap"],
+                    "data_transfer_operator_options" : ["use_transpose"]
+                }
+            ]
+        }
+        ],
+        "coupling_operations" : {
+            "scaling_loads_interface_flap" : {
+                "type"           : "scaling",
+                "solver"         : "structure",
+                "data_name"      : "load_interface_flap",
+                "scaling_factor" : "(sin(((t)/2.0)*pi/2))**1",
+                "echo_level"     : 1,
+                "interval"       : [0.0, 2.0]
+            }
+        },
+        "solvers" :
+        {
+            "Openfoam_Kratos_Wrapper":
+            {
+                "type" : "solver_wrappers.external.openfoam_wrapper_strong_coupling",
+                "solver_wrapper_settings" : {
+                    "import_meshes"    : ["interface_flap"],
+                    "export_data"      : ["Displacement-Flap"],
+                    "import_data"      : ["Force-Flap"],
+                    "start_time"               : 0.0,
+                    "time_step"                : 0.005,
+                    "end_time"                 : 25.0,
+                    "strong_coupling"          : true,
+                    "first_solver_in_sequence" : false
+                },
+                "io_settings" : {
+                    "type"       : "kratos_co_sim_io",
+                    "echo_level" : 4,
+                    "connect_to" : "Openfoam_Adapter",
+                    "communication_format" : "file"
+                },
+                "data" : {
+                    "Displacement-Flap" : {
+                        "model_part_name"   : "interface_flap",
+                        "dimension" : 3,
+                        "variable_name" : "DISPLACEMENT"
+                    },
+                    "Force-Flap" : {
+                        "model_part_name"   : "interface_flap",
+                        "dimension" : 3,
+                        "variable_name" : "FORCE"
+                    }
+                }
+            },
+            "structure" :
+            {
+                "type" : "solver_wrappers.kratos.structural_mechanics_wrapper",
+                "solver_wrapper_settings" : {
+                    "input_file"  : "ProjectParameters"
+                },
+                "data" : {
+                    "disp_interface_flap" : {
+                        "model_part_name" : "Structure.StructureInterface2D_StructureInterface",
+                        "variable_name" : "DISPLACEMENT",
+                        "dimension" : 3
+                    },
+                    "load_interface_flap" : {
+                        "model_part_name" : "Structure.StructureInterface2D_StructureInterface",
+                        "variable_name" : "POINT_LOAD",
+                        "dimension" : 3
+                    }
+                }
+            }
+        }
+    }
+}

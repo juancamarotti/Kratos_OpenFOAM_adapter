@@ -1,0 +1,38 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      CoSimIODict;
+}
+
+preciceConfig "precice-config.xml";
+
+participant Fluid;
+
+modules (FSI);
+
+interfaces
+{
+  interface_flap
+  {
+    mesh              interface_flap;
+    patches           (Mok);
+    locations         FaceCenters;
+    
+    ReadData
+    (
+        Displacement-Flap
+    );
+    
+    WriteData
+    (
+        Force-Flap
+    );
+  };
+};
+
+FSI
+{
+  rho rho [1 -3 0 0 0 0 0] 956.0;
+}
