@@ -9,11 +9,18 @@ rm -rfv Wall_Structure_partitioned/
 rm -rfv vtk_output_structure/
 
 echo "--- Cleaning OpenFOAM result files in $(pwd)"
-if [ -n "${WM_PROJECT:-}" ] || error "No OpenFOAM environment is active."; then
-    # shellcheck disable=SC1090 # This is an OpenFOAM file which we don't need to check
+if [ -n "${WM_PROJECT:-}" ]; then
+
+    # shellcheck disable=SC1091
     . "${WM_PROJECT_DIR}/bin/tools/CleanFunctions"
+
     cleanCase
+
     rm -rfv 0/uniform/functionObjects/functionObjectProperties
+
+else
+    echo "No OpenFOAM environment is active." >&2
+    exit 1
 fi
 
 echo "--- Cleaning logfiles"
