@@ -657,12 +657,6 @@ void CoSimIOAdapter::Adapter::Initialize()
     // Obtain whether the coupling is strong or not
     ProcessControlInfo(ImportControlInfo());
 
-    // Obtain whether OpenFOAM is the first one to go or nor
-    ProcessControlInfo(ImportControlInfo());
-
-    // Obtain the time step window
-    ProcessControlInfo(ImportControlInfo());
-
     mCoSimIOInitialized = true;
     ACCUMULATE_TIMER(time_in_initialize);
 
@@ -741,9 +735,7 @@ void CoSimIOAdapter::Adapter::CheckSolverTimeStepAndReadData()
 
 bool CoSimIOAdapter::Adapter::IsCouplingOngoing()
 {
-    bool IsCouplingOngoing = false;
-
-    return IsCouplingOngoing;
+    return mCouplingOngoing;
 }
 
 CoSimIO::Info CoSimIOAdapter::Adapter::ImportControlInfo()
@@ -767,12 +759,12 @@ void CoSimIOAdapter::Adapter::ProcessControlInfo(
     Info << "OPENFOAM: received control_signal = "
          << signal << Foam::endl;
 
-    if (signal == "isStrongCoupling")
+    if (signal == "is_strong_coupling")
     {
         mStrongCoupling =
-            settings.Get<bool>("isStrongCoupling");
+            settings.Get<bool>("is_strong_coupling");
 
-        Info << "OPENFOAM: isStrongCoupling = "
+        Info << "OPENFOAM: is_strong_coupling = "
              << mStrongCoupling << Foam::endl;
     }
     else if (signal == "coupling_ongoing")
