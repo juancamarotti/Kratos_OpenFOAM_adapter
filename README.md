@@ -142,7 +142,7 @@ interfaces
 The ```moduleName``` selects the coupling module used by the adapter. Available modules include FSI for fluid-structure interaction, CHT for conjugate heat transfer, and FF for fluid-fluid coupling.
 The ```interfaces``` block determines the interfaces available in the co-simulation. For each interface, following properties have to be determined:
 - ```InterfaceName``` can be set arbitrarily
-- ```meshName``` <!-- participant and meshName are originally required to correspond with preciceConfig.xml. How about here? ProjectParametersCoSim.json?-->
+- ```meshName``` has to correspond to ```import_meshes``` under ```solver_settings/solvers/Openfoam_Kratos_Wrapper/solver_wrapper_settings``` of file ```ProjectParametersCoSim.json``` at the root.
 - ```patches``` specifies the list of names of boundary patches that participate in the co-simulation. Each specified patch must exist in the OpenFOAM mesh boundary, and the corresponding field files in the ```0/``` directory must provide appropriate boundary conditions for that patch.
 - The ```locations``` field determines the position where the interface mesh is defined on the cell. Default value of ```locations``` is ```FaceCenters```, while other values can be set for ```interfaceMeshLocation```, including ```FaceNodes``` and ```VolumeCenters```.
 - ```ReadData``` and ```WriteData``` sections define which field will be exchanged between the two solvers. Available fields include ```Temperature```,  ```Heat-Flux```, ```Sink-Temperature```, and ```Heat-Transfer-Coefficient```. Postfixed names following a hyphen can be added to distinguish multiple data sets of the same type (e.g. ```Temperature-Domain1```). For FSI module, ```WriteData``` values also include ```Force``` and ```Stress``` for fluid participants and ```Displacement``` for solid participants, while ```ReadData``` takes also ```Displacement``` and ```DisplacementDelta``` for fluid participants and ```Force``` and ```Stress``` for solid participants.
@@ -158,6 +158,8 @@ The ```interfaces``` block determines the interfaces available in the co-simulat
     - ```FF``` module supports reading and writing ```Pressure```, ```Velocity```, ```PressureGradient```, ```VelocityGradient```, ```FlowTemperature```, ```FlowTemperatureGradient```, ```Alpha```, ```AlphaGradient``` and the face flux ```Phi```. Similarly to the ```CHT``` module, you need a ```fixedValue``` boundary condition of the respective primary field in order to read and apply values, and a ```fixedGradient``` boundary condition of the respective gradient field in order to read and apply gradients.
 
 - The last section defines additional properties for specific solvers. More information can be obtained via [preCICE-OpenFoam-Adapter documentation](https://precice.org/adapter-openfoam-config.html#additional-properties-for-some-solvers).
+
+**⚠️ Warning:** Their must be a correspondence between the information the wrapper writes and OpenFOAM receives and vice versa, i.e. ```solver_settings/solvers/Openfoam_Kratos_Wrapper/solver_wrapper_settings/export_data``` in ```ProjectParametersCoSim.json``` vs ```interfaces/interface_flap/ReadData``` in ```system/CoSimIODict```, as well as ```solver_settings/solvers/Openfoam_Kratos_Wrapper/solver_wrapper_settings/import_data``` in ```system/CoSimIODict``` vs ```interfaces/interface_flap/WriteData``` in ```system/CoSimIODict```
 
 An overview of entries required for ```CoSimIODict``` configuration can be found in the following table:
 
