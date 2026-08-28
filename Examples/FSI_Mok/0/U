@@ -1,0 +1,77 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    Mok
+    {
+        type            movingWallVelocity;
+        value           uniform (0 0 0);
+    }
+
+    top
+    {
+        type            slip;
+
+    }
+
+    bottom
+    {
+        type            noSlip;
+    }
+
+    inlet
+    {
+        type            codedFixedValue;
+        value           uniform (0 0 0);
+        name            parabolicRampInlet;
+
+        code
+        #{
+            const scalar t = this->db().time().value();
+
+            scalar vTilde;
+
+            if (t < 10.0)
+            {
+                vTilde =
+                    0.06067/2.0*(1.0 - cos(Foam::constant::mathematical::pi*t/10.0));
+            }
+            else
+            {
+                vTilde = 0.06067;
+            }
+
+            forAll(*this, faceI)
+            {
+                const scalar y = patch().Cf()[faceI].y();
+
+                const scalar Ux = 4.0*vTilde*y*(1.0 - y);
+
+                operator[](faceI) = vector(Ux, 0.0, 0.0);
+            }
+        #};
+    }
+
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //
