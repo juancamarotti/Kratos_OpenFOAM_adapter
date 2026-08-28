@@ -1,36 +1,258 @@
-# OpenFOAM-preCICE adapter
+# The OpenFOAM adapter
 
-[![Ask questions in the forum](https://img.shields.io/badge/community-forum-orange?link=https%3A%2F%2Fprecice.discourse.group%2F)](https://precice.discourse.group/)
-[![Release](https://img.shields.io/github/release/precice/openfoam-adapter.svg)](https://github.com/precice/openfoam-adapter/releases/latest)
-[![SoftwareHeritage](https://archive.softwareheritage.org/badge/origin/https://github.com/precice/openfoam-adapter/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/precice/openfoam-adapter)
-[![Cite](https://img.shields.io/badge/cite-literature_guide-d45815)](https://precice.org/fundamentals-literature-guide.html)
-[![Changelog](https://img.shields.io/badge/Keep%20a%20Changelog--555.svg?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNmMTVkMzAiIHZpZXdCb3g9IjAgMCAxODcgMTg1Ij48cGF0aCBkPSJNNjIgN2MtMTUgMy0yOCAxMC0zNyAyMmExMjIgMTIyIDAgMDAtMTggOTEgNzQgNzQgMCAwMDE2IDM4YzYgOSAxNCAxNSAyNCAxOGE4OSA4OSAwIDAwMjQgNCA0NSA0NSAwIDAwNiAwbDMtMSAxMy0xYTE1OCAxNTggMCAwMDU1LTE3IDYzIDYzIDAgMDAzNS01MiAzNCAzNCAwIDAwLTEtNWMtMy0xOC05LTMzLTE5LTQ3LTEyLTE3LTI0LTI4LTM4LTM3QTg1IDg1IDAgMDA2MiA3em0zMCA4YzIwIDQgMzggMTQgNTMgMzEgMTcgMTggMjYgMzcgMjkgNTh2MTJjLTMgMTctMTMgMzAtMjggMzhhMTU1IDE1NSAwIDAxLTUzIDE2bC0xMyAyaC0xYTUxIDUxIDAgMDEtMTItMWwtMTctMmMtMTMtNC0yMy0xMi0yOS0yNy01LTEyLTgtMjQtOC0zOWExMzMgMTMzIDAgMDE4LTUwYzUtMTMgMTEtMjYgMjYtMzMgMTQtNyAyOS05IDQ1LTV6TTQwIDQ1YTk0IDk0IDAgMDAtMTcgNTQgNzUgNzUgMCAwMDYgMzJjOCAxOSAyMiAzMSA0MiAzMiAyMSAyIDQxLTIgNjAtMTRhNjAgNjAgMCAwMDIxLTE5IDUzIDUzIDAgMDA5LTI5YzAtMTYtOC0zMy0yMy01MWE0NyA0NyAwIDAwLTUtNWMtMjMtMjAtNDUtMjYtNjctMTgtMTIgNC0yMCA5LTI2IDE4em0xMDggNzZhNTAgNTAgMCAwMS0yMSAyMmMtMTcgOS0zMiAxMy00OCAxMy0xMSAwLTIxLTMtMzAtOS01LTMtOS05LTEzLTE2YTgxIDgxIDAgMDEtNi0zMiA5NCA5NCAwIDAxOC0zNSA5MCA5MCAwIDAxNi0xMmwxLTJjNS05IDEzLTEzIDIzLTE2IDE2LTUgMzItMyA1MCA5IDEzIDggMjMgMjAgMzAgMzYgNyAxNSA3IDI5IDAgNDJ6bS00My03M2MtMTctOC0zMy02LTQ2IDUtMTAgOC0xNiAyMC0xOSAzN2E1NCA1NCAwIDAwNSAzNGM3IDE1IDIwIDIzIDM3IDIyIDIyLTEgMzgtOSA0OC0yNGE0MSA0MSAwIDAwOC0yNCA0MyA0MyAwIDAwLTEtMTJjLTYtMTgtMTYtMzEtMzItMzh6bS0yMyA5MWgtMWMtNyAwLTE0LTItMjEtN2EyNyAyNyAwIDAxLTEwLTEzIDU3IDU3IDAgMDEtNC0yMCA2MyA2MyAwIDAxNi0yNWM1LTEyIDEyLTE5IDI0LTIxIDktMyAxOC0yIDI3IDIgMTQgNiAyMyAxOCAyNyAzM3MtMiAzMS0xNiA0MGMtMTEgOC0yMSAxMS0zMiAxMXptMS0zNHYxNGgtOFY2OGg4djI4bDEwLTEwaDExbC0xNCAxNSAxNyAxOEg5NnoiLz48L3N2Zz4K)](https://github.com/precice/openfoam-adapter/blob/develop/CHANGELOG.md)
-[![License](https://img.shields.io/github/license/precice/openfoam-adapter.svg)](https://github.com/precice/openfoam-adapter/blob/master/LICENSE)
-[![Build with OpenFOAM v2512](https://github.com/precice/openfoam-adapter/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/precice/openfoam-adapter/actions/workflows/build.yml)
-[![OpenFOAM Package Index](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fexasim-project%2Fopi%2Frefs%2Fheads%2Fmain%2Fpkg%2Fprecice-adapter%2Fmetadata.json&query=%24.%5Bname%2Ctype%2Cversion%5D&label=opi)](https://github.com/exasim-project/opi)
+**Requirements**: OpenFOAM v2512, CoSimIO built with MPI support, CMake, and a compatible C++ compiler.
 
-## Start here
 
-See the [adapter documentation](https://precice.org/adapter-openfoam-overview.html) and related [tutorials](https://precice.org/tutorials.html).
+## Overview
 
-Please [report any issues](https://github.com/precice/openfoam-adapter/issues) here and give us feedback through [one of our community channels](https://precice.org/community-channels.html). Please ask question in the [preCICE forum](https://precice.discourse.group/), not via issues.
+### Description
+This adapter enables communication between the OpenFOAM solver and the CoSimIO library from Kratos Multiphysics. It is based on the OpenFOAM-preCICE adapter and adapts its functionality to use CoSimIO for data exchange. This adapter is a fork of the [OpenFOAM-preCICE adapter](https://precice.org/adapter-openfoam-overview.html). It supports fluid-structure interaction (fluid part), conjugate heat transfer (fluid and solid parts), and fluid-fluid simulations.
 
-This project is actively maintained on [precice/openfoam-adapter](https://github.com/precice/openfoam-adapter). Current maintainers: [@MakisH](https://github.com/MakisH/) and [@DavidSCN](https://github.com/DavidSCN).
+### Capabilities
+This adapter can read/write the following fields in a surface coupling setup:
 
-## Contributing
+- Temperature (read + write)
+- Temperature surface-normal gradient (read + write)
+- Heat flux (read + write)
+- Sink temperature (read + write)
+- Heat transfer coefficient (read + write)
+- Force (read + write)
+- Stress (write)
+- Displacement (read + write)
+- Displacement delta (read)
+- Pressure (read + write)
+- Pressure surface-normal gradient (read + write)
+- Velocity (read + write)
+- Velocity surface-normal gradient (read + write)
+- Phase fraction (alpha) (read + write)
+- Phase fraction (alpha) gradient (read + write)
+- Phase flux (phi) (read + write)
 
-We welcome contributions! Have a look at open [good first issues](https://github.com/precice/openfoam-adapter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) and [where we need help](https://github.com/precice/openfoam-adapter/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+In addition, the adapter supports the following fields in a volume coupling setup:
 
-Check the file `CONTRIBUTING.md` for a few tips and guidelines.
+- Temperature (write)
+- Pressure (write)
+- Velocity (read + write)
 
-## Citing
 
-Whenever using or referring to this adapter in academic publications, please cite it [1]. See the option "Cite this repository" in the "About" section, as well as the [preCICE literature guide](https://precice.org/fundamentals-literature-guide.html) and the [adapter overview page](https://precice.org/adapter-openfoam-overview.html) for more information.
+## How to get the adapter?
+The adapter depends on OpenFOAM v2512 and CoSimIO. The following provides a complete guideline to get the adapter and its dependencies.
+
+**1. Clone the adapter's repository**
+
+```bash
+git clone https://github.com/juancamarotti/OpenFOAM_CoSimIO-Adapter.git
+```
+
+**2. Clone, build, and install CoSimIO with MPI support**
+
+```bash
+git clone https://github.com/KratosMultiphysics/CoSimIO.git
+
+cd CoSimIO
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCO_SIM_IO_BUILD_MPI=ON -DCO_SIM_IO_BUILD_TESTING=OFF
+
+cmake --build build --parallel "$(nproc)"
+
+cmake --install build
+```
+
+**3. Install OpenFOAM solver version v2512**
+```bash
+# Add the repository
+curl -s https://dl.openfoam.com/add-debian-repo.sh | sudo bash
+
+# Update the repository information
+sudo apt-get update
+
+# Install OpenFOAM v2512
+sudo apt-get install openfoam2512-default
+```
+
+**⚠️ Warning:** The adapter currently supports **only OpenFOAM v2512**. Please install this version before proceeding.
+
+
+**4. Load OpenFOAM environment**
+
+```bash
+source /usr/lib/openfoam/openfoam2512/etc/bashrc
+```
+
+**5. Set environment variables**
+
+```bash
+export COSIMIO_ROOT=/path/to/CoSimIO
+export LD_LIBRARY_PATH=path/to/CoSimIO_build
+```
+Please change ```<path/to/CoSimIO>``` accordingly. Besides, ```LD_LIBRARY_PATH``` must include the directories containing the shared libraries ```libco_sim_io.so``` and ```libco_sim_io_mpi.so``` so that the runtime linker can locate them.
+
+**6. At adapter's directory, run ```Allwmake``` build file**
+
+From the adapter root directory, execute:
+```bash
+chmod +x ./Allwmake
+
+./Allwmake
+```
+
+## Configuration
+
+This section summarizes how to write the ```CoSimIODict``` file, set the boundary conditions, and activate the adapter in the ```controlDict```.
+
+### CoSimIODict
+The adapter is configured via the file ```system/CoSimIODict```. This file is an OpenFOAM dictionary with the following structure:
+
+```
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      CoSimIODict;
+}
+
+modules (<moduleName>);
+
+interfaces
+{
+    <InterfaceName>
+    {
+        mesh              <meshName>;
+        patches           (<boundaryPatchName>);
+        locations         <interfaceMeshLocation>;
+        
+        ReadData
+        (
+            <readFieldData>
+        );
+        
+        WriteData
+        (
+            <writeFieldData>
+        );
+    };
+};
+
+<moduleName>
+{
+    <quantityKeyword> <quantityName> <dimensionList> <value>;
+}
+```
+The ```moduleName``` selects the coupling module used by the adapter. Available modules include FSI for fluid-structure interaction, CHT for conjugate heat transfer, and FF for fluid-fluid coupling.
+The ```interfaces``` block determines the interfaces available in the co-simulation. For each interface, following properties have to be determined:
+- ```InterfaceName``` can be set arbitrarily
+- ```meshName``` has to correspond to ```import_meshes``` under ```solver_settings/solvers/Openfoam_Kratos_Wrapper/solver_wrapper_settings``` of file ```ProjectParametersCoSim.json``` at the root.
+- ```patches``` specifies the list of names of boundary patches that participate in the co-simulation. Each specified patch must exist in the OpenFOAM mesh boundary, and the corresponding field files in the ```0/``` directory must provide appropriate boundary conditions for that patch.
+- The ```locations``` field determines the position where the interface mesh is defined on the cell. Default value of ```locations``` is ```FaceCenters```, while other values can be set for ```interfaceMeshLocation```, including ```FaceNodes``` and ```VolumeCenters```.
+- ```ReadData``` and ```WriteData``` sections define which field will be exchanged between the two solvers. Available fields include ```Temperature```,  ```Heat-Flux```, ```Sink-Temperature```, and ```Heat-Transfer-Coefficient```. Postfixed names following a hyphen can be added to distinguish multiple data sets of the same type (e.g. ```Temperature-Domain1```). For FSI module, ```WriteData``` values also include ```Force``` and ```Stress``` for fluid participants and ```Displacement``` for solid participants, while ```ReadData``` takes also ```Displacement``` and ```DisplacementDelta``` for fluid participants and ```Force``` and ```Stress``` for solid participants.
+- Specific settings when using certain values for ```ReadData``` and/or ```WriteData``` for each boundary module has to be satisfied:
+
+    - ```CHT``` module: for ```readData(Temperature)```, use ```type fixedValue``` for the interface in ```0/T```. For ```readData(Heat-Flux)```, use ```type fixedGradient``` for the interface in ```0/T```. For ```readData(Sink-Temperature)``` or ```Heat-Transfer-Coefficient```, use ```type mixed``` for the interface in ```0/T```
+    - ```FSI``` module: for ```ReadData``` values ```Displacement``` or ```DisplacementDelta```, you need the following:
+        
+        - ```type movingWallVelocity``` for the interface (e.g., ```flap```) in ```0/U```
+        - type ```fixedValue``` for the interface (e.g., ```flap```) in the ```0/pointDisplacement```, and
+        - ```solver displacementLaplacian``` in the ```constant/dynamicMeshDict```
+
+    - ```FF``` module supports reading and writing ```Pressure```, ```Velocity```, ```PressureGradient```, ```VelocityGradient```, ```FlowTemperature```, ```FlowTemperatureGradient```, ```Alpha```, ```AlphaGradient``` and the face flux ```Phi```. Similarly to the ```CHT``` module, you need a ```fixedValue``` boundary condition of the respective primary field in order to read and apply values, and a ```fixedGradient``` boundary condition of the respective gradient field in order to read and apply gradients.
+
+- The last section defines additional properties for specific solvers. More information can be obtained via [preCICE-OpenFoam-Adapter documentation](https://precice.org/adapter-openfoam-config.html#additional-properties-for-some-solvers).
+
+**⚠️ Warning:** Their must be a correspondence between the information the wrapper writes and OpenFOAM receives and vice versa, i.e. ```solver_settings/solvers/Openfoam_Kratos_Wrapper/solver_wrapper_settings/export_data``` in ```ProjectParametersCoSim.json``` vs ```interfaces/interface_flap/ReadData``` in ```system/CoSimIODict```, as well as ```solver_settings/solvers/Openfoam_Kratos_Wrapper/solver_wrapper_settings/import_data``` in ```system/CoSimIODict``` vs ```interfaces/interface_flap/WriteData``` in ```system/CoSimIODict```
+
+An overview of entries required for ```CoSimIODict``` configuration can be found in the following table:
+
+| Entry         | Description                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `modules`     | Specifies the enabled coupling modules (`FSI`, `CHT`, `FF`, etc.).                                                  |
+| `interfaces`  | Defines one or more coupling interfaces.                                                                            |
+| `mesh`        | Name/identifier of the coupling mesh exported through CoSimIO.                                                      |
+| `patches`     | OpenFOAM boundary patches belonging to the interface.                                                               |
+| `locations`   | Specifies whether coupling locations are face centers, face nodes, or volume centers.                               |
+| `ReadData`    | Quantities imported from the coupled solver.                                                                        |
+| `WriteData`   | Quantities exported to the coupled solver.                                                                          |
+
+
+### controlDict
+
+Beside common parameters setup for ```controlDict``` as per regular ```openFOAM``` solver execution, function object ```CoSimIO_Adapter``` must also be added as follows:
+
+```
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+
+// Parameters definition
+
+functions
+{
+    CoSimIO_Adapter
+    {
+        type CoSimIOAdapterFunctionObject;
+        errors strict; // Available since OpenFOAM v2012
+    }
+
+    //Additional OpenFOAM function objects declaration
+}
+```
+
+The ```errors strict``` option is optional. It instructs OpenFOAM to stop in case it faces issues with loading the adapter.
+
+
+### Examples
+
+#### FSI Mok
+
+```CoSimIODict``` configuration
+
+```
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      CoSimIODict;
+}
+
+modules (FSI);
+
+interfaces
+{
+  interface_flap
+  {
+    mesh              interface_flap;
+    patches           (Mok);
+    locations         FaceCenters;
+    
+    ReadData
+    (
+        Displacement-Flap
+    );
+    
+    WriteData
+    (
+        Force-Flap
+    );
+  };
+};
+
+FSI
+{
+  rho rho [1 -3 0 0 0 0 0] 956.0;
+}
+```
+
 
 ## References
 
-[1] Chourdakis, G., Schneider, D., & Uekermann, B. (2023). OpenFOAM-preCICE: Coupling OpenFOAM with External Solvers for Multi-Physics Simulations. OpenFOAM® Journal, 3, 1–25. [DOI: 10.51560/ofj.v3.88](https://doi.org/10.51560/ofj.v3.88)
+OpenCFD Ltd. (2024, January 2). *Function objects*. OpenFOAM Documentation. https://doc.openfoam.com/2312/tools/post-processing/function-objects/
 
-## Disclaimer
+preCICE. (2026, June 30). *Configure the OpenFOAM adapter*. https://precice.org/adapter-openfoam-config.html#additional-properties-for-some-solvers
 
-This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM®  and OpenCFD®  trade marks.
+Sastre i Rienitz, E. (2026, August 17). *Coupling Kratos Multiphysics with OpenFOAM for strongly coupled FSI problems* [Presentation slides]. Technische Universität München. https://github.com/juancamarotti/OpenFOAM_CoSimIO-Adapter/blob/develop/Coupling_Kratos_Multiphysics_with_OpenFOAM.pdf
