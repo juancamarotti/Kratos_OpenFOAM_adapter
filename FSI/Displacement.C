@@ -2,7 +2,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FSI::Displacement::Displacement(
+CoSimIOAdapter::FSI::Displacement::Displacement(
     const Foam::fvMesh& mesh,
     const std::string namePointDisplacement,
     const std::string nameCellDisplacement)
@@ -21,7 +21,7 @@ preciceAdapter::FSI::Displacement::Displacement(
 
 // We cannot do this step in the constructor by design of the adapter since the information of the CouplingDataUser is
 // defined later. Hence, we call this method after the CouplingDaaUser has been configured
-void preciceAdapter::FSI::Displacement::Initialize()
+void CoSimIOAdapter::FSI::Displacement::Initialize()
 {
     // Initialize appropriate objects for each interface patch, namely the volField and the interpolation object
     // this is only necessary for face based FSI
@@ -36,7 +36,7 @@ void preciceAdapter::FSI::Displacement::Initialize()
 }
 
 
-std::size_t preciceAdapter::FSI::Displacement::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FSI::Displacement::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     /* TODO: Implement
      * We need two nested for-loops for each patch,
@@ -91,7 +91,7 @@ std::size_t preciceAdapter::FSI::Displacement::Write(double* buffer, bool meshCo
 
 
 // return the displacement to use later in the velocity?
-void preciceAdapter::FSI::Displacement::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FSI::Displacement::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
     for (unsigned int j = 0; j < mPatchIDs.size(); j++)
@@ -140,7 +140,7 @@ void preciceAdapter::FSI::Displacement::Read(double* buffer, const unsigned int 
     }
 }
 
-bool preciceAdapter::FSI::Displacement::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FSI::Displacement::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     // Solid solver can allow connectivity for writing displacement
     if (meshConnectivity)
@@ -153,7 +153,7 @@ bool preciceAdapter::FSI::Displacement::IsLocationTypeSupported(const bool meshC
     }
 }
 
-std::string preciceAdapter::FSI::Displacement::GetDataName() const
+std::string CoSimIOAdapter::FSI::Displacement::GetDataName() const
 {
     return "Displacement";
 }

@@ -5,7 +5,7 @@
 #include "mixedFvPatchFields.H"
 #include "fvCFD.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace CHT
 {

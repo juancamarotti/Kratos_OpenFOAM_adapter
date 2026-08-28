@@ -2,7 +2,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::PressureGradientFull::PressureGradientFull(
+CoSimIOAdapter::FF::PressureGradientFull::PressureGradientFull(
     const Foam::fvMesh& mesh,
     const std::string nameP)
 : p_(
@@ -19,7 +19,7 @@ preciceAdapter::FF::PressureGradientFull::PressureGradientFull(
     mDataType = vector;
 }
 
-std::size_t preciceAdapter::FF::PressureGradientFull::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::PressureGradientFull::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
     gradP_ = fvc::grad(*p_);
@@ -96,7 +96,7 @@ std::size_t preciceAdapter::FF::PressureGradientFull::Write(double* buffer, bool
     return bufferIndex;
 }
 
-void preciceAdapter::FF::PressureGradientFull::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::PressureGradientFull::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -121,12 +121,12 @@ void preciceAdapter::FF::PressureGradientFull::Read(double* buffer, const unsign
     }
 }
 
-bool preciceAdapter::FF::PressureGradientFull::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::PressureGradientFull::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     return (this->mLocationType == LocationType::FaceCenters || this->mLocationType == LocationType::VolumeCenters);
 }
 
-std::string preciceAdapter::FF::PressureGradientFull::GetDataName() const
+std::string CoSimIOAdapter::FF::PressureGradientFull::GetDataName() const
 {
     return "PressureGradientFull";
 }

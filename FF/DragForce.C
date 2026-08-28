@@ -3,7 +3,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::DragForce::DragForce(
+CoSimIOAdapter::FF::DragForce::DragForce(
     const Foam::fvMesh& mesh,
     const std::string nameFd)
 {
@@ -28,7 +28,7 @@ preciceAdapter::FF::DragForce::DragForce(
     mDataType = vector;
 }
 
-std::size_t preciceAdapter::FF::DragForce::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::DragForce::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -106,7 +106,7 @@ std::size_t preciceAdapter::FF::DragForce::Write(double* buffer, bool meshConnec
     return bufferIndex;
 }
 
-void preciceAdapter::FF::DragForce::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::DragForce::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -185,7 +185,7 @@ void preciceAdapter::FF::DragForce::Read(double* buffer, const unsigned int dim)
     }
 }
 
-bool preciceAdapter::FF::DragForce::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::DragForce::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -197,7 +197,7 @@ bool preciceAdapter::FF::DragForce::IsLocationTypeSupported(const bool meshConne
     }
 }
 
-std::string preciceAdapter::FF::DragForce::GetDataName() const
+std::string CoSimIOAdapter::FF::DragForce::GetDataName() const
 {
     return "DragForce";
 }

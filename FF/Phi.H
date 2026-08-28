@@ -5,7 +5,7 @@
 
 #include "fvCFD.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace FF
 {

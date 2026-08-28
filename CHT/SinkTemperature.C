@@ -3,7 +3,7 @@
 
 using namespace Foam;
 
-preciceAdapter::CHT::SinkTemperature::SinkTemperature(
+CoSimIOAdapter::CHT::SinkTemperature::SinkTemperature(
     const Foam::fvMesh& mesh,
     const std::string nameT)
 : T_(
@@ -14,7 +14,7 @@ preciceAdapter::CHT::SinkTemperature::SinkTemperature(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::CHT::SinkTemperature::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::CHT::SinkTemperature::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -66,7 +66,7 @@ std::size_t preciceAdapter::CHT::SinkTemperature::Write(double* buffer, bool mes
     return bufferIndex;
 }
 
-void preciceAdapter::CHT::SinkTemperature::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::CHT::SinkTemperature::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -93,7 +93,7 @@ void preciceAdapter::CHT::SinkTemperature::Read(double* buffer, const unsigned i
     }
 }
 
-bool preciceAdapter::CHT::SinkTemperature::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::CHT::SinkTemperature::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -105,7 +105,7 @@ bool preciceAdapter::CHT::SinkTemperature::IsLocationTypeSupported(const bool me
     }
 }
 
-std::string preciceAdapter::CHT::SinkTemperature::GetDataName() const
+std::string CoSimIOAdapter::CHT::SinkTemperature::GetDataName() const
 {
     return "SinkTemperature";
 }

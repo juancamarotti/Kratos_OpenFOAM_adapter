@@ -3,7 +3,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::VelocityGradient::VelocityGradient(
+CoSimIOAdapter::FF::VelocityGradient::VelocityGradient(
     const Foam::fvMesh& mesh,
     const std::string nameU)
 : U_(
@@ -13,7 +13,7 @@ preciceAdapter::FF::VelocityGradient::VelocityGradient(
     mDataType = vector;
 }
 
-std::size_t preciceAdapter::FF::VelocityGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::VelocityGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -49,7 +49,7 @@ std::size_t preciceAdapter::FF::VelocityGradient::Write(double* buffer, bool mes
     return bufferIndex;
 }
 
-void preciceAdapter::FF::VelocityGradient::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::VelocityGradient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -95,12 +95,12 @@ void preciceAdapter::FF::VelocityGradient::Read(double* buffer, const unsigned i
     }
 }
 
-bool preciceAdapter::FF::VelocityGradient::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::VelocityGradient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::VelocityGradient::GetDataName() const
+std::string CoSimIOAdapter::FF::VelocityGradient::GetDataName() const
 {
     return "VelocityGradient";
 }

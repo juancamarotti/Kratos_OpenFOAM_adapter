@@ -3,7 +3,7 @@
 
 #include "ForceBase.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace FSI
 {

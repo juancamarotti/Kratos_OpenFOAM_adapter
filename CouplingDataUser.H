@@ -2,11 +2,10 @@
 #define COUPLINGDATAUSER_H
 
 #include "Utilities.H"
-#include <precice/precice.hpp>
 #include <vector>
 #include <string>
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 // A small enum to deal with the different locations of the
 // coupling interface

@@ -1,5 +1,5 @@
-#ifndef PRECICEADAPTER_H
-#define PRECICEADAPTER_H
+#ifndef COSIMIOADAPTER_H
+#define COSIMIOADAPTER_H
 #include "Interface.H"
 
 // Conjugate Heat Transfer module
@@ -22,16 +22,13 @@
 #include "Time.H"
 #include "fvMesh.H"
 
-// preCICE Solver Interface
-#include <precice/precice.hpp>
-
 // CoSimIO header file
 #include "co_sim_io.hpp"
 #include "co_sim_io_mpi.hpp"
 
 using CoSimIOError = std::runtime_error;
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 
 class Adapter
@@ -90,14 +87,6 @@ private:
     //- OpenFOAM fvMesh object
     const Foam::fvMesh& mMesh;
 
-    // Configuration parameters used in the Adapter
-
-    //- preCICE configuration file name
-    Foam::word mCoSimIOConfigFilename;
-
-    //- preCICE participant name
-    Foam::word mParticipantName;
-
     //- Switch for checkpointing
     bool mCheckpointing = false;
 
@@ -126,9 +115,6 @@ private:
 
     //- Interfaces
     std::vector<Interface*> mInterfaces;
-
-    //- preCICE solver interface
-    precice::Participant* mPrecice = nullptr;
 
     //- preCICE solver interface initialized
     bool mCoSimIOInitialized = false;
@@ -278,15 +264,6 @@ private:
     //- Determine if the coupling is still happening
     bool IsCouplingOngoing();
 
-    //- Determine if the coupling timestep has been completed
-    bool IsCouplingTimeWindowComplete();
-
-    //- Determine if a checkpoint must be read
-    bool RequiresReadingCheckpoint();
-
-    //- Determine if a checkpoint must be written
-    bool RequiresWritingCheckpoint();
-
     // Methods for checkpointing
 
     //- Configure the mesh checkpointing
@@ -297,7 +274,6 @@ private:
 
     //- Remove checkpointed fields which are not used by OpenFOAM anymore
     void PruneCheckpointedFields();
-
 
     //- Make a copy of the runTime object
     void StoreCheckpointTime();

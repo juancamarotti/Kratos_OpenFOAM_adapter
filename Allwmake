@@ -106,7 +106,7 @@ if ! adapter_build_command 2>&1 | tee wmake.log ||
     exit 1
 else
     ADAPTER_WMAKE_UNDEFINED_SYMBOLS=$(grep -c -E "undefined|not defined" wmake.log) || echo "Everything looks fine in wmake.log."
-    ldd -r "${ADAPTER_TARGET_DIR}/libpreciceAdapterFunctionObject.so" >ldd.log 2>&1
+    ldd -r "${ADAPTER_TARGET_DIR}/libCoSimIOAdapterFunctionObject.so" >ldd.log 2>&1
     ADAPTER_LD_UNDEFINED_SYMBOLS=$(grep -c -E "undefined|not defined" ldd.log) || echo "Everything looks fine in ldd.log."
     if [ "${ADAPTER_WMAKE_UNDEFINED_SYMBOLS}" -gt 0 ] || [ "${ADAPTER_LD_UNDEFINED_SYMBOLS}" -gt 0 ]; then
         log "=== ERROR: Building completed with linking problems: there were undefined symbols. ==="

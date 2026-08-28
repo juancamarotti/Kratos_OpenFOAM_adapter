@@ -85,7 +85,7 @@ class CoSimIOAdapterFunctionObject
 #endif
 
     //- Adapter's main class instance
-    preciceAdapter::Adapter mAdapter;
+    CoSimIOAdapter::Adapter mAdapter;
 
     // Private Member Functions
 

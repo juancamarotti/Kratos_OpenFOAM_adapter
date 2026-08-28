@@ -4,11 +4,11 @@
 
 using namespace Foam;
 
-preciceAdapter::Generic::GenericInterface::GenericInterface(
+CoSimIOAdapter::Generic::GenericInterface::GenericInterface(
     const Foam::fvMesh& mesh)
 : mesh_(mesh) {}
 
-bool preciceAdapter::Generic::GenericInterface::configure(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::Generic::GenericInterface::configure(const IOdictionary& adapterConfig)
 {
     DEBUG(adapterInfo("Configuring the Generic module..."));
 
@@ -35,13 +35,13 @@ bool preciceAdapter::Generic::GenericInterface::configure(const IOdictionary& ad
     return true;
 }
 
-bool preciceAdapter::Generic::GenericInterface::readConfig(const IOdictionary& adapterConfig)
+bool CoSimIOAdapter::Generic::GenericInterface::readConfig(const IOdictionary& adapterConfig)
 {
     // Empty for now. No other specific configuration options for the Generic module.
     return true;
 }
 
-bool preciceAdapter::Generic::GenericInterface::addWriters(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::Generic::GenericInterface::addWriters(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     bool found = false;
 
@@ -79,7 +79,7 @@ bool preciceAdapter::Generic::GenericInterface::addWriters(const preciceAdapter:
     return found;
 }
 
-bool preciceAdapter::Generic::GenericInterface::addReaders(const preciceAdapter::FieldConfig& fieldConfig, Interface* interface)
+bool CoSimIOAdapter::Generic::GenericInterface::addReaders(const CoSimIOAdapter::FieldConfig& fieldConfig, Interface* interface)
 {
     bool found = false;
 

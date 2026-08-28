@@ -6,7 +6,7 @@
 #include "fvCFD.H"
 #include "cellSet.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace CHT
 {

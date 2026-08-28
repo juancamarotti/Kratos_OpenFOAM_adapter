@@ -7,7 +7,7 @@
 #include "fvCFD.H"
 #include "cellSet.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace Generic
 {
@@ -17,10 +17,10 @@ class ScalarFieldCoupler : public CouplingDataUser // One CouplingDataUser for e
 protected:
     Foam::volScalarField* scalarField_;
     const Foam::fvMesh& mesh_;
-    const preciceAdapter::FieldConfig& fieldConfig_;
+    const CoSimIOAdapter::FieldConfig& fieldConfig_;
 
 public:
-    ScalarFieldCoupler(const Foam::fvMesh& mesh, const preciceAdapter::FieldConfig& fieldConfig);
+    ScalarFieldCoupler(const Foam::fvMesh& mesh, const CoSimIOAdapter::FieldConfig& fieldConfig);
 
     void Initialize();
     std::size_t Write(double* buffer, bool meshConnectivity, const unsigned int dim);
@@ -36,10 +36,10 @@ class VectorFieldCoupler : public CouplingDataUser
 protected:
     Foam::volVectorField* vectorField_;
     const Foam::fvMesh& mesh_;
-    const preciceAdapter::FieldConfig& fieldConfig_;
+    const CoSimIOAdapter::FieldConfig& fieldConfig_;
 
 public:
-    VectorFieldCoupler(const Foam::fvMesh& mesh, const preciceAdapter::FieldConfig& fieldConfig);
+    VectorFieldCoupler(const Foam::fvMesh& mesh, const CoSimIOAdapter::FieldConfig& fieldConfig);
 
     void Initialize();
     std::size_t Write(double* buffer, bool meshConnectivity, const unsigned int dim);

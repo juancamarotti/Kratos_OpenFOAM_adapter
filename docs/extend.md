@@ -3,29 +3,9 @@ title: Extend the OpenFOAM adapter
 permalink: adapter-openfoam-extend.html
 keywords: adapter, openfoam, development, modules
 summary: "An overview of the OpenFOAM adapter's architecture and which parts to modify if you want to add functionality."
-hide: 
-    -toc
 ---
 
-!!! abstract "Summary"
-        An overview of the OpenFOAM adapter's architecture and which parts to modify if you want to add functionality.
-
-## **Table of content**
-- [Architecture](#architecture)
-- [Starting points](#starting-points)
-- [Checkpointing](#checkpointing)
-    - [Checkpointed fields](#checkpointed-fields)
-        - [Volume fields](#volume-fields)
-        - [Surface fields](#surface-fields)
-        - [Point fields](#point-fields)
-        - [Mesh data](#mesh-data)
-    - [Non-checkpointed fields](#non-checkpointed-fields)
-        - [Derived mesh fields](#derived-mesh-fields)
-        - [Dictionaries](#dictionaries)
-
-
-
-## **Architecture**
+## Architecture
 
 The OpenFOAM adapter separates the core functionality (e.g. calling preCICE methods) from the problem-specific methods (e.g. accessing fields and converting quantities). The latter is encapsulated into "modules", which add only a few lines of code in the core. The following, simplified UML diagram gives an overview:
 
@@ -33,10 +13,10 @@ The OpenFOAM adapter separates the core functionality (e.g. calling preCICE meth
 
 While in the beginning the adapter only included a module for conjugate heat transfer, [a module for fluid-structure interaction](https://github.com/precice/openfoam-adapter/pull/56) and [a module for fluid-fluid coupling](https://github.com/precice/openfoam-adapter/pull/67) have been added since then.
 
-## **Starting points**
+## Starting points
 
 In case you just want to couple a different variable, you need to create a new
-coupling data user class in the `preciceAdapter::CHT` namespace or in a new one.
+coupling data user class in the `CoSimIOAdapter::CHT` namespace or in a new one.
 Then you need to add an option for it in the configuration part
 to add objects of it into the `couplingDataWriters` and `couplingDataReaders`
 whenever requested.
@@ -49,7 +29,7 @@ another missing library will trigger an "undefined symbol" runtime error.
 
 See also the notes and discussion in [issue #7: Create a module for fluid-structure interaction](https://github.com/precice/openfoam-adapter/issues/7).
 
-## **Checkpointing**
+## Checkpointing
 
 In implicit coupling, the adapter manages the coupling loop, which entails checkpointing the simulation state (fields and mesh).
 The checkpoints are stored and reloaded to repeat implicit time steps.

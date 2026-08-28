@@ -5,9 +5,9 @@
 
 using namespace Foam;
 
-//----- preciceAdapter::CHT::KappaEff_Compressible ------------------
+//----- CoSimIOAdapter::CHT::KappaEff_Compressible ------------------
 
-preciceAdapter::CHT::KappaEff_Compressible::KappaEff_Compressible(
+CoSimIOAdapter::CHT::KappaEff_Compressible::KappaEff_Compressible(
     const Foam::fvMesh& mesh)
 : mesh_(mesh),
   turbulence_(
@@ -16,7 +16,7 @@ preciceAdapter::CHT::KappaEff_Compressible::KappaEff_Compressible(
     DEBUG(adapterInfo("Constructed KappaEff_Compressible."));
 }
 
-void preciceAdapter::CHT::KappaEff_Compressible::extract(uint patchID, bool meshConnectivity)
+void CoSimIOAdapter::CHT::KappaEff_Compressible::extract(uint patchID, bool meshConnectivity)
 {
     if (meshConnectivity)
     {
@@ -33,15 +33,15 @@ void preciceAdapter::CHT::KappaEff_Compressible::extract(uint patchID, bool mesh
     }
 }
 
-scalar preciceAdapter::CHT::KappaEff_Compressible::getAt(int i)
+scalar CoSimIOAdapter::CHT::KappaEff_Compressible::getAt(int i)
 {
     return kappaEff_[i];
 }
 
 
-//----- preciceAdapter::CHT::KappaEff_Incompressible ------------------
+//----- CoSimIOAdapter::CHT::KappaEff_Incompressible ------------------
 
-preciceAdapter::CHT::KappaEff_Incompressible::KappaEff_Incompressible(
+CoSimIOAdapter::CHT::KappaEff_Incompressible::KappaEff_Incompressible(
     const Foam::fvMesh& mesh,
     const std::string nameRho,
     const std::string nameCp,
@@ -102,7 +102,7 @@ preciceAdapter::CHT::KappaEff_Incompressible::KappaEff_Incompressible(
     }
 }
 
-void preciceAdapter::CHT::KappaEff_Incompressible::extract(uint patchID, bool meshConnectivity)
+void CoSimIOAdapter::CHT::KappaEff_Incompressible::extract(uint patchID, bool meshConnectivity)
 {
     // Compute kappaEff_ from the turbulence model, using alpha and Prandl
 
@@ -150,14 +150,14 @@ void preciceAdapter::CHT::KappaEff_Incompressible::extract(uint patchID, bool me
     }
 }
 
-scalar preciceAdapter::CHT::KappaEff_Incompressible::getAt(int i)
+scalar CoSimIOAdapter::CHT::KappaEff_Incompressible::getAt(int i)
 {
     return kappaEff_[i];
 }
 
-//----- preciceAdapter::CHT::KappaEff_Basic ---------------------------
+//----- CoSimIOAdapter::CHT::KappaEff_Basic ---------------------------
 
-preciceAdapter::CHT::KappaEff_Basic::KappaEff_Basic(
+CoSimIOAdapter::CHT::KappaEff_Basic::KappaEff_Basic(
     const Foam::fvMesh& mesh,
     const std::string nameKappa)
 : mesh_(mesh),
@@ -183,12 +183,12 @@ preciceAdapter::CHT::KappaEff_Basic::KappaEff_Basic(
     }
 }
 
-void preciceAdapter::CHT::KappaEff_Basic::extract(uint patchID, bool meshConnectivity)
+void CoSimIOAdapter::CHT::KappaEff_Basic::extract(uint patchID, bool meshConnectivity)
 {
     // Already extracted in the constructor
 }
 
-scalar preciceAdapter::CHT::KappaEff_Basic::getAt(int i)
+scalar CoSimIOAdapter::CHT::KappaEff_Basic::getAt(int i)
 {
     // For a basic solver, the kappaEff is only one value.
     // Therefore, return the same value all the time.

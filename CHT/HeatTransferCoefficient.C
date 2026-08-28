@@ -6,9 +6,9 @@
 
 using namespace Foam;
 
-//----- preciceAdapter::CHT::HeatTransferCoefficient --------------------------
+//----- CoSimIOAdapter::CHT::HeatTransferCoefficient --------------------------
 
-preciceAdapter::CHT::HeatTransferCoefficient::HeatTransferCoefficient(
+CoSimIOAdapter::CHT::HeatTransferCoefficient::HeatTransferCoefficient(
     const Foam::fvMesh& mesh,
     const std::string nameT)
 : T_(
@@ -20,7 +20,7 @@ preciceAdapter::CHT::HeatTransferCoefficient::HeatTransferCoefficient(
 }
 
 
-std::size_t preciceAdapter::CHT::HeatTransferCoefficient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::CHT::HeatTransferCoefficient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -73,7 +73,7 @@ std::size_t preciceAdapter::CHT::HeatTransferCoefficient::Write(double* buffer, 
 }
 
 
-void preciceAdapter::CHT::HeatTransferCoefficient::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::CHT::HeatTransferCoefficient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -116,7 +116,7 @@ void preciceAdapter::CHT::HeatTransferCoefficient::Read(double* buffer, const un
     }
 }
 
-bool preciceAdapter::CHT::HeatTransferCoefficient::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::CHT::HeatTransferCoefficient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -128,15 +128,15 @@ bool preciceAdapter::CHT::HeatTransferCoefficient::IsLocationTypeSupported(const
     }
 }
 
-std::string preciceAdapter::CHT::HeatTransferCoefficient::GetDataName() const
+std::string CoSimIOAdapter::CHT::HeatTransferCoefficient::GetDataName() const
 {
     return "HeatTransferCoefficient";
 }
 
 
-//----- preciceAdapter::CHT::HeatTransferCoefficient_Compressible -------------
+//----- CoSimIOAdapter::CHT::HeatTransferCoefficient_Compressible -------------
 
-preciceAdapter::CHT::
+CoSimIOAdapter::CHT::
     HeatTransferCoefficient_Compressible::HeatTransferCoefficient_Compressible(
         const Foam::fvMesh& mesh,
         const std::string nameT)
@@ -145,27 +145,27 @@ preciceAdapter::CHT::
 {
 }
 
-preciceAdapter::CHT::HeatTransferCoefficient_Compressible::
+CoSimIOAdapter::CHT::HeatTransferCoefficient_Compressible::
     ~HeatTransferCoefficient_Compressible()
 {
     delete Kappa_;
 }
 
-void preciceAdapter::CHT::HeatTransferCoefficient_Compressible::
+void CoSimIOAdapter::CHT::HeatTransferCoefficient_Compressible::
     extractKappaEff(uint patchID, bool meshConnectivity)
 {
     Kappa_->extract(patchID, meshConnectivity);
 }
 
-scalar preciceAdapter::CHT::HeatTransferCoefficient_Compressible::
+scalar CoSimIOAdapter::CHT::HeatTransferCoefficient_Compressible::
     getKappaEffAt(int i)
 {
     return Kappa_->getAt(i);
 }
 
-//----- preciceAdapter::CHT::HeatTransferCoefficient_Incompressible -----------
+//----- CoSimIOAdapter::CHT::HeatTransferCoefficient_Incompressible -----------
 
-preciceAdapter::CHT::HeatTransferCoefficient_Incompressible::
+CoSimIOAdapter::CHT::HeatTransferCoefficient_Incompressible::
     HeatTransferCoefficient_Incompressible(
         const Foam::fvMesh& mesh,
         const std::string nameT,
@@ -178,27 +178,27 @@ preciceAdapter::CHT::HeatTransferCoefficient_Incompressible::
 {
 }
 
-preciceAdapter::CHT::HeatTransferCoefficient_Incompressible::
+CoSimIOAdapter::CHT::HeatTransferCoefficient_Incompressible::
     ~HeatTransferCoefficient_Incompressible()
 {
     delete Kappa_;
 }
 
-void preciceAdapter::CHT::HeatTransferCoefficient_Incompressible::
+void CoSimIOAdapter::CHT::HeatTransferCoefficient_Incompressible::
     extractKappaEff(uint patchID, bool meshConnectivity)
 {
     Kappa_->extract(patchID, meshConnectivity);
 }
 
-scalar preciceAdapter::CHT::HeatTransferCoefficient_Incompressible::
+scalar CoSimIOAdapter::CHT::HeatTransferCoefficient_Incompressible::
     getKappaEffAt(int i)
 {
     return Kappa_->getAt(i);
 }
 
-//----- preciceAdapter::CHT::HeatTransferCoefficient_Basic -----------------------------------
+//----- CoSimIOAdapter::CHT::HeatTransferCoefficient_Basic -----------------------------------
 
-preciceAdapter::CHT::HeatTransferCoefficient_Basic::
+CoSimIOAdapter::CHT::HeatTransferCoefficient_Basic::
     HeatTransferCoefficient_Basic(
         const Foam::fvMesh& mesh,
         const std::string nameT,
@@ -208,19 +208,19 @@ preciceAdapter::CHT::HeatTransferCoefficient_Basic::
 {
 }
 
-preciceAdapter::CHT::HeatTransferCoefficient_Basic::
+CoSimIOAdapter::CHT::HeatTransferCoefficient_Basic::
     ~HeatTransferCoefficient_Basic()
 {
     delete Kappa_;
 }
 
-void preciceAdapter::CHT::HeatTransferCoefficient_Basic::
+void CoSimIOAdapter::CHT::HeatTransferCoefficient_Basic::
     extractKappaEff(uint patchID, bool meshConnectivity)
 {
     Kappa_->extract(patchID, meshConnectivity);
 }
 
-scalar preciceAdapter::CHT::HeatTransferCoefficient_Basic::
+scalar CoSimIOAdapter::CHT::HeatTransferCoefficient_Basic::
     getKappaEffAt(int i)
 {
     return Kappa_->getAt(i);

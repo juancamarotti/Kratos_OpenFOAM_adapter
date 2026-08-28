@@ -12,7 +12,7 @@
 #include "turbulentFluidThermoModel.H"
 #include "turbulentTransportModel.H"
 
-namespace preciceAdapter
+namespace CoSimIOAdapter
 {
 namespace FSI
 {

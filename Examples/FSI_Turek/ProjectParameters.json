@@ -1,0 +1,91 @@
+{
+    "problem_data"     : {
+        "problem_name"  : "Turek_CSM",
+        "parallel_type" : "OpenMP",
+        "echo_level"    : 1,
+        "start_time"    : 0.0,
+        "end_time"      : 25.0
+    },
+    "solver_settings"  : {
+        "time_stepping"                        : {
+            "time_step"       : 0.005
+        },
+        "solver_type"                          : "Dynamic",
+        "model_part_name"                      : "Structure",
+        "domain_size"                          : 2,
+        "echo_level"                           : 1,
+        "analysis_type"                        : "non_linear",
+        "time_integration_method"              : "implicit",
+        "scheme_type"                          : "bossak",
+        "model_import_settings"                : {
+            "input_type"     : "mdpa",
+            "input_filename" : "fsi_turek_FSI2_Structural"
+        },
+        "material_import_settings"             : {
+            "materials_filename" : "StructuralMaterials.json"
+        },
+        "rayleigh_alpha"                       : 0.0,
+        "rayleigh_beta"                        : 0.0,
+        "line_search"                          : false,
+        "convergence_criterion"              : "residual_criterion",
+        "displacement_relative_tolerance"    : 0.0001,
+        "displacement_absolute_tolerance"    : 1e-9,
+        "residual_relative_tolerance"        : 1e-6,
+        "residual_absolute_tolerance"        : 1e-8,
+        "max_iteration"                        : 10,
+        "use_old_stiffness_in_first_iteration" : false,
+        "rotation_dofs"                        : false,
+        "volumetric_strain_dofs"               : false
+    },
+    "processes"        : {
+        "constraints_process_list" : [{
+            "python_module" : "assign_vector_variable_process",
+            "kratos_module" : "KratosMultiphysics",
+            "process_name"  : "AssignVectorVariableProcess",
+            "Parameters"    : {
+                "model_part_name" : "Structure.DISPLACEMENT_FixedDisplacement",
+                "variable_name"   : "DISPLACEMENT",
+                "constrained"     : [true,true,true],
+                "value"           : [0.0,0.0,0.0],
+                "interval"        : [0.0,"End"]
+            }
+        }],
+        "loads_process_list"       : [{
+            "python_module" : "assign_vector_by_direction_to_condition_process",
+            "kratos_module" : "KratosMultiphysics",
+            "check"         : "DirectorVectorNonZero direction",
+            "process_name"  : "AssignVectorByDirectionToConditionProcess",
+            "Parameters"    : {
+                "model_part_name" : "Structure.StructureInterface2D_StructureInterface",
+                "variable_name"   : "POINT_LOAD",
+                "interval"        : [0.0,"End"],
+                "modulus"         : 0.0,
+                "direction"       : [1.0,0.0,0.0]
+            }
+        }],
+        "list_other_processes"     : []
+    },
+    "output_processes" : {
+        "vtk_output" : [{
+            "python_module" : "vtk_output_process",
+            "kratos_module" : "KratosMultiphysics",
+            "process_name"  : "VtkOutputProcess",
+            "Parameters"    : {
+                "model_part_name"                             : "Structure",
+                "output_control_type"                         : "step",
+                "output_interval"                             : 5,
+                "file_format"                                 : "ascii",
+                "output_precision"                            : 7,
+                "output_sub_model_parts"                      : false,
+                "output_path"                                 : "vtk_output_structure",
+                "save_output_files_in_folder"                 : true,
+                "nodal_solution_step_data_variables"          : ["DISPLACEMENT","REACTION","VELOCITY","ACCELERATION"],
+                "nodal_data_value_variables"                  : [],
+                "element_data_value_variables"                : [],
+                "condition_data_value_variables"              : [],
+                "gauss_point_variables_extrapolated_to_nodes" : ["VON_MISES_STRESS"]
+            }
+        }]
+    },
+    "analysis_stage"   : "KratosMultiphysics.StructuralMechanicsApplication.structural_mechanics_analysis"
+}

@@ -1,38 +1,11 @@
 ---
-hide:
-  -toc
+title: OpenFOAM support
+permalink: adapter-openfoam-support.html
+keywords: adapter, openfoam, support, versions
+summary: Recent OpenFOAM.com versions work out-of-the-box. Recent OpenFOAM.org versions are also supported, but you will need a version-specific branch.
 ---
 
-!!! info "Summary"
-
-    Recent OpenFOAM.com versions work out-of-the-box.
-    Recent OpenFOAM.org versions are also supported, but you will need a
-    version-specific branch.
-
-## **Table of Contents**
-- [How to get OpenFOAM](#how-to-get-openfoam)
-- [Supported OpenFOAM solvers](#supported-openfoam-solvers)
-- [Supported OpenFOAM versions](#supported-openfoam-versions)
-- [Availability of OpenFOAM packages](#availability-of-openfoam-packages)
-- [Differences between OpenFOAM versions](#differences-between-openfoam-versions)
-    - [OpenFOAM v1612-v1806](#openfoam-v1612-v1806)
-    - [OpenFOAM 4 and 5](#openfoam-4-and-5)
-    - [OpenFOAM 6](#openfoam-6)
-    - [OpenFOAM 7](#openfoam-7)
-    - [OpenFOAM 8](#openfoam-8)
-    - [OpenFOAM 9](#openfoam-9)
-    - [OpenFOAM 10](#openfoam-10)
-    - [OpenFOAM 11](#openfoam-11)
-    - [OpenFOAM 12](#openfoam-12)
-    - [foam-extend](#foam-extend)
-- [Notes on OpenFOAM features](#notes-on-openfoam-features)
-    - [End of the simulation](#end-of-the-simulation)
-    - [Function Objects](#function-objects)
-    - [Writing results](#writing-results)
-    - [Adjustable timestep and modifiable runTime](#adjustable-timestep-and-modifiable-runtime)
-
-
-## **How to get OpenFOAM**
+## How to get OpenFOAM
 
 The easiest way to start is to get binary packages for your Linux distribution. For example, to [get OpenFOAM v2512 on Ubuntu](https://gitlab.com/openfoam/core/openfoam/-/wikis/precompiled/debian):
 
@@ -46,15 +19,11 @@ sudo apt-get install openfoam2512-dev
 
 As these steps change your `.profile`, you need to log out and in again to make OpenFOAM fully discoverable.
 
-!!! warning
-
-    Currently only version v2512 is is supported for CoSIM. For accurate operation, please make sure to install version v2512 correctly.
-
-## **Supported OpenFOAM solvers**
+## Supported OpenFOAM solvers
 
 We support mainstream OpenFOAM solvers such as pimpleFoam and solids4Foam for FSI, buoyantPimpleFoam, buoyantSimpleFoam, and laplacianFoam for CHT, or pimpleFoam and sonicLiquidFoam for FF. Our community has, additionally, tried the adapter with multiple different solvers that support function objects.
 
-## **Supported OpenFOAM versions**
+## Supported OpenFOAM versions
 
 OpenFOAM is a project with long history and many forks, of which we try to support as many as possible. Since several HPC systems only provide older versions, we try to also support a wide range of versions.
 
@@ -78,7 +47,7 @@ We provide version-specific [release archives](https://github.com/precice/openfo
 
 Known not supported versions: OpenFOAM v1606+ or older, OpenFOAM 3 or older, foam-extend (any version).
 
-## **Availability of OpenFOAM packages**
+## Availability of OpenFOAM packages
 
 We use the Ubuntu repositories of each OpenFOAM vendor for testing. Quick reference for maintainers:
 
@@ -121,13 +90,13 @@ The following table gives an overview, including versions that we do not support
 | (ext) 5.0   | -     | x     | x     | -     |
 | (ext) 4.1   | -     | -     | -     | x     |
 
-## **Differences between OpenFOAM versions**
+## Differences between OpenFOAM versions
 
 We take into account the following relevant differences between OpenFOAM versions, compared to the latest OpenCFD version. This list is important for maintainers of version-specific ports of the adapter.
 
 ### OpenFOAM v1612-v1806
 
-- **clockValue:** The `clockValue.H` header is not available (used in `preciceAdapterFunctionObject.H`).
+- **clockValue:** The `clockValue.H` header is not available (used in `CoSimIOAdapterFunctionObject.H`).
   - Disable the timers feature, controlled by the `ADAPTER_ENABLE_TIMINGS` preprocessor variable (set in `Allwmake`).
 - **dictionary access:** In dictionaries (essentially: in the `preciceDict`), some methods are not available. These are mainly used in the configuration step in `Adapter.C`, but also in `ForceBase.C`.
   - Replace `preciceDict.get<fileName>("...")` with `static_cast<fileName>(preciceDict.lookup("...")`.
@@ -181,7 +150,7 @@ Related work in the adapter: [PR #91](https://github.com/precice/openfoam-adapte
 OpenFOAM 8 was [released](https://openfoam.org/release/8/) in July 2020 ([GitHub mirror](https://github.com/OpenFOAM/OpenFOAM-8), [Doxygen](https://cpp.openfoam.org/v8)). Compared to OpenFOAM 7:
 
 - **Function objects:** Function objects changed behavior, and the `execute()` method is now also executed at start. See the [adapter issue #179](https://github.com/precice/openfoam-adapter/issues/179) and [PR #180](https://github.com/precice/openfoam-adapter/pull/180).
-  - In the beginning of `preciceAdapterFunctionObject::read()`, add `this->executeAtStart_ = false;`.
+  - In the beginning of `CoSimIOAdapterFunctionObject::read()`, add `this->executeAtStart_ = false;`.
 - **Thermophysical models:** Some properties were moved from the previous `TurbulenceModels` and `transportModels` to the new `ThermophysicalTransportModels` and `MomentumTransportModels`.
   - In `Make/options`, replace the following include paths:
     - Remove the include paths to `transportModels/incompressible`, `transportModels/compressible`, `transportModels/twoPhaseMixture`, `transportModels/interfaceProperties`, `transportModels/immiscibleIncompressibleTwoPhaseMixture`, `TurbulenceModels/turbulenceModels`, `TurbulenceModels/compressible`, `TurbulenceModels/incompressible`.
@@ -225,7 +194,7 @@ Related work in the adapter: [PR #130](https://github.com/precice/openfoam-adapt
 OpenFOAM 9 was [released](https://openfoam.org/release/9/) in July 2021 ([GitHub mirror](https://github.com/OpenFOAM/OpenFOAM-9), [Doxygen](https://cpp.openfoam.org/v9)). Compared to OpenFOAM 8:
 
 - **Function objects:** The `setTimeStep()` method was removed.
-  - Remove the method from the `preciceAdapterFunctionObject.H` and `preciceAdapterFunctionObject.C`. Adjust the comments for the equivalent method in `Adapter.H`.
+  - Remove the method from the `CoSimIOAdapterFunctionObject.H` and `CoSimIOAdapterFunctionObject.C`. Adjust the comments for the equivalent method in `Adapter.H`.
   - **Impact:** See limitations in adjustable time step size ([#261](https://github.com/precice/openfoam-adapter/issues/261)).
 - **Thermophysical models:** Different libraries need to be linked and different headers need to be included:
   - In `Make/options`, remove the linking of `fluidThermoMomentumTransportModels` and `incompressibleMomentumTransportModels`.
@@ -249,7 +218,7 @@ Related work in the adapter: [PR #221](https://github.com/precice/openfoam-adapt
 OpenFOAM 10 was [released](https://openfoam.org/release/10/) in July 2022 ([GitHub mirror](https://github.com/OpenFOAM/OpenFOAM-10), [Doxygen](https://cpp.openfoam.org/v10)). Compared to OpenFOAM 9:
 
 - **Function objects:** The method `fields()` has been made pure virtual, meaning it needs to be implemented.
-  - In `preciceAdapterFunctionObject.H`, implement it as (more of a workaround to avoid implementation):
+  - In `CoSimIOAdapterFunctionObject.H`, implement it as (more of a workaround to avoid implementation):
 
     ```c++
     virtual wordList fields() const
@@ -263,7 +232,7 @@ OpenFOAM 10 was [released](https://openfoam.org/release/10/) in July 2022 ([GitH
   - In `FSI/ForceBase.H`, replace `kinematicMomentumTransportModel.H` with `incompressibleMomentumTransportModel.H`.
   - In `FSI/ForceBase.C`, replace `basicThermo::dictName` with `physicalProperties::typeName`.
 - **Fields `V0` and `V00`:** The fields `V0` and `V00` have been removed or renamed (not sure to what).
-  - In `Adapter.C`, method `preciceAdapter::Adapter::setupMeshVolCheckpointing()`, guard each of these two fields with a `if (mesh_.foundObject<volScalarField::Internal>("V0"))` (and `if (... ("V00"))`, respectively). Alternatively, remove the implementation of this method altogether.
+  - In `Adapter.C`, method `CoSimIOAdapter::Adapter::setupMeshVolCheckpointing()`, guard each of these two fields with a `if (mesh_.foundObject<volScalarField::Internal>("V0"))` (and `if (... ("V00"))`, respectively). Alternatively, remove the implementation of this method altogether.
   - **Impact:** This might lead to stability issues in FSI simulations with implicit coupling. Check your results.
 - **Case files:** Several [changes to the tutorials](https://github.com/precice/tutorials/tree/OpenFOAM10) are needed, read the [discussion](https://github.com/precice/tutorials/pull/283).
 
@@ -283,7 +252,7 @@ We have not yet documented all related changes that would make the adapter work 
 
 Related work in the adapter: [PR #302](https://github.com/precice/openfoam-adapter/pull/302).
 
-## **Notes on OpenFOAM features**
+## Notes on OpenFOAM features
 
 ### End of the simulation
 
@@ -343,8 +312,8 @@ functions
 
     preCICE_Adapter
     {
-        type preciceAdapterFunctionObject;
-        libs ("libpreciceAdapterFunctionObject.so");
+        type CoSimIOAdapterFunctionObject;
+        libs ("libCoSimIOAdapterFunctionObject.so");
     }
 
 }

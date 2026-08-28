@@ -2,7 +2,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FSI::Stress::Stress(
+CoSimIOAdapter::FSI::Stress::Stress(
     const Foam::fvMesh& mesh,
     const std::string solverType)
 : ForceBase(mesh, solverType)
@@ -21,17 +21,17 @@ preciceAdapter::FSI::Stress::Stress(
             Foam::vector::zero));
 }
 
-std::size_t preciceAdapter::FSI::Stress::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FSI::Stress::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     return this->writeToBuffer(buffer, *Stress_, dim);
 }
 
-void preciceAdapter::FSI::Stress::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FSI::Stress::Read(double* buffer, const unsigned int dim)
 {
     this->readFromBuffer(buffer);
 }
 
-bool preciceAdapter::FSI::Stress::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FSI::Stress::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -43,18 +43,18 @@ bool preciceAdapter::FSI::Stress::IsLocationTypeSupported(const bool meshConnect
     }
 }
 
-std::string preciceAdapter::FSI::Stress::GetDataName() const
+std::string CoSimIOAdapter::FSI::Stress::GetDataName() const
 {
     return "Stress";
 }
 
-Foam::tmp<Foam::vectorField> preciceAdapter::FSI::Stress::getFaceVectors(const unsigned int patchID) const
+Foam::tmp<Foam::vectorField> CoSimIOAdapter::FSI::Stress::getFaceVectors(const unsigned int patchID) const
 {
     // face normal vectors
     return mesh_.boundary()[patchID].nf();
 }
 
-preciceAdapter::FSI::Stress::~Stress()
+CoSimIOAdapter::FSI::Stress::~Stress()
 {
     delete Stress_;
 }

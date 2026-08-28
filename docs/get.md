@@ -3,29 +3,12 @@ title: Get the OpenFOAM adapter
 permalink: adapter-openfoam-get.html
 keywords: adapter, openfoam, building
 summary: "Get the code from GitHub and run ./Allwmake. If this fails, look into wmake.log and ldd.log."
-hide: 
-    - toc
 ---
-
-!!! abstract "Summary"
-
-    Get the code from GitHub and run ./Allwmake. If this fails, look into wmake.log and ldd.log.
-
-## **Table of Contents**
-- [What does the adapter version mean?](#what-does-the-adapter-version-mean)
-- [Troubleshooting](#troubleshooting)
-    - [Unknown function type `preciceAdapterFunctionObject`](#unknown-function-type-preciceadapterfunctionobject)
-    - [wmkdep: could not open file X](#wmkdep-could-not-open-file-x)
-    - [A header file cannot be found (during compilation)](#a-header-file-cannot-be-found-during-compilation)
-    - [Rellocation-related errors](#rellocation-related-errors)
-    - [Undefined symbols from FFTW](#undefined-symbols-from-fftw)
-
-
 
 To build the adapter, you need to install a few dependencies and then execute the `Allwmake` script.
 
-1. Install [a compatible OpenFOAM distribution](openfoam-support.md).
-2. Install [preCICE v3](https://precice.org/installation-overview.html). <!--Link to installation section is still kept at preCICE. We can migrate this in the future>
+1. Install [a compatible OpenFOAM distribution](https://precice.org/adapter-openfoam-support.html).
+2. Install [preCICE v3](https://precice.org/installation-overview.html).
     * In case you need preCICE v2, please install an older version of the adapter ([v1.2.3](https://github.com/precice/openfoam-adapter/releases/tag/v1.2.3) was the last release to support preCICE v2).
 3. [Download the latest release](https://github.com/precice/openfoam-adapter/releases/latest) for your OpenFOAM version.
 4. Execute the build script: `./Allwmake`.
@@ -36,7 +19,7 @@ The adapter also requires [pkg-config](https://linux.die.net/man/1/pkg-config) t
 
 The `Allwmake` script uses two environment variables:
 
-* `PRECICE_OPENFOAM_TARGET_DIR`: Where the `libpreciceAdapterFunctionObject.so` will be installed. Defaults to `FOAM_USER_LIBBIN`.
+* `PRECICE_OPENFOAM_TARGET_DIR`: Where the `libCoSimIOAdapterFunctionObject.so` will be installed. Defaults to `FOAM_USER_LIBBIN`.
 * `PRECICE_OPENFOAM_CFLAGS`: Additional flags passed to wmake and used by the preprocessor/compiler. Defaults to an empty string.
   * Adding `-DADAPTER_DEBUG_MODE` flag activates additional debug messages.
   * Adding the `-DADAPTER_ENABLE_TIMINGS` flag  activates time measurements for several regions of the adapter, printed at the end of the simulation output.
@@ -45,7 +28,7 @@ If you are building the adapter often, you may want to build it in parallel. You
 
 Next: [configure and load the adapter](https://precice.org/adapter-openfoam-config.html) or [run a tutorial](https://precice.org/tutorials.html).
 
-## **What does the adapter version mean?**
+## What does the adapter version mean?
 
 We use [semantic versioning](https://semver.org/) (MAJOR.MINOR.PATCH), adapted to the nature of an adapter:
 
@@ -57,22 +40,22 @@ Note that the OpenFOAM version is not part of the version of the adapter. It is 
 
 Read the [discussion that lead to this versioning strategy](https://github.com/precice/openfoam-adapter/issues/52) for more details.
 
-## **Troubleshooting**
+## Troubleshooting
 
 The following are common problems that may appear during building the OpenFOAM adapter if something went wrong in the described steps. Make sure to always check for error messages at every step before continuing to the next.
 
 The `Allwmake` script prints the environment variables it uses in the beginning (as well as in `Allwmake.log`) and it writes the building commands in the file `wmake.log`. Afterwards, it checks (using `ldd`) if the library was linked correctly and writes the output to `ldd.log`. **Please check these files and include them in your report if you have need help.**
 
-If you don't have access to the log files, you can also try running `foamHasLibrary -verbose precice libpreciceAdapterFunctionObject`, which should lead to the following message:
+If you don't have access to the log files, you can also try running `foamHasLibrary -verbose precice libCoSimIOAdapterFunctionObject`, which should lead to the following message:
 
 ```text
 Can load "precice"
-Can load "libpreciceAdapterFunctionObject"
+Can load "libCoSimIOAdapterFunctionObject"
 ```
 
-If the libraries are available but cannot be loaded, the most common issue is conflicting or missing dependencies. Run `ldd ${FOAM_USER_LIBBIN}/libpreciceAdapterFunctionObject.so` and check for any undefined symbols messages at the bottom.
+If the libraries are available but cannot be loaded, the most common issue is conflicting or missing dependencies. Run `ldd ${FOAM_USER_LIBBIN}/libCoSimIOAdapterFunctionObject.so` and check for any undefined symbols messages at the bottom.
 
-### Unknown function type `preciceAdapterFunctionObject`
+### Unknown function type `CoSimIOAdapterFunctionObject`
 
 <details markdown="1">
 <summary>Did building & linking the adapter succeed? Any errors in wmake.log or ldd.log? Details: (click)</summary>
@@ -89,19 +72,19 @@ Starting time loop
  --> FOAM Warning :
      From function bool Foam::dlLibraryTable::open(const Foam::fileName&, bool)
      in file db/dynamicLibrary/dlLibraryTable/dlLibraryTable.C at line 105
-     **could not load "libpreciceAdapterFunctionObject.so"**
+     **could not load "libCoSimIOAdapterFunctionObject.so"**
  --> FOAM Warning :
      From function bool Foam::dlLibraryTable::open(const Foam::dictionary&, const Foam::word&, const TablePtr&) [with TablePtr = Foam::HashTable<Foam::autoPtr<Foam::functionObject> (*)(const Foam::word&, const Foam::Time&, const Foam::dictionary&), Foam::word, Foam:     :string::hash>*]
      in file lnInclude/dlLibraryTableTemplates.C at line 62
-     Could not open library "libpreciceAdapterFunctionObject.so"
+     Could not open library "libCoSimIOAdapterFunctionObject.so"
 
  --> FOAM Warning :
- Unknown function type preciceAdapterFunctionObject
+ Unknown function type CoSimIOAdapterFunctionObject
 ```
 
 then this probably means that something went wrong while building the OpenFOAM adapter. Check the files `wmake.log` (for building errors) and `ldd.log` (for runtime linking errors). Make sure that, when you run the simulation, you have the same OpenFOAM and any other required environment variables as when you built the adapter.
 
-If everything during building has gone well, the adapter must be installed into your `$FOAM_USER_LIBBIN` directory. Check that it exists (`ls $FOAM_USER_LIBBIN`) and that `ldd $FOAM_USER_LIBBIN/libpreciceAdapterFunctionObject.so` does not return any errors.
+If everything during building has gone well, the adapter must be installed into your `$FOAM_USER_LIBBIN` directory. Check that it exists (`ls $FOAM_USER_LIBBIN`) and that `ldd $FOAM_USER_LIBBIN/libCoSimIOAdapterFunctionObject.so` does not return any errors.
 
 Note that the simulation will continue without loading the adapter and there will be no coupling.
 </details>

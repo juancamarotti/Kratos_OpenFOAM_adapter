@@ -7,11 +7,11 @@
 
 using namespace Foam;
 
-//----- preciceAdapter::Generic::scalarFieldCoupler -----------------------------------------
+//----- CoSimIOAdapter::Generic::scalarFieldCoupler -----------------------------------------
 
-preciceAdapter::Generic::ScalarFieldCoupler::ScalarFieldCoupler(
+CoSimIOAdapter::Generic::ScalarFieldCoupler::ScalarFieldCoupler(
     const Foam::fvMesh& mesh,
-    const preciceAdapter::FieldConfig& fieldConfig)
+    const CoSimIOAdapter::FieldConfig& fieldConfig)
 : scalarField_(
     const_cast<volScalarField*>(
         &mesh.lookupObject<volScalarField>(fieldConfig.solver_name))),
@@ -21,7 +21,7 @@ preciceAdapter::Generic::ScalarFieldCoupler::ScalarFieldCoupler(
     mDataType = scalar;
 }
 
-void preciceAdapter::Generic::ScalarFieldCoupler::Initialize()
+void CoSimIOAdapter::Generic::ScalarFieldCoupler::Initialize()
 {
     if (fieldConfig_.operation == "surface-normal-gradient")
     {
@@ -38,7 +38,7 @@ void preciceAdapter::Generic::ScalarFieldCoupler::Initialize()
 }
 
 
-std::size_t preciceAdapter::Generic::ScalarFieldCoupler::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::Generic::ScalarFieldCoupler::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -121,7 +121,7 @@ std::size_t preciceAdapter::Generic::ScalarFieldCoupler::Write(double* buffer, b
     return bufferIndex;
 }
 
-void preciceAdapter::Generic::ScalarFieldCoupler::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::Generic::ScalarFieldCoupler::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -184,7 +184,7 @@ void preciceAdapter::Generic::ScalarFieldCoupler::Read(double* buffer, const uns
     }
 }
 
-bool preciceAdapter::Generic::ScalarFieldCoupler::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::Generic::ScalarFieldCoupler::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -196,16 +196,16 @@ bool preciceAdapter::Generic::ScalarFieldCoupler::IsLocationTypeSupported(const 
     }
 }
 
-std::string preciceAdapter::Generic::ScalarFieldCoupler::GetDataName() const
+std::string CoSimIOAdapter::Generic::ScalarFieldCoupler::GetDataName() const
 {
     return fieldConfig_.name;
 }
 
-//----- preciceAdapter::Generic::VectorFieldCoupler -----------------------------------------
+//----- CoSimIOAdapter::Generic::VectorFieldCoupler -----------------------------------------
 
-preciceAdapter::Generic::VectorFieldCoupler::VectorFieldCoupler(
+CoSimIOAdapter::Generic::VectorFieldCoupler::VectorFieldCoupler(
     const Foam::fvMesh& mesh,
-    const preciceAdapter::FieldConfig& fieldConfig)
+    const CoSimIOAdapter::FieldConfig& fieldConfig)
 : vectorField_(
     const_cast<volVectorField*>(
         &mesh.lookupObject<volVectorField>(fieldConfig.solver_name))),
@@ -215,7 +215,7 @@ preciceAdapter::Generic::VectorFieldCoupler::VectorFieldCoupler(
     mDataType = vector;
 }
 
-void preciceAdapter::Generic::VectorFieldCoupler::Initialize()
+void CoSimIOAdapter::Generic::VectorFieldCoupler::Initialize()
 {
     // In the Generic module, for vector fields only the value operation is supported for now, i.e., cannot write gradients.
     if (fieldConfig_.operation == "gradient" || fieldConfig_.operation == "surface-normal-gradient")
@@ -224,7 +224,7 @@ void preciceAdapter::Generic::VectorFieldCoupler::Initialize()
     }
 }
 
-std::size_t preciceAdapter::Generic::VectorFieldCoupler::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::Generic::VectorFieldCoupler::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -296,7 +296,7 @@ std::size_t preciceAdapter::Generic::VectorFieldCoupler::Write(double* buffer, b
     return bufferIndex;
 }
 
-void preciceAdapter::Generic::VectorFieldCoupler::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::Generic::VectorFieldCoupler::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -386,7 +386,7 @@ void preciceAdapter::Generic::VectorFieldCoupler::Read(double* buffer, const uns
     }
 }
 
-bool preciceAdapter::Generic::VectorFieldCoupler::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::Generic::VectorFieldCoupler::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     if (meshConnectivity)
     {
@@ -398,7 +398,7 @@ bool preciceAdapter::Generic::VectorFieldCoupler::IsLocationTypeSupported(const 
     }
 }
 
-std::string preciceAdapter::Generic::VectorFieldCoupler::GetDataName() const
+std::string CoSimIOAdapter::Generic::VectorFieldCoupler::GetDataName() const
 {
     return fieldConfig_.name;
 }

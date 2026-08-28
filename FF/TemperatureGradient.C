@@ -3,7 +3,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::TemperatureGradient::TemperatureGradient(
+CoSimIOAdapter::FF::TemperatureGradient::TemperatureGradient(
     const Foam::fvMesh& mesh,
     const std::string nameT)
 : T_(
@@ -13,7 +13,7 @@ preciceAdapter::FF::TemperatureGradient::TemperatureGradient(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::TemperatureGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::TemperatureGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -37,7 +37,7 @@ std::size_t preciceAdapter::FF::TemperatureGradient::Write(double* buffer, bool 
     return bufferIndex;
 }
 
-void preciceAdapter::FF::TemperatureGradient::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::TemperatureGradient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -62,12 +62,12 @@ void preciceAdapter::FF::TemperatureGradient::Read(double* buffer, const unsigne
     }
 }
 
-bool preciceAdapter::FF::TemperatureGradient::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::TemperatureGradient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::TemperatureGradient::GetDataName() const
+std::string CoSimIOAdapter::FF::TemperatureGradient::GetDataName() const
 {
     return "TemperatureGradient";
 }

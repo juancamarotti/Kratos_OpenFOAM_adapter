@@ -35,7 +35,7 @@
 #endif
 
 // String added in the beginning of every printed message
-#define INFO_STR_ADAPTER "---[preciceAdapter] "
+#define INFO_STR_ADAPTER "---[CoSimIOAdapter] "
 
 #include "IOstreams.H"
 

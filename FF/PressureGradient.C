@@ -2,7 +2,7 @@
 
 using namespace Foam;
 
-preciceAdapter::FF::PressureGradient::PressureGradient(
+CoSimIOAdapter::FF::PressureGradient::PressureGradient(
     const Foam::fvMesh& mesh,
     const std::string nameP)
 : p_(
@@ -12,7 +12,7 @@ preciceAdapter::FF::PressureGradient::PressureGradient(
     mDataType = scalar;
 }
 
-std::size_t preciceAdapter::FF::PressureGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
+std::size_t CoSimIOAdapter::FF::PressureGradient::Write(double* buffer, bool meshConnectivity, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -36,7 +36,7 @@ std::size_t preciceAdapter::FF::PressureGradient::Write(double* buffer, bool mes
     return bufferIndex;
 }
 
-void preciceAdapter::FF::PressureGradient::Read(double* buffer, const unsigned int dim)
+void CoSimIOAdapter::FF::PressureGradient::Read(double* buffer, const unsigned int dim)
 {
     int bufferIndex = 0;
 
@@ -61,12 +61,12 @@ void preciceAdapter::FF::PressureGradient::Read(double* buffer, const unsigned i
     }
 }
 
-bool preciceAdapter::FF::PressureGradient::IsLocationTypeSupported(const bool meshConnectivity) const
+bool CoSimIOAdapter::FF::PressureGradient::IsLocationTypeSupported(const bool meshConnectivity) const
 {
     return (this->mLocationType == LocationType::FaceCenters);
 }
 
-std::string preciceAdapter::FF::PressureGradient::GetDataName() const
+std::string CoSimIOAdapter::FF::PressureGradient::GetDataName() const
 {
     return "PressureGradient";
 }
