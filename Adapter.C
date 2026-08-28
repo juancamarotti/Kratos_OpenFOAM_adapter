@@ -478,34 +478,33 @@ catch (const CoSimIOError& e)
     std::exit(EXIT_FAILURE);
 }
 
-// Execute() for CoSimIO
 void CoSimIOAdapter::Adapter::execute()
 try
 {
     Info << "OPENFOAM: inside execute()" << Foam::endl;
 
-    // OpenFOAM has already solved. Export force to Kratos.
     WriteCouplingData();
-
     Info << "OPENFOAM: coupling data exported" << Foam::endl;
 
-    if (mStrongCoupling)
-    {
-        CoSimIO::Info controlInfo =
-            ImportControlInfo();
+    // Required for BOTH weak and strong coupling.
+    ProcessControlInfo(ImportControlInfo());
 
-        ProcessControlInfo(controlInfo);
+    // Weak coupling may send finalize/coupling_ongoing here.
+    if (!mCouplingOngoing)
+    {
+        Info << "OPENFOAM: finalize requested" << Foam::endl;
+
+        const_cast<Time&>(mRunTime).setEndTime(mRunTime.value());
+        const_cast<Time&>(mRunTime).functionObjects().end();
+        return;
     }
 
     if (mStrongCoupling && mRepeatTimeStep)
     {
         Info << "OPENFOAM: repeating timestep" << Foam::endl;
 
-        if (mStrongCoupling)
-        {
-            PruneCheckpointedFields();
-            ReadCheckpoint();
-        }
+        PruneCheckpointedFields();
+        ReadCheckpoint();
 
         CheckSolverTimeStepAndReadData();
 
@@ -513,14 +512,14 @@ try
         return;
     }
 
-    if (mStrongCoupling && !mRepeatTimeStep)
+    if (mStrongCoupling)
     {
         Info << "OPENFOAM: timestep accepted" << Foam::endl;
 
         WriteCheckpoint();
 
-        CoSimIO::Info controlInfo = ImportControlInfo();
-        ProcessControlInfo(controlInfo);
+        // Strong coupling has a second control message after acceptance.
+        ProcessControlInfo(ImportControlInfo());
 
         if (!mCouplingOngoing)
         {
@@ -528,19 +527,16 @@ try
 
             const_cast<Time&>(mRunTime).setEndTime(mRunTime.value());
             const_cast<Time&>(mRunTime).functionObjects().end();
-
             return;
         }
-
-        CheckSolverTimeStepAndReadData();
-        return;
     }
 
     CheckSolverTimeStepAndReadData();
 }
 catch (const CoSimIOError& e)
 {
-    Info << "OPENFOAM: CoSimIO error in execute()" << Foam::endl;
+    Info << "OPENFOAM: CoSimIO error in execute(): "
+         << e.what() << Foam::endl;
     std::exit(EXIT_FAILURE);
 }
 
